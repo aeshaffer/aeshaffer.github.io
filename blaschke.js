@@ -1,7 +1,9 @@
 zs = [
+    numeric.t(0, .25),
     numeric.t(0,.5),
+    numeric.t(0, .75),
     numeric.t(0,0),
-    numeric.t(0,-.5)
+    numeric.t(.5, 0)
 ];
 ys = numeric.linspace(-1,1,100).map(function(l) {return numeric.t(0,l);})
 xs = numeric.linspace(-1,1,100).map(function(l) {return numeric.t(l,0);})
@@ -75,7 +77,7 @@ function draweval(zs, bpzs) {
     var N = bpzs.length;
     var idata = ctx.createImageData(bpzs.length, bpzs.length);
     function baddr(row,col) {
-	return (N*4)*row + 4*col;
+	return (N*4)*(N-1-row) + 4*col;
     }
     for(var row = 0; row < N; row++) {
 	for (var col = 0; col < N; col++) {
@@ -93,6 +95,7 @@ function draweval(zs, bpzs) {
 	    }
 	}
     }
+
     return {ctx: ctx, idata: idata};
 }
 
