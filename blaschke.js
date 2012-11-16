@@ -77,7 +77,7 @@ function draweval(zs, bpzs) {
     var N = bpzs.length;
     var idata = ctx.createImageData(bpzs.length, bpzs.length);
     function baddr(row,col) {
-	return (N*4)*(N-1-row) + 4*col;
+	return (N*4)*((N-1)-col) + 4*row;
     }
     for(var row = 0; row < N; row++) {
 	for (var col = 0; col < N; col++) {
