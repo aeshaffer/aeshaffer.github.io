@@ -1,4 +1,8 @@
 
+function iszero(z) {
+    return z.abs().x == 0;
+}
+
 // Multiply polynomial coefficients.
 // coeffs1[0] is the constant term,
 // .. etc.
@@ -14,7 +18,6 @@ function polymult(coeffs1, coeffs2) {
     }
     return coeffs3;
 }
-
 
 function dcoeffs(cs) {
     var retval = Array();
@@ -62,8 +65,16 @@ function polysub(cs1, cs2) {
 }
 
 function polyroots(cs) {
+    if(cs.length == 0) {
+	return undefined;
+    }
     var f = function(z) { return peval(cs, z); }
-    var deg = cs.length - 1
+    while(cs.length > 0 && iszero(cs[cs.length -1])) {
+	cs.splice(-1,1);
+    }
+    var leading = cs[cs.length - 1];    
+    cs = polymult(cs, [none.div(leading)]);
+    var deg = cs.length - 1;
     var roots = Array();
     for(var i = 1; i < deg+1; i++) {
 	roots[i-1] = c(.4, .9).pow(i);

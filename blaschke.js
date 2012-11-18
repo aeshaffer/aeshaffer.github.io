@@ -90,14 +90,20 @@ function lt(a) {
     }
 }
 
-function bpterm(a, z) {
-    var l = lt(a); // a*/|a|
-    var num = a.sub(z); // (a - z)
-    var den = none.sub(a.conj().mul(z)); // (1-a*z)
-    return l.mul(num.div(den));
-}
-
 function bpeval(as, z) {
+
+    function bpterm(a) {
+	var l = lt(a); // a*/|a|
+	var num;
+	if(!iszero(a)) {
+	    num = a.sub(z); // (a - z)
+	} else {
+	    num = z;
+	}
+	var den = none.sub(a.conj().mul(z)); // (1-a*z)
+	return l.mul(num).div(den);
+    }
+
     var retval = none;
     for(i in as) {
 	var term = bpterm(as[i], z);
@@ -125,13 +131,11 @@ function l(as) {
 }
 
 function bpnum(as) {
-    // z term.
-    var num = [nzero, none];
+    // cancel the sign on the z (as[i] == 0) term.
+    var num = [none.mul(-1)];
     for(i in as) {
 	var polyterm;
-	if(as[i] != nzero) {
-	    polyterm = [as[i], none.mul(-1)];
-	}
+	polyterm = [as[i], none.mul(-1)];
 	num = polymult(polyterm, num);
     }
     return num;
@@ -154,21 +158,28 @@ function getbp(as) {
     return polysub(polymult(nump, den), polymult(denp, num));
 }
 
+function preimage(zs, beta) {
+    var num = bpnum(zs);
+    var den = bpden(zs);
+    var lambda = l(zs);
+    var lambdanum = polymult([lambda], num);
+    var alphaden = polymult([beta], den);
+    var poly = polysub(lambdanum, alphaden);
+    var preimages = polyroots(poly);    
+    return preimages;
+}
+
 function bpcompose(zs1, zs2) {
     var retval = Array();
     var num = bpnum(zs2);
     var den = bpden(zs2);
     var lambda = l(zs2);
     for(i in zs1) {
-	var alpha = zs1[i];
-	var lambdanum = polymult([lambda], num);
-	var alphaden = polymult([alpha], den);
-	var poly = polysub(lambdanum, alphaden);
-	var alpharoots = polyroots(poly);
 	retval = retval.concat(alpharoots);
     }
     return retval;
 }
+
 var go = function() {
     bpzs = bpgrideval(200, zs); 
     o = draweval(bpzs.zs, bpzs.bpzs); 
