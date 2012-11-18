@@ -1,5 +1,6 @@
-
-var nt = numeric.t;
+function c(x,y) {
+    return numeric.t(x,y);
+}
 
 pi = 3.1415;
 
@@ -7,46 +8,23 @@ var nzero = numeric.t(0,0);
 var none = numeric.t(1,0);
 
 zs = [
-    numeric.t(0, .25),
-    numeric.t(0,.5),
-    numeric.t(0, .75),
-    numeric.t(0,0),
-    numeric.t(.5, 0)
+    c(0, .25),
+    c(0,.5),
+    c(0, .75),
+    c(0,0),
+    c(.5, 0)
+];
+
+zeroonehalf = [
+    c(0 ,0),
+    c(.5,0)
+];
+
+z = [
+    c(0,0)
 ];
 
 cs = coeffs(zs);
-
-/**
- * Converts an HSV color value to RGB. Conversion formula
- * adapted from http://en.wikipedia.org/wiki/HSV_color_space.
- * Assumes h, s, and v are contained in the set [0, 1] and
- * returns r, g, and b in the set [0, 255].
- *
- * @param   Number  h       The hue
- * @param   Number  s       The saturation
- * @param   Number  v       The value
- * @return  Array           The RGB representation
- */
-function hsvToRgb(h, s, v){
-    var r, g, b;
-
-    var i = Math.floor(h * 6);
-    var f = h * 6 - i;
-    var p = v * (1 - s);
-    var q = v * (1 - f * s);
-    var t = v * (1 - (1 - f) * s);
-
-    switch(i % 6){
-        case 0: r = v, g = t, b = p; break;
-        case 1: r = q, g = v, b = p; break;
-        case 2: r = p, g = v, b = t; break;
-        case 3: r = p, g = q, b = v; break;
-        case 4: r = t, g = p, b = v; break;
-        case 5: r = v, g = p, b = q; break;
-    }
-
-    return [r * 255, g * 255, b * 255];
-}
 
 function cgrid(N) {
     xs = numeric.linspace(-1,1,N);
@@ -55,7 +33,7 @@ function cgrid(N) {
     for(i in xs) {
 	retval[i] = Array(N);
 	for(j in ys) {
-	    retval[i][j] = numeric.t(xs[i], ys[j]);
+	    retval[i][j] = c(xs[i], ys[j]);
 	}
     }
     return retval;
@@ -104,57 +82,9 @@ function draweval(zs, bpzs) {
 
     
 
-// Multiply polynomial coefficients.
-// coeffs1[0] is the constant term,
-// .. etc.
-function polymult(coeffs1, coeffs2) {
-    var deg1 = coeffs1.length -1;
-    var deg2 = coeffs2.length -1;
-    var coeffs3 = Array();
-    for(i = 0; i < coeffs1.length; i++) {
-	for(j = 0; j < coeffs2.length; j++) {
-	    if(coeffs3[i+j] == undefined) coeffs3[i+j] = nzero ;
-	    coeffs3[i+j] = coeffs3[i+j].add(coeffs1[i].mul(coeffs2[j]));
-	}	
-    }
-    return coeffs3;
-}
-
-function dcoeffs(cs) {
-    var retval = Array();
-    for(var i = 0; i < cs.length -1; i++) {
-	retval[i] = numeric.t(i+1, 0).mul(cs[i+1]);
-    }
-    return retval;
-}
-
-function coeffs(zs) {
-    var xcoeffs = [none];
-    for(var i = 0; i < zs.length; i++) {
-	var t = [numeric.t(-1,0).mul(zs[i]), none];
-	xcoeffs = polymult(xcoeffs, t);
-    }
-    return xcoeffs;
-}
-
-function cps(zs) {
-    var dcs = dcoeffs(coeffs(zs));
-    return polyroots(dcs);
-}
-
-function peval(coeffs, z) {    
-    var retval = nzero;
-    for(var i = 0; i < coeffs.length; i++) {
-	var zn = z.pow(i);
-	var term = zn.mul(coeffs[i]);
-	retval = retval.add(term);
-    }
-    return retval;
-}
-
 function lt(a) {
     if(a.abs().x == 0) {
-	return nt(1);
+	return c(1);
     } else {
 	return a.conj().div(a.abs());
     }
@@ -177,22 +107,31 @@ function bpeval(as, z) {
 }
 
 function bpeval2(as, z) {
+    var lambda = l(as);
+    var num = bpnum(as);
+    var numv = peval(num, z);
+    var den = bpden(as);
+    var denv = peval(den, z);
+    return lambda.mul(numv).div(denv);
+}
+
+function l(as) {
     var l = none;
     for(i in as) {
 	var a = as[i];
 	l = l.mul(lt(a));
     }
-    var num = bpnum(as);
-    var numv = peval(num, z);
-    var den = bpden(as);
-    var denv = peval(den, z);
-    return l.mul(numv).div(denv);
+    return l;
 }
 
 function bpnum(as) {
-    var num = [none];
+    // z term.
+    var num = [nzero, none];
     for(i in as) {
-	var polyterm = [as[i].mul(-1), none];
+	var polyterm;
+	if(as[i] != nzero) {
+	    polyterm = [as[i], none.mul(-1)];
+	}
 	num = polymult(polyterm, num);
     }
     return num;
@@ -215,47 +154,21 @@ function getbp(as) {
     return polysub(polymult(nump, den), polymult(denp, num));
 }
 
-function polysub(cs1, cs2) {
+function bpcompose(zs1, zs2) {
     var retval = Array();
-    for(var i = 0; i < Math.max(cs1.length, cs2.length); i++) {
-	var c1 = nzero;
-	var c2 = nzero;
-	if(cs1[i] != undefined) {c1 = cs1[i];}
-	if(cs2[i] != undefined) {c2 = cs2[i];}
-	retval[i] = c1.sub(c2);
+    var num = bpnum(zs2);
+    var den = bpden(zs2);
+    var lambda = l(zs2);
+    for(i in zs1) {
+	var alpha = zs1[i];
+	var lambdanum = polymult([lambda], num);
+	var alphaden = polymult([alpha], den);
+	var poly = polysub(lambdanum, alphaden);
+	var alpharoots = polyroots(poly);
+	retval = retval.concat(alpharoots);
     }
     return retval;
 }
-
-function polyroots(cs) {
-    var f = function(z) { return peval(cs, z); }
-    var deg = cs.length - 1
-    var roots = Array();
-    for(var i = 1; i < deg+1; i++) {
-	roots[i-1] = numeric.t(.4, .9).pow(i);
-    }
-    var n = 0;
-    while(n < 100) {
-	var newroots = Array();
-
-	for(var i = 0; i < roots.length; i++) {
-	    var den = none;
-	    for(var j = 0; j < roots.length; j++) {
-		if(i != j) {
-		    den = den.mul(roots[i].sub(roots[j]));
-		}
-	    }
-	    var fr = f(roots[i]);
-	    var delta = fr.div(den);
-	    newroots[i] = roots[i].sub(delta); 
-	}
-
-	roots = newroots;
-	n++;
-    }
-    return roots;
-}
-
 var go = function() {
     bpzs = bpgrideval(200, zs); 
     o = draweval(bpzs.zs, bpzs.bpzs); 
