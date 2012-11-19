@@ -201,6 +201,12 @@ function roll(ar) {
 function cpinfo(zs) {
 
     var bpp = getBPprime(zs);
+    // FIXME: For some reason, for a large number
+    // of zeroes, I get mostly derivative zeroes
+    // outside the circle.  Dunno why, perhaps
+    // I need more iterations?
+    // cps.map(function(z) { return peval(bpp, z).abs().x; })
+    // The above shows that all the roots are indeed close to zero...
     var cps = polyroots(bpp);
     var circlecps = new Array();
     for(i in cps) {

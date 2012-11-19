@@ -1,8 +1,10 @@
 
 //zs = bpcompose(zeroonehalf, [c(0,0), c(.51, 0)] );
 
-function cssscatter(canvas, pts, cssclass) {
-    $(canvas).parent('div').find("."+cssclass).remove();
+function cssscatter(canvas, pts, cssclass, doclear) {
+    if(doclear == undefined || doclear) {
+	$(canvas).parent('div').find("."+cssclass).remove();
+    }
     var N = $(canvas).width();
     var offset = N/2;
     for(i in pts) {
@@ -11,6 +13,7 @@ function cssscatter(canvas, pts, cssclass) {
 	var y = z.y == undefined ? 0: z.y;
 	var div = $("<div />");
 	div.addClass(cssclass);
+	div.addClass("scatterpoint");
 	div.attr("id", cssclass+i);
 	div.css("top", N/2 - (N/2)*y);
 	div.css("left", N/2 + (N/2)*x);
@@ -170,6 +173,7 @@ var go = function(zs, cpi) {
 	resize(range);
 	var o0 = showRegions(rangecxt, bpzs.zs, bpzs.zs, cpi.cvangles);
 	rangecxt.putImageData(o0.idata, 0, 0);
+	scatter(rangecxt, cpi.cvs, "#000000", N);
 
 	var regions = document.getElementById("rainbow");
 	var regionscxt = regions.getContext("2d");
@@ -236,4 +240,24 @@ function attachcanvasclicks() {
     $("#regions").on("dblclick", dc);
     $("#rainbow").on("click", cf);
     $("#regions").on("click", cf);
+    $("#clearpreimages").on("click", 
+			    function(e) {
+				cssscatter($("#regions"), [], "pi", true);
+			    }
+			   );
+    var rangemd = false;
+    $("#range")
+	.on("mouseleave", function(e) {
+	    rangemd = false;
+	})
+	.on("click", function(e) {
+	    rangemd = !rangemd;
+	})
+	.on("mousemove", function(e) {
+	    if(rangemd || e.which == 1) {
+		var z = zeroFromClick($(this), e);
+		var preimages = preimage(zs, z);
+		var pidivs = cssscatter($("#regions"), preimages, "pi", false);
+	    }
+	});
 };

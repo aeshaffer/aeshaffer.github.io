@@ -4,26 +4,33 @@
 <head>
 
 <style type="text/css">
+  div.scatterpoint {
+  width: 5px;
+  height: 5px;
+  position: absolute;
+  }  
 div.zero {
-background-color: #000000;
-width: 5px;
-height: 5px;
-position: absolute;
-cursor: crosshair;
+  background-color: #000000;
+  cursor: crosshair;
 }
 div.zerozero {
-cursor: default;
+  cursor: default;
+}
+div.pi {
+  border: 1px solid #444444;
+  border-radius: 3px;
 }
 div.cp {
 background-color: #888888;
-width: 5px;
-height: 5px;
-position: absolute
+}
+div.cv {
+  background-color: #444444;
 }
 canvas.graph{
 position: relative;
 }
 .canvaswrapper {
+user-select: none;
 border: 2px solid black; 
 width: 400px; 
 height: 400px; 
@@ -42,20 +49,23 @@ display: inline-block;
 
 </head>
 <body>
-  <button type="button" id="plotbutton">Plot</button><br />
   <div class="canvaswrapper">
     <canvas id="rainbow" class="graph" width="200" height="200" 
 	    style="width: 400px; height: 400px;">      
     </canvas>
+    <button type="button" id="plotbutton">Plot</button>
   </div>
   <div class="canvaswrapper">
     <canvas id="regions" class="graph" width="200" height="200" style="width: 400px; height: 400px;">
     </canvas>
+    <button type="button" id="clearpreimages">Clear Preimages</button>
   </div>
   <div class="canvaswrapper">
     <canvas id="range"   class="graph" width="200" height="200" style="width: 400px; height: 400px;">
     </canvas>
   </div>
+  <br/>
+  <br/>
   <br/>
   Click: <span id="point" ></span><br />
   Dest:  <span id="dest" ></span><br/>
