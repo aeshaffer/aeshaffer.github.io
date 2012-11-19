@@ -72,19 +72,22 @@ function display(zs, cpi) {
     }   
 }
 
-function updatezeroes() {
+function updatezero() {
     var unit = $("#rainbow").width() /2.0;
-    var zeroes = $("#rainbow").parent('div').find(".zero");
-    var positions = zeroes.map(function() {
-	var p = $(this).position();
-	var nudge = (1.0/2.0)*$(this).width();
-	return {
-	    left: p.left + nudge,
-	    top: p.top + nudge
-	};
-    });
-    var newzs = positions.map(function() {return c(this.left/unit -1, -(this.top/unit - 1));});
-    zs = jQuery.makeArray(newzs);
+    var nudge = (1.0/2.0)*$(this).width();
+    var zeroid = $(this).attr("id").replace("zero", "");
+    var p = $(this).position();
+    var newpos = {
+	left: p.left + nudge,
+	top: p.top + nudge
+    };    
+    var z = c(newpos.left/unit-1, -(newpos.top/unit - 1));
+    if(z.abs().x <= 1) {
+	zs[zeroid] = z;
+    } else {
+	zs.splice(zeroid, 1);
+    }
+    
     rescatter(zs);
 }
 
@@ -103,7 +106,7 @@ function rescatter(zs) {
 	.addClass("ui-draggable")
 	.addClass("ui-widget-content")
 	.draggable({containment: ".canvaswrapper", scroll: false,
-		    stop: updatezeroes});
+		    stop: updatezero});
 
     for(var i = 0; i < zs.length; i++) {
 	if(zs[i].abs().x == 0) {
@@ -187,8 +190,6 @@ var go = function(zs, cpi) {
 	var c=document.getElementById("graph");
 	var ctx=c.getContext("2d");
     }
-    
-    attachcanvasclicks(zs, cpi);
 }
 
 function round2(n) {
@@ -200,26 +201,37 @@ function dcomplex(z) {
 }
 
 $(function() {
+    attachcanvasclicks();
     $("#plotbutton").click(function() {
 	go(zs, cpi);
     });
 });
 
-function attachcanvasclicks(zs, cpi) {
-    $("#rainbow").off("click");
-    $("#regions").off("click");
+function zeroFromClick(canvas, e) {
+    var unit = $(canvas).width() / 2.0;
+    var mouseX = e.pageX - $(canvas).offset().left;
+    var mouseY = e.pageY - $(canvas).offset().top;
+    var x = (mouseX/unit) - 1;
+    var y = -1 * (mouseY/unit -1);
+    return c(x,y);
+}
+
+function attachcanvasclicks() {
     var cf = function(e) {
-	var mouseX = e.pageX - this.offsetLeft;
-	var mouseY = e.pageY - this.offsetTop;
-	
-	var unit = $(this).width() /2; // Pixels per unit length
-	
-	var x = (mouseX/unit) - 1;
-	var y = -1.0 * (mouseY / unit - 1)
-	var val = bpeval(zs, c(x,y));
-	$("#point").text(round2(x) + " " + round2(y) + "i");
+	var z = zeroFromClick($(this), e);
+	var val = bpeval(zs, c(z.x,z.y));
+	$("#point").text(round2(z.x) + " " + round2(z.y) + "i");
 	$("#dest").text(dcomplex(val) + " " + getangleindex(val.angle(), cpi.cvangles));	
     };
+    var dc = function(e) {
+	var z = zeroFromClick($(this), e);
+	if(z.abs().x <=1) {
+	    zs.push(z);
+	    rescatter(zs);
+	}
+    }
+    $("#rainbow").on("dblclick", dc);
+    $("#regions").on("dblclick", dc);
     $("#rainbow").on("click", cf);
     $("#regions").on("click", cf);
 };
