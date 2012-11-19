@@ -2,30 +2,75 @@
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
 <head>
-<script type="text/javascript" src="./numeric-1.2.3.js" >
-</script>
-<script type="text/javascript" src="./jquery-1.8.3.js"></script>
+
+<style type="text/css">
+div.zero {
+background-color: #000000;
+width: 5px;
+height: 5px;
+position: absolute;
+cursor: crosshair;
+}
+div.zerozero {
+cursor: default;
+}
+div.cp {
+background-color: #888888;
+width: 5px;
+height: 5px;
+position: absolute
+}
+canvas.graph{
+position: relative;
+}
+.canvaswrapper {
+border: 2px solid black; 
+width: 400px; 
+height: 400px; 
+position: relative; 
+display: inline-block;
+}
+</style>
+<script type="text/javascript" src="./numeric-1.2.3.js" ></script>
+<script type="text/javascript" src="./jquery-ui-1.9.1.custom/js/jquery-1.8.2.js"></script>
+<script src="./jquery-ui-1.9.1.custom/js/jquery-ui-1.9.1.custom.js"></script>
 <script type="text/javascript" src="./polynomials.js" ></script>
 <script type="text/javascript" src="./hsvToRGB.js" ></script>
+
 <script type="text/javascript" src="./blaschke.js" ></script>
 </head>
 <body>
-  <canvas id="regions" width="200" height="200" style="width: 400px; height: 400px; border: 2px solid black;">
-  </canvas>
-  <canvas id="rainbow" width="200" height="200" style="width: 400px; height: 400px; border: 2px solid black;">
-  </canvas>
-  <canvas id="range"  width="200" height="200" style="width: 400px; height: 400px; border: 2px solid black;">
-  </canvas>
+  <button type="button" id="plotbutton">Plot</button><br />
+  <div class="canvaswrapper">
+    <canvas id="rainbow" class="graph" width="200" height="200" 
+	    style="width: 400px; height: 400px;">      
+    </canvas>
+  </div>
+  <div class="canvaswrapper">
+    <canvas id="regions" class="graph" width="200" height="200" style="width: 400px; height: 400px;">
+    </canvas>
+  </div>
+  <div class="canvaswrapper">
+    <canvas id="range"   class="graph" width="200" height="200" style="width: 400px; height: 400px;">
+    </canvas>
+  </div>
   <br/>
   Click: <span id="point" ></span><br />
-  Dest:  <span id="dest" ></span>
-  <h3>Zeroes</h3>
-  <ul id="zeroes">  </ul>
-  <h3>Critical Points</h3>
-  <ul id="criticalpoints">  </ul>
-  <h3>Critical Values</h3>
-  <ul id="criticalvalues"></ul>
-  <h3>Ordered Critical Angles</h3>
-  <ul id="criticalangles"></ul>
-</body>
+  Dest:  <span id="dest" ></span><br/>
+  <div style="display: block; float:left; width: 200px;">
+    <h3>Zeroes</h3>
+    <ul id="zeroes">  </ul>
+  </div>
+  <div style="display: block; float:left; width: 200px;">
+    <h3>Critical Points</h3>
+    <ul id="criticalpoints">  </ul>
+  </div>
+  <div style="display: block; float:left; width: 200px;">
+    <h3>Critical Values</h3>
+    <ul id="criticalvalues"></ul>
+  </div>
+  <div style="display: block; float:left; width: 200px;">
+    <h3>Ordered Critical Angles</h3>
+    <ul id="criticalangles"></ul>
+  </div>
 </html>

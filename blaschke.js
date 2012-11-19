@@ -191,25 +191,6 @@ function bpcompose(zs1, zs2) {
     return retval;
 }
 
-//zs = bpcompose(zeroonehalf, [c(0,0), c(.51, 0)] );
-
-function scatter(ctx, pts, color, Nover2) {
-    ctx.save();
-    ctx.translate(Nover2,Nover2);
-    for(i in pts) {
-	var z = pts[i];
-	ctx.beginPath();
-	var x = z.x;
-	var y = z.y == undefined ? 0: z.y;
-	ctx.arc(Nover2*z.x, -Nover2*y, 2, 0, Math.PI*2, true);
-	//ctx.linewidth=10;
-	ctx.closePath();
-	ctx.fillStyle=color;
-	ctx.fill();
-    }
-    ctx.restore();
-}
-
 function roll(ar) {
     var retval = ar.slice(0);
     var end = retval.shift();
@@ -231,7 +212,7 @@ function cpinfo(zs) {
     var cvs = circlecps.map(function(cp) {return bpeval(zs, cp);});
 
     var cvangles = cvs.map(function(cv) {return cv.angle();}).map(normalizeangle);
-    cvangles.sort(function(a,b) {a-b});
+    cvangles.sort(function(a,b) {return a-b});
     return {"cps": circlecps, "cvs": cvs, "cvangles": cvangles};
 }
 
@@ -245,30 +226,45 @@ function getangleindex(theta, ts) {
     return ts.length - 1;
 }
 
- 
-zs = [
-   // c(0, .25),
-//    c(-.5, -.5),
-    c(0, .75),
-    c(0,0),
-    c(.5, 0)
-];
+//zs = bpcompose(zeroonehalf, [c(0,0), c(.51, 0)] );
 
-zeroonehalf = [
-    c(0 ,0),
-    c(.5,0)
-];
+function cssscatter(canvas, pts, cssclass) {
+    $(canvas).parent('div').find("."+cssclass).remove();
+    var N = $(canvas).width();
+    var offset = N/2;
+    for(i in pts) {
+	var z = pts[i];
+	var x = z.x;
+	var y = z.y == undefined ? 0: z.y;
+	var div = $("<div />");
+	div.addClass(cssclass);
+	div.attr("id", cssclass+i);
+	div.css("top", N/2 - (N/2)*y);
+	div.css("left", N/2 + (N/2)*x);
+	$(canvas).parent('div').append(div);
+	var nudge = Math.floor(div.width()/2);
+	div.css("top", div.position().top - nudge);
+	div.css("left", div.position().left - nudge);
+    }
+    return $(canvas).parent('div').find("."+cssclass);
+}
 
-z = [
-    c(0,0)
-];
-
-// zs = zeroonehalf;
-
-var cpi = cpinfo(zs);
-var cps = cpi.cps;
-var cvs = cpi.cvs;
-var cvangles = cpi.cvangles;
+function scatter(ctx, pts, color, Nover2) {
+    ctx.save();
+    ctx.translate(Nover2,Nover2);
+    for(i in pts) {
+	var z = pts[i];
+	ctx.beginPath();
+	var x = z.x;
+	var y = z.y == undefined ? 0: z.y;
+	ctx.arc(Nover2*z.x, -Nover2*y, 2, 0, Math.PI*2, true);
+	//ctx.linewidth=10;
+	ctx.closePath();
+	ctx.fillStyle=color;
+	ctx.fill();
+    }
+    ctx.restore();
+}
 
 var N = 100;
 
@@ -296,13 +292,87 @@ function display(zs, cpi) {
     for(var i = 0; i < cpi.cvangles.length; i++) {
 	var li = $("<li>");
 	li.text(round2(cpi.cvangles[i]) +"-" + round2(rolledcvangles[i]));
-	var rgb = hsvToRgb(1.0*i/(cvangles.length), 1, 1);
+	var rgb = hsvToRgb(1.0*i/(cpi.cvangles.length), 1, 1);
 	li.css("background-color", "rgb("+rgb[0]+","+rgb[1]+","+rgb[2]+")");
 	$("#criticalangles").append(li);
     }   
 }
 
-var go = function() {
+function updatezeroes() {
+    var unit = $("#rainbow").width() /2.0;
+    var zeroes = $("#rainbow").parent('div').find(".zero");
+    var positions = zeroes.map(function() {
+	var p = $(this).position();
+	var nudge = (1.0/2.0)*$(this).width();
+	return {
+	    left: p.left + nudge,
+	    top: p.top + nudge
+	};
+    });
+    var newzs = positions.map(function() {return c(this.left/unit -1, -(this.top/unit - 1));});
+    zs = jQuery.makeArray(newzs);
+    rescatter(zs);
+}
+
+function rescatter(zs) {
+
+    cpi = cpinfo(zs);
+    var cps = cpi.cps;
+    var cvs = cpi.cvs;
+    var cvangles = cpi.cvangles;
+
+    display(zs, cpi);
+    
+
+    var zerodivs = cssscatter($("#rainbow"), zs, "zero");
+    zerodivs.addClass("draggable")
+	.addClass("ui-draggable")
+	.addClass("ui-widget-content")
+	.draggable({containment: ".canvaswrapper", scroll: false,
+		    stop: updatezeroes});
+
+    for(var i = 0; i < zs.length; i++) {
+	if(zs[i].abs().x == 0) {
+	    $("#zero"+i).removeClass("draggable")
+		.removeClass("ui-draggable")
+		.removeClass("ui-widget-content")
+		.addClass("zerozero")
+		.draggable('disable');
+	}
+    }
+
+    cssscatter($("#rainbow"), cpi.cps, "cp");
+};
+
+var cpi;
+
+var zs;
+
+$(function() {
+
+    zs = [
+	// c(0, .25),
+	c(-.5, -.5),
+	c(0, .75),
+	c(0,0),
+	c(.5, 0)
+    ];
+    
+    zeroonehalf = [
+	c(0 ,0),
+	c(.5,0)
+    ];
+    
+    z = [
+	c(0,0)
+    ];
+    
+    // zs = zeroonehalf;
+
+    rescatter(zs);
+});
+
+var go = function(zs, cpi) {
 
     function resize(graph) {
 	graph.style.width = 2*N;
@@ -311,7 +381,6 @@ var go = function() {
 	graph.height = 2*N;
     }
 
-    display(zs, cpi);
 
     var ctx;
     if(true) {
@@ -323,7 +392,7 @@ var go = function() {
 	var o0 = showRegions(rangecxt, bpzs.zs, bpzs.zs, cpi.cvangles);
 	rangecxt.putImageData(o0.idata, 0, 0);
 
-	var regions = document.getElementById("regions");
+	var regions = document.getElementById("rainbow");
 	var regionscxt = regions.getContext("2d");
 	resize(regions);
 	var o1 = draweval(regionscxt, bpzs.zs, bpzs.bpzs);
@@ -331,7 +400,7 @@ var go = function() {
 	scatter(regionscxt, cpi.cps, "#000000", N);
 	scatter(regionscxt, zs, "#ffffff", N);
 	
-	var angles = document.getElementById("rainbow");
+	var angles = document.getElementById("regions");
 	var anglescxt = angles.getContext("2d");
 	resize(angles);
 	var o2 = showRegions(regionscxt, bpzs.zs, bpzs.bpzs, cpi.cvangles);
@@ -339,11 +408,13 @@ var go = function() {
 	anglescxt.putImageData(o2.idata, 0, 0);
 	scatter(anglescxt, cpi.cps, "#000000", N);
 	scatter(anglescxt, zs, "#ffffff", N);
-
+	
     } else {
 	var c=document.getElementById("graph");
 	var ctx=c.getContext("2d");
     }
+    
+    attachcanvasclicks(zs, cpi);
 }
 
 function round2(n) {
@@ -355,19 +426,26 @@ function dcomplex(z) {
 }
 
 $(function() {
+    $("#plotbutton").click(function() {
+	go(zs, cpi);
+    });
+});
+
+function attachcanvasclicks(zs, cpi) {
+    $("#rainbow").off("click");
+    $("#regions").off("click");
     var cf = function(e) {
 	var mouseX = e.pageX - this.offsetLeft;
 	var mouseY = e.pageY - this.offsetTop;
 	
 	var unit = $(this).width() /2; // Pixels per unit length
-
+	
 	var x = (mouseX/unit) - 1;
 	var y = -1.0 * (mouseY / unit - 1)
 	var val = bpeval(zs, c(x,y));
 	$("#point").text(round2(x) + " " + round2(y) + "i");
-	$("#dest").text(dcomplex(val) + " " + getangleindex(val.angle(), cpi.cvangles));
-	
-   };
-    $("#rainbow").click(cf);
-    $("#regions").click(cf);
-});
+	$("#dest").text(dcomplex(val) + " " + getangleindex(val.angle(), cpi.cvangles));	
+    };
+    $("#rainbow").on("click", cf);
+    $("#regions").on("click", cf);
+};
