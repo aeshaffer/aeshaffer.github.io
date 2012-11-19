@@ -67,7 +67,10 @@ function display(zs, cpi) {
 	var li = $("<li>");
 	li.text(round2(cpi.cvangles[i]) +"-" + round2(rolledcvangles[i]));
 	var rgb = hsvToRgb(1.0*i/(cpi.cvangles.length), 1, 1);
-	li.css("background-color", "rgb("+rgb[0]+","+rgb[1]+","+rgb[2]+")");
+	li.attr("id", "ca"+i);
+	function H(n) { n = Math.round(n); return (n < 16 ? "0" : "") + n.toString(16); }
+	var rgbstring = "#"+H(rgb[0]) + H(rgb[1]) + H(rgb[2]);
+	li.css("background-color", rgbstring);
 	$("#criticalangles").append(li);
     }   
 }
@@ -100,7 +103,6 @@ function rescatter(zs) {
 
     display(zs, cpi);
     
-
     var zerodivs = cssscatter($("#rainbow"), zs, "zero");
     zerodivs.addClass("draggable")
 	.addClass("ui-draggable")
