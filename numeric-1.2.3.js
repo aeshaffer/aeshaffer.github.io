@@ -1055,9 +1055,9 @@ numeric.Tunop = function Tunop(r,c,s) {
 
 numeric.T.prototype.angle = function() {
     if(this.y == undefined) {
-	return numeric.atan(this.x, 0);
+	return numeric.atan2(0, this.x);
     } else {
-	return numeric.atan(this.x, this.y);
+	return numeric.atan2(this.y, this.x);
     }
 }
 

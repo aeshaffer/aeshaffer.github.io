@@ -1,13 +1,31 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
 <head>
 <script type="text/javascript" src="./numeric-1.2.3.js" >
 </script>
+<script type="text/javascript" src="./jquery-1.8.3.js"></script>
 <script type="text/javascript" src="./polynomials.js" ></script>
 <script type="text/javascript" src="./hsvToRGB.js" ></script>
 <script type="text/javascript" src="./blaschke.js" ></script>
 </head>
 <body>
-  <canvas id="graph" width="200" height="200" style="border: 2px solid black;">
+  <canvas id="regions" width="200" height="200" style="width: 400px; height: 400px; border: 2px solid black;">
   </canvas>
+  <canvas id="rainbow" width="200" height="200" style="width: 400px; height: 400px; border: 2px solid black;">
+  </canvas>
+  <canvas id="range"  width="200" height="200" style="width: 400px; height: 400px; border: 2px solid black;">
+  </canvas>
+  <br/>
+  Click: <span id="point" ></span><br />
+  Dest:  <span id="dest" ></span>
+  <h3>Zeroes</h3>
+  <ul id="zeroes">  </ul>
+  <h3>Critical Points</h3>
+  <ul id="criticalpoints">  </ul>
+  <h3>Critical Values</h3>
+  <ul id="criticalvalues"></ul>
+  <h3>Ordered Critical Angles</h3>
+  <ul id="criticalangles"></ul>
 </body>
 </html>
