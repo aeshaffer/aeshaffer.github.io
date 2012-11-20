@@ -29,6 +29,9 @@ div.cv {
 canvas.graph{
 position: relative;
 }
+/*canvas {
+  background-color: #eeeeee;
+}*/
 .canvaswrapper {
 user-select: none;
 border: 2px solid black; 
@@ -36,6 +39,9 @@ width: 400px;
 height: 400px; 
 position: relative; 
 display: inline-block;
+}
+.workingbutton {
+  background-color: red;
 }
 </style>
 <script type="text/javascript" src="./numeric-1.2.3.js" ></script>
@@ -49,23 +55,23 @@ display: inline-block;
 
 </head>
 <body>
+  Display Width: <input id="displaypixels" value="400"></input>
+  Pixels: <input id="pixels" value="200"></input>
+  <button type="button" id="plotbutton">Plot</button>    
+  <button type="button" id="clearpreimages">Clear Preimages</button>
+  <br />
   <div class="canvaswrapper">
-    <canvas id="rainbow" class="graph" width="200" height="200" 
-	    style="width: 400px; height: 400px;">      
-    </canvas>
-    <button type="button" id="plotbutton">Plot</button>
-  </div>
-  <div class="canvaswrapper">
-    <canvas id="regions" class="graph" width="200" height="200" style="width: 400px; height: 400px;">
-    </canvas>
-    <button type="button" id="clearpreimages">Clear Preimages</button>
-  </div>
-  <div class="canvaswrapper">
-    <canvas id="range"   class="graph" width="200" height="200" style="width: 400px; height: 400px;">
+    <canvas id="rainbow" class="graph">
     </canvas>
   </div>
-  <br/>
-  <br/>
+  <div class="canvaswrapper">
+    <canvas id="regions" class="graph">
+    </canvas>
+  </div>
+  <div class="canvaswrapper">
+    <canvas id="range">
+    </canvas>
+  </div>
   <br/>
   Click: <span id="point" ></span><br />
   Dest:  <span id="dest" ></span><br/>

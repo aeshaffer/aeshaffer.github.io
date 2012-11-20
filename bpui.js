@@ -5,8 +5,8 @@ function cssscatter(canvas, pts, cssclass, doclear) {
     if(doclear == undefined || doclear) {
 	$(canvas).parent('div').find("."+cssclass).remove();
     }
-    var N = $(canvas).width();
-    var offset = N/2;
+    var canvaswidth = $(canvas).width();
+    var offset = canvaswidth/2;
     for(i in pts) {
 	var z = pts[i];
 	var x = z.x;
@@ -15,8 +15,8 @@ function cssscatter(canvas, pts, cssclass, doclear) {
 	div.addClass(cssclass);
 	div.addClass("scatterpoint");
 	div.attr("id", cssclass+i);
-	div.css("top", N/2 - (N/2)*y);
-	div.css("left", N/2 + (N/2)*x);
+	div.css("top",  offset - offset*y);
+	div.css("left", offset + offset*x);
 	$(canvas).parent('div').append(div);
 	var nudge = Math.floor(div.width()/2);
 	div.css("top", div.position().top - nudge);
@@ -25,8 +25,9 @@ function cssscatter(canvas, pts, cssclass, doclear) {
     return $(canvas).parent('div').find("."+cssclass);
 }
 
-function scatter(ctx, pts, color, Nover2) {
+function scatter(ctx, pts, color, N) {
     ctx.save();
+    var Nover2 = N/2;
     ctx.translate(Nover2,Nover2);
     for(i in pts) {
 	var z = pts[i];
@@ -41,9 +42,6 @@ function scatter(ctx, pts, color, Nover2) {
     }
     ctx.restore();
 }
-
-
-var N = 100;
 
 function display(zs, cpi) {
     $("#criticalpoints").empty();
@@ -154,30 +152,58 @@ $(function() {
     rescatter(zs);
 });
 
+function resizeCanvases() {
+    var N = $("#pixels").val();
+    var cssN = $("#displaypixels").val();
+
+    resize("range", N, cssN);
+    resize("rainbow", N, cssN);
+    resize("regions", N, cssN);
+}
+
+$(function() {
+    resizeCanvases();
+    rescatter(zs);
+    $("#displaypixels").change(
+	function() {resizeCanvases(); rescatter(zs);}
+    );
+    $("#pixels").change(
+	function() {resizeCanvases(); rescatter(zs);}
+    );
+});
+
+function resize(graphName, N, cssN) {
+    $("#"+graphName).parent(".canvaswrapper")
+	.css("width", cssN+"px")
+	.css("height", cssN+"px");
+    var graph = document.getElementById(graphName);
+    $(graph).css("width", cssN+"px")
+	.css("height", cssN+"px");
+    graph.width = N;
+    graph.height = N;
+}
+
+
+
 var go = function(zs, cpi) {
 
-    function resize(graph) {
-	graph.style.width = 2*N;
-	graph.style.height = 2*N;
-	graph.width = 2*N;
-	graph.height = 2*N;
-    }
+    var N = $("#pixels").val();
+    var cssN = $("#displaypixels").val();
 
-
+    resizeCanvases();
+    
     var ctx;
     if(true) {
-	bpzs = bpgrideval(2*N, zs);
+	bpzs = bpgrideval(N, zs);
 
 	var range = document.getElementById("range");
 	var rangecxt = range.getContext("2d");
-	resize(range);
 	var o0 = showRegions(rangecxt, bpzs.zs, bpzs.zs, cpi.cvangles);
 	rangecxt.putImageData(o0.idata, 0, 0);
 	scatter(rangecxt, cpi.cvs, "#000000", N);
 
 	var regions = document.getElementById("rainbow");
 	var regionscxt = regions.getContext("2d");
-	resize(regions);
 	var o1 = draweval(regionscxt, bpzs.zs, bpzs.bpzs);
 	regionscxt.putImageData(o1.idata, 0, 0);
 	scatter(regionscxt, cpi.cps, "#000000", N);
@@ -185,13 +211,12 @@ var go = function(zs, cpi) {
 	
 	var angles = document.getElementById("regions");
 	var anglescxt = angles.getContext("2d");
-	resize(angles);
 	var o2 = showRegions(regionscxt, bpzs.zs, bpzs.bpzs, cpi.cvangles);
 	//	var o2 = showRegions(regionscxt, bpzs.zs, bpzs.bpzs, [Math.PI/8, Math.PI/8+Math.PI/2, Math.PI/8 + 2*(Math.PI/2), Math.PI/8 + 3*(Math.PI/2)]);
 	anglescxt.putImageData(o2.idata, 0, 0);
 	scatter(anglescxt, cpi.cps, "#000000", N);
 	scatter(anglescxt, zs, "#ffffff", N);
-	
+
     } else {
 	var c=document.getElementById("graph");
 	var ctx=c.getContext("2d");
