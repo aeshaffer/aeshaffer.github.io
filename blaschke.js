@@ -21,13 +21,14 @@ function cgrid(N) {
 }
 
 function bpgrideval(N, as) {
+    var bpe = getBPF(as);
     grid = cgrid(N);
     var retval = Array(N);
     for(var i = 0; i < N; i++) {
 	retval[i] = Array(N);
 	for(var j = 0; j < N; j++) {
 	    var z = grid[i][j];
-	    retval[i][j] = bpeval(as, z);
+	    retval[i][j] = bpe(z);
 	}
     }
     return {zs: grid, bpzs: retval};
@@ -99,10 +100,34 @@ function lt(a) {
     }
 }
 
+function getBPF(as) {
+    var asNums = new Array();
+    var asDens = new Array();
+    var asVars = new Array();
+    var l = none;
+    function toc(a) { return "c("+a.x+","+a.y+")"; }
+    for(i in as) {
+	var a = as[i];
+	asVars.push("var a"+i+" = "+toc(a));
+	asNums.push(".mul(a"+i+".sub(z))");
+	asDens.push(".div(none.sub(a"+i+".conj().mul(z)))");
+	l = l.mul(lt(a));
+    }
+    
+    var expr = asVars.join(';') + "; var f = function(z) { return " + toc(l) + asNums.join('') + asDens.join('') + "; }; {f};"
+    return eval(expr);
+}
+
 function bpeval(as, z) {
+    var f = getBPF(as);
+    return f(z);
+}
+
+/*
+function bpeval0(as, z) {
 
     function bpterm(a) {
-	var l = lt(a); // a*/|a|
+	var l = lt(a); // (a*)/|a|
 	var num;
 	if(!iszero(a)) {
 	    num = a.sub(z); // (a - z)
@@ -129,6 +154,8 @@ function bpeval2(as, z) {
     var denv = peval(den, z);
     return lambda.mul(numv).div(denv);
 }
+
+*/
 
 function l(as) {
     var l = none;
