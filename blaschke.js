@@ -45,12 +45,13 @@ function normalizeangle(theta) {
     }
 }
 
+function region(cvangles, z, bpz) {
+    var i = getangleindex(bpz.angle(), cvangles);
+    return 1.0*i/(cvangles.length);
+}
+
 function showRegions(ctx, zs, bpzs, cvangles) {    
-    function region(z, bpz) {
-	var i = getangleindex(bpz.angle(), cvangles);
-	return 1.0*i/(cvangles.length);
-    }
-    return mapOverbpzs(ctx, zs, bpzs, region);
+    return mapOverbpzs(ctx, zs, bpzs, function(z, bpz) { return region(cvangles, z, bpz); });
 }
 
 function mapOverbpzs(ctx, zs, bpzs, huefn) {

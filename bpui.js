@@ -1,6 +1,10 @@
 
 //zs = bpcompose(zeroonehalf, [c(0,0), c(.51, 0)] );
 
+var zs;
+var cpi;
+var bpzs;
+
 function cssscatter(canvas, pts, cssclass, doclear) {
     if(doclear == undefined || doclear) {
 	$(canvas).parent('div').find("."+cssclass).remove();
@@ -43,7 +47,7 @@ function scatter(ctx, pts, color, N) {
     ctx.restore();
 }
 
-function display(zs, cpi) {
+function displayTables(zs, cpi) {
     $("#criticalpoints").empty();
     for(var i = 0; i < cpi.cps.length; i++) {
 	var li = $("<li>");
@@ -102,7 +106,7 @@ function rescatter(zs) {
     var cvs = cpi.cvs;
     var cvangles = cpi.cvangles;
 
-    display(zs, cpi);
+    displayTables(zs, cpi);
     
     var zerodivs = cssscatter($("#rainbow"), zs, "zero");
     zerodivs.addClass("draggable")
@@ -123,10 +127,6 @@ function rescatter(zs) {
 
     cssscatter($("#rainbow"), cpi.cps, "cp");
 };
-
-var cpi;
-
-var zs;
 
 $(function() {
 
@@ -181,11 +181,34 @@ function resize(graphName, N, cssN) {
 	.css("height", cssN+"px");
     graph.width = N;
     graph.height = N;
+    drawPlots(bpzs, N, zs, cpi);
 }
 
+function drawPlots(bpzs, N, zs, cpi) {
+    if(bpzs == undefined) {return;}
+    var range = document.getElementById("range");
+    var rangecxt = range.getContext("2d");
+    var o0 = showRegions(rangecxt, bpzs.zs, bpzs.zs, cpi.cvangles);
+    rangecxt.putImageData(o0.idata, 0, 0);
+    scatter(rangecxt, cpi.cvs, "#000000", N);
+    
+    var regions = document.getElementById("rainbow");
+    var regionscxt = regions.getContext("2d");
+    var o1 = draweval(regionscxt, bpzs.zs, bpzs.bpzs);
+    regionscxt.putImageData(o1.idata, 0, 0);
+    scatter(regionscxt, cpi.cps, "#000000", N);
+    scatter(regionscxt, zs, "#ffffff", N);
+    
+    var angles = document.getElementById("regions");
+    var anglescxt = angles.getContext("2d");
+    var o2 = showRegions(regionscxt, bpzs.zs, bpzs.bpzs, cpi.cvangles);
+    //	var o2 = showRegions(regionscxt, bpzs.zs, bpzs.bpzs, [Math.PI/8, Math.PI/8+Math.PI/2, Math.PI/8 + 2*(Math.PI/2), Math.PI/8 + 3*(Math.PI/2)]);
+    anglescxt.putImageData(o2.idata, 0, 0);
+    scatter(anglescxt, cpi.cps, "#000000", N);
+    scatter(anglescxt, zs, "#ffffff", N);    
+}
 
-
-var go = function(zs, cpi) {
+function replot(zs, cpi) {
 
     var N = $("#pixels").val();
     var cssN = $("#displaypixels").val();
@@ -195,28 +218,7 @@ var go = function(zs, cpi) {
     var ctx;
     if(true) {
 	bpzs = bpgrideval(N, zs);
-
-	var range = document.getElementById("range");
-	var rangecxt = range.getContext("2d");
-	var o0 = showRegions(rangecxt, bpzs.zs, bpzs.zs, cpi.cvangles);
-	rangecxt.putImageData(o0.idata, 0, 0);
-	scatter(rangecxt, cpi.cvs, "#000000", N);
-
-	var regions = document.getElementById("rainbow");
-	var regionscxt = regions.getContext("2d");
-	var o1 = draweval(regionscxt, bpzs.zs, bpzs.bpzs);
-	regionscxt.putImageData(o1.idata, 0, 0);
-	scatter(regionscxt, cpi.cps, "#000000", N);
-	scatter(regionscxt, zs, "#ffffff", N);
-	
-	var angles = document.getElementById("regions");
-	var anglescxt = angles.getContext("2d");
-	var o2 = showRegions(regionscxt, bpzs.zs, bpzs.bpzs, cpi.cvangles);
-	//	var o2 = showRegions(regionscxt, bpzs.zs, bpzs.bpzs, [Math.PI/8, Math.PI/8+Math.PI/2, Math.PI/8 + 2*(Math.PI/2), Math.PI/8 + 3*(Math.PI/2)]);
-	anglescxt.putImageData(o2.idata, 0, 0);
-	scatter(anglescxt, cpi.cps, "#000000", N);
-	scatter(anglescxt, zs, "#ffffff", N);
-
+	drawPlots(bpzs, N, zs, cpi);
     } else {
 	var c=document.getElementById("graph");
 	var ctx=c.getContext("2d");
@@ -234,7 +236,7 @@ function dcomplex(z) {
 $(function() {
     attachcanvasclicks();
     $("#plotbutton").click(function() {
-	go(zs, cpi);
+	replot(zs, cpi);
     });
 });
 
