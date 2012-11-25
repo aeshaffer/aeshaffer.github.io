@@ -1,0 +1,37 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="blaschke.css"></link>
+    <script type="text/javascript" src="./numeric-1.2.3.js" ></script>
+    <script type="text/javascript" src="./jquery-ui-1.9.1.custom/js/jquery-1.8.2.js"></script>
+    <script src="./jquery-ui-1.9.1.custom/js/jquery-ui-1.9.1.custom.js"></script>
+    <script type="text/javascript" src="./polynomials.js" ></script>
+    <script type="text/javascript" src="./hsvToRGB.js" ></script>
+    
+    <script type="text/javascript" src="./blaschke.js" ></script>
+    <script type="text/javascript" src="./composetool.js" ></script>
+  </head>
+  <body>
+    <h3>Outer Zeroes</h3>
+    <textarea id="outerzs" style="width: 50%" ></textarea>
+    <h3>Inner Zeroes</h3>
+    <textarea id="innerzs" style="width: 50%" ></textarea>
+    <h3>Composed Zeroes</h3>
+    <textarea id="composedzs" style="width: 50%" ></textarea><br />
+    <table id="preimages">
+      <thead>
+	<th>Outer Zero</th>
+	<th id="ipimgs">Inner Preimages</th>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+    
+    <button type="button" id="composebutton">Compose</button>
+    <button type="button" id="testbutton">Test</button>
+
+
+
+  </body>
+</html>

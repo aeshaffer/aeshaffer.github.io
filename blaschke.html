@@ -14,8 +14,9 @@
 
 </head>
 <body>
-  Display Width: <input id="displaypixels" value="400"></input>
-  Pixels: <input id="pixels" value="200"></input>
+  Rendered Size: <input id="pixels" value="200"></input>
+  Zoom Size: <input id="graphzoom" value="2"></input>
+  Window Width: <input id="windowpixels" value="400"></input> 
   <button type="button" id="plotbutton">Plot</button>    
   <button type="button" id="clearpreimages">Clear Preimages</button>
   <br />
@@ -50,4 +51,7 @@
     <h3>Ordered Ct. Angles</h3>
     <ul id="criticalangles"></ul>
   </div>
+  <br style="clear: both" />
+  <textarea id="zsstring" style="width: 50%" ></textarea>
+  <button type="button" id="loadbutton">Load</button>
 </html>

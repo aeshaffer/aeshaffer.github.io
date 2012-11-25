@@ -6,25 +6,33 @@ var cpi;
 var bpzs;
 
 function cssscatter(canvas, pts, cssclass, doclear) {
+    var cw = $(canvas).parent(".canvaswrapper");
     if(doclear == undefined || doclear) {
-	$(canvas).parent('div').find("."+cssclass).remove();
+	cw.find(".circle").remove();
+	cw.find("."+cssclass).remove();
     }
     var canvaswidth = $(canvas).width();
     var offset = canvaswidth/2;
+	
+    var circle = $('<div class="circle"></div>');
+    circle.css("width", canvaswidth);
+    circle.css("height", canvaswidth);
+    circle.css("border-radius", offset);
+    cw.append(circle);
+    
     for(i in pts) {
 	var z = pts[i];
 	var x = z.x;
 	var y = z.y == undefined ? 0: z.y;
 	var div = $("<div />");
+	cw.append(div);
+
 	div.addClass(cssclass);
 	div.addClass("scatterpoint");
 	div.attr("id", cssclass+i);
-	div.css("top",  offset - offset*y);
-	div.css("left", offset + offset*x);
-	$(canvas).parent('div').append(div);
-	var nudge = Math.floor(div.width()/2);
-	div.css("top", div.position().top - nudge);
-	div.css("left", div.position().left - nudge);
+	var nudge = Math.floor((1.0)/(2.0)*div.width());
+	div.css("top",  offset - offset*y - nudge);
+	div.css("left", offset + offset*x - nudge);
     }
     return $(canvas).parent('div').find("."+cssclass);
 }
@@ -60,6 +68,10 @@ function displayTables(zs, cpi) {
 	li.text(dcomplex(zs[i]));
 	$("#zeroes").append(li);
     }    
+    $("#zsstring").val("");
+    var zscode = zsString(zs);
+    $("#zsstring").val(zscode);
+    $("#zsstring").attr("rows", zs.length);
     $("#criticalvalues").empty();
     for(var i = 0; i < cpi.cvs.length; i++) {
 	var li = $("<li>");
@@ -82,12 +94,14 @@ function displayTables(zs, cpi) {
 
 function updatezero() {
     var unit = $("#rainbow").width() /2.0;
-    var nudge = (1.0/2.0)*$(this).width();
+    var nudge = Math.floor((1.0/2.0)*$(this).width());
     var zeroid = $(this).attr("id").replace("zero", "");
+    var cw = $(this).parent(".canvaswrapper");
+    var canvas = cw.find("canvas");
     var p = $(this).position();
     var newpos = {
-	left: p.left + nudge,
-	top: p.top + nudge
+	left: p.left - canvas.position().left + nudge,
+	top: p.top - canvas.position().top + nudge
     };    
     var z = c(newpos.left/unit-1, -(newpos.top/unit - 1));
     if(z.abs().x <= 1) {
@@ -130,14 +144,19 @@ function rescatter(zs) {
 
 $(function() {
 
-    zs = [
+/*    zs = [
 	// c(0, .25),
 	c(-.5, -.5),
 	c(0, .75),
 	c(0,0),
 	c(.5, 0)
     ];
-    
+  */
+zs = [
+    c(0,0),
+    c(.5, -.5)
+];
+
     zeroonehalf = [
 	c(0 ,0),
 	c(.5,0)
@@ -149,36 +168,56 @@ $(function() {
     
     // zs = zeroonehalf;
 
+    resizeCanvases();
     rescatter(zs);
 });
 
 function resizeCanvases() {
-    var N = $("#pixels").val();
-    var cssN = $("#displaypixels").val();
+    var N = parseFloat($("#pixels").val());
+    var zoom = parseFloat($("#graphzoom").val());
+    var windowN = parseFloat($("#windowpixels").val());
 
-    resize("range", N, cssN);
-    resize("rainbow", N, cssN);
-    resize("regions", N, cssN);
+    resize("range", N, windowN, zoom*N);
+    resize("rainbow", N, windowN, zoom*N);
+    resize("regions", N, windowN, zoom*N);
 }
 
 $(function() {
     resizeCanvases();
     rescatter(zs);
-    $("#displaypixels").change(
+    $("#windowpixels").change(
 	function() {resizeCanvases(); rescatter(zs);}
     );
-    $("#pixels").change(
+    $("#graphzoom").change(
 	function() {resizeCanvases(); rescatter(zs);}
     );
+/*    $("#pixels").change(
+	function() {resizeCanvases(); rescatter(zs);}
+    );
+*/
 });
 
-function resize(graphName, N, cssN) {
-    $("#"+graphName).parent(".canvaswrapper")
-	.css("width", cssN+"px")
-	.css("height", cssN+"px");
+// N is the number of pixels in the canvas
+// wrapperN is the size of the canvas wrapper
+function resize(graphName, N, wrapperN, graphN) {
+    var cw = $("#"+graphName).parent(".canvaswrapper");
+    cw
+	.css("width", wrapperN+"px")
+	.css("height", wrapperN+"px");
+    if(graphN > wrapperN) {
+	cw
+	    .addClass("canvaswrapperScroll")
+	    .removeClass("canvaswrapperHidden");
+    } else {
+	cw
+	    .removeClass("canvaswrapperScroll")
+	    .addClass("canvaswrapperHidden");
+    }
+
     var graph = document.getElementById(graphName);
-    $(graph).css("width", cssN+"px")
-	.css("height", cssN+"px");
+    $(graph)
+	.css("width", graphN+"px")
+	.css("height", graphN+"px");
     graph.width = N;
     graph.height = N;
     drawPlots(bpzs, N, zs, cpi);
@@ -209,12 +248,8 @@ function drawPlots(bpzs, N, zs, cpi) {
 }
 
 function replot(zs, cpi) {
-
     var N = $("#pixels").val();
-    var cssN = $("#displaypixels").val();
-
-    resizeCanvases();
-    
+    resizeCanvases();    
     var ctx;
     if(true) {
 	bpzs = bpgrideval(N, zs);
@@ -225,18 +260,17 @@ function replot(zs, cpi) {
     }
 }
 
-function round2(n) {
-    return Math.round(n*100)/100;
-}
-
-function dcomplex(z) {
-    return round2(z.x) + " " + round2(z.y) + "i" + " (" + round2(z.angle()) + ")";
-}
-
 $(function() {
     attachcanvasclicks();
     $("#plotbutton").click(function() {
+	resizeCanvases();
+	rescatter(zs);
 	replot(zs, cpi);
+    });
+    $("#loadbutton").click(function() {
+	resizeCanvases();
+	zs = parseZsString($("#zsstring").val());
+	rescatter(zs);
     });
 });
 
@@ -277,10 +311,12 @@ function attachcanvasclicks() {
 	.on("mouseleave", function(e) {
 	    rangemd = false;
 	})
-	.on("click", function(e) {
+ 	.on("click", function(e) {
 	    rangemd = !rangemd;
 	})
 	.on("mousemove", function(e) {
+
+//	.on("click", function(e) {
 	    if(rangemd || e.which == 1) {
 		var z = zeroFromClick($(this), e);
 		var preimages = preimage(zs, z);

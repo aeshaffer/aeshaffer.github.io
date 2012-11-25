@@ -27,13 +27,28 @@ canvas.graph{
 /*canvas {
   background-color: #eeeeee;
   }*/
+.circle {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    border: 1px solid black;
+    background-color: transparent;
+    z-index: -1;
+}
+
 .canvaswrapper {
     user-select: none;
     border: 2px solid black; 
-    width: 400px; 
-    height: 400px; 
+    width: 10px; 
+    height: 10px; 
     position: relative; 
     display: inline-block;
+}
+.canvaswrapperHidden {
+    overflow: hidden !important;
+}
+.canvaswrapperScroll {
+    overflow: scroll !important;
 }
 .workingbutton {
     background-color: red;

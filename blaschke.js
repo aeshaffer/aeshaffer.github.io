@@ -2,6 +2,19 @@ function c(x,y) {
     return numeric.t(x,y);
 }
 
+function round2(n) {
+    return Math.round(n*100)/100;
+}
+
+function dc(z) {
+    var y = z.y == undefined ? 0 : z.y;
+    return round2(z.x) + " " + (y >= 0 ? "+": "") +round2(y) + "i";
+}
+
+function dcomplex(z) {
+    return dc(z) + " (" + round2(normalizeangle(z.angle())) + ")";
+}
+
 pi = 3.1415;
 
 var nzero = numeric.t(0,0);
@@ -32,6 +45,20 @@ function bpgrideval(N, as) {
 	}
     }
     return {zs: grid, bpzs: retval};
+}
+
+function zsString(zs) {
+    return zs.map(function(z) { return "z="+z.x+","+(z.y == undefined ? 0: z.y); }).join("\n&");
+}
+
+function parseZsString(s) {
+    var zs = s.replace(/\n/g, "").replace(/z=/g, "").split("&");
+    var retval = new Array();
+    for(i in zs) {
+	var parts = zs[i].split(",");
+	retval.push(c(parseFloat(parts[0]), parseFloat(parts[1])));
+    }
+    return retval;
 }
 
 function normalizeangle(theta) {
@@ -100,7 +127,7 @@ function lt(a) {
     }
 }
 
-function getBPF(as) {
+function getBPFExpr(as) {
     var asNums = new Array();
     var asDens = new Array();
     var asVars = new Array();
@@ -109,22 +136,31 @@ function getBPF(as) {
     for(i in as) {
 	var a = as[i];
 	asVars.push("var a"+i+" = "+toc(a));
-	asNums.push(".mul(a"+i+".sub(z))");
-	asDens.push(".div(none.sub(a"+i+".conj().mul(z)))");
-	l = l.mul(lt(a));
+	if(iszero(a)) {
+	    asNums.push(".mul(z)");
+	    asDens.push(".div(none)");
+	} else {
+	    asNums.push(".mul(a"+i+".sub(z))");
+	    asDens.push(".div(none.sub(a"+i+".conj().mul(z)))");
+	    l = l.mul(lt(a));
+	}
     }
     
-    var expr = asVars.join(';') + "; var f = function(z) { return " + toc(l) + asNums.join('') + asDens.join('') + "; }; {f};"
-    return eval(expr);
+    var expr = asVars.join(';') + "; var l = "+toc(l)+"; var f = function(z) { return l" +  asNums.join('') + asDens.join('') + "; }; {f};"
+    return expr;
 }
 
-function bpeval(as, z) {
+function getBPF(as) {
+    return eval(getBPFExpr(as));
+}
+
+function bpeval0(as, z) {
     var f = getBPF(as);
     return f(z);
 }
 
-/*
-function bpeval0(as, z) {
+
+function bpeval(as, z) {
 
     function bpterm(a) {
 	var l = lt(a); // (a*)/|a|
@@ -145,6 +181,7 @@ function bpeval0(as, z) {
     }
     return retval;
 }
+/*
 
 function bpeval2(as, z) {
     var lambda = l(as);
@@ -205,18 +242,21 @@ function preimage(zs, beta) {
     return preimages;
 }
 
-function bpcompose(zs1, zs2) {
+function bpcompose2(zs1, zs2) {
     var retval = Array();
-    var num = bpnum(zs2);
-    var den = bpden(zs2);
-    var lambda = l(zs2);
     for(i in zs1) {
 	// Find points that zs2 maps to alpha.
 	alpha = zs1[i];
 	alpharoots = preimage(zs2, alpha);
-	retval = retval.concat(alpharoots);
+	var o = {'outerzero': alpha, 'preimages': alpharoots};
+	retval.push(o);
     }
     return retval;
+}
+
+function bpcompose(zs1, zs2) {
+    var preimages = bpcompose2(zs1, zs2);
+    return [].concat.apply([], preimages.map(function(pimg) {return pimg.preimages;}));
 }
 
 function roll(ar) {
