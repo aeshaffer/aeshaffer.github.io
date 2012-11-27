@@ -1,3 +1,29 @@
+function c(x,y) {
+    return numeric.t(x,y);
+}
+
+function round2(n) {
+    return Math.round(n*100)/100;
+}
+
+function dc(z) {
+    var y = z.y == undefined ? 0 : z.y;
+    return round2(z.x) + " " + (y >= 0 ? "+": "") +round2(y) + "i";
+}
+
+function dcp(z) {
+    var y = z.y == undefined ? 0 : z.y;
+    return round2(z.x) + " " + (y >= 0 ? "+": "") +round2(y) + "j";
+}
+
+function dcomplex(z) {
+    return dc(z) + " (" + round2(normalizeangle(z.angle())) + ")";
+}
+
+pi = 3.1415;
+
+var nzero = numeric.t(0,0);
+var none = numeric.t(1,0);
 
 function iszero(z) {
     return z.abs().x == 0;
@@ -64,38 +90,69 @@ function polysub(cs1, cs2) {
     return retval;
 }
 
-function polyroots(cs) {
-    if(cs.length == 0) {
+// see /sympy/mpmath/calculus/polynomials.py
+
+function pypoly(cs) {   
+    var cs2 = cs.slice();
+    cs2.reverse();
+    return "[" + cs2.map(dcp).join(",") + "]";
+}
+
+function printzs(zs) {
+    return "[" + zs.map(dcp).join(",") + "]";
+}
+
+function product(zs) {
+    return zs.filter(function(z) { return z != undefined; })
+	.reduce(function(z1,z2) { return z1.mul(z2);}, none);
+}
+
+function polyroots(incs) {
+    if(incs.length == 0) {
 	return undefined;
     }
-    var f = function(z) { return peval(cs, z); }
+    var cs = incs.slice();
     while(cs.length > 0 && iszero(cs[cs.length -1])) {
 	cs.splice(-1,1);
     }
+    var deg = cs.length - 1;
     var leading = cs[cs.length - 1];    
     cs = polymult(cs, [none.div(leading)]);
-    var deg = cs.length - 1;
+    var f = function(z) { return peval(cs, z); }
     var roots = Array();
-    for(var i = 1; i < deg+1; i++) {
-	roots[i-1] = c(.4, .9).pow(i);
+    for(var i = 0; i < deg; i++) {
+	roots[i] = c(.4, .9).pow(i);
+    }
+    if(console.log) { 
+	console.log(pypoly(incs)); 
+	console.log(pypoly(cs));
     }
     var n = 0;
-    while(n < 100) {
-	var newroots = Array();
+    while(n < 5) {
+	var dens = new Array();
+	var deltas = new Array();
+	var newroots = new Array();
 
-	for(var i = 0; i < roots.length; i++) {
-	    var den = none;
-	    for(var j = 0; j < roots.length; j++) {
-		if(i != j) {
-		    den = den.mul(roots[i].sub(roots[j]));
-		}
-	    }
-	    var fr = f(roots[i]);
-	    var delta = fr.div(den);
-	    newroots[i] = roots[i].sub(delta); 
+	if(console.log != undefined) {
+	    console.log("");
+	    console.log("Roots: " + printzs(roots));
 	}
 
-	roots = newroots;
+	for(var i = 0; i < roots.length; i++) {
+	    var p = roots[i];
+	    var x = f(p);
+	    for(var j = 0; j < roots.length; j++) {
+		if(i != j) {
+		    x = x.div(p.sub(roots[j]));
+		}
+	    }
+	    if(console.log != undefined) {
+		console.log(i + " P:" + printzs([p]) + " f(p):" + printzs([f(p)]) + " x:" + printzs([x]));
+	    }
+	    roots[i] = p.sub(x);
+	}
+
+	// roots = newroots;
 	n++;
     }
     return roots;

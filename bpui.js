@@ -144,6 +144,16 @@ function rescatter(zs) {
 
 $(function() {
 
+    if(window.location.search != "") {
+	var urlZS = window.location.search.replace(/^\?/, '');
+	zs = parseZsString(urlZS);
+    } else {
+	zs = [
+	    c(0,0),
+	    c(.5, -.5)
+	];
+    }
+
 /*    zs = [
 	// c(0, .25),
 	c(-.5, -.5),
@@ -152,10 +162,6 @@ $(function() {
 	c(.5, 0)
     ];
   */
-zs = [
-    c(0,0),
-    c(.5, -.5)
-];
 
     zeroonehalf = [
 	c(0 ,0),

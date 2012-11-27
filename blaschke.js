@@ -1,24 +1,3 @@
-function c(x,y) {
-    return numeric.t(x,y);
-}
-
-function round2(n) {
-    return Math.round(n*100)/100;
-}
-
-function dc(z) {
-    var y = z.y == undefined ? 0 : z.y;
-    return round2(z.x) + " " + (y >= 0 ? "+": "") +round2(y) + "i";
-}
-
-function dcomplex(z) {
-    return dc(z) + " (" + round2(normalizeangle(z.angle())) + ")";
-}
-
-pi = 3.1415;
-
-var nzero = numeric.t(0,0);
-var none = numeric.t(1,0);
 
 function cgrid(N) {
     xs = numeric.linspace(-1,1,N);
