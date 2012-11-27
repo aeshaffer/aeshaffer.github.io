@@ -128,7 +128,7 @@ function polyroots(incs) {
 	console.log(pypoly(cs));
     }
     var n = 0;
-    while(n < 5) {
+    while(n < 100) {
 	var dens = new Array();
 	var deltas = new Array();
 	var newroots = new Array();
