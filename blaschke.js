@@ -52,6 +52,19 @@ function normalizeangle(theta) {
     }
 }
 
+// Normalize to between -Pi and Pi.
+function anglediff(theta) {
+    while(true) {
+	if(theta > Math.PI) {
+	    theta = theta - 2*Math.PI;
+	} else if(theta < -Math.PI) {
+	    theta = theta + 2*Math.PI;
+	} else {
+	    return theta;
+	}
+    }
+}
+
 function region(cvangles, z, bpz) {
     var i = getangleindex(bpz.angle(), cvangles);
     return 1.0*i/(cvangles.length);

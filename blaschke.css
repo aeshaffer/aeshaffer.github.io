@@ -24,6 +24,10 @@ div.cv {
 canvas.graph{
     position: relative;
 }
+#lines {
+    position: absolute; left: 0px; top: 0px;
+}
+
 /*canvas {
   background-color: #eeeeee;
   }*/

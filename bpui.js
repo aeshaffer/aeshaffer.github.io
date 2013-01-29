@@ -72,6 +72,8 @@ function displayTables(zs, cpi) {
     var zscode = zsString(zs);
     $("#zsstring").val(zscode);
     $("#zsstring").attr("rows", zs.length);
+    var wl = window.location.href.replace(window.location.search, "");
+    $("#permalink").attr("href", wl+"?"+zscode);
     $("#criticalvalues").empty();
     for(var i = 0; i < cpi.cvs.length; i++) {
 	var li = $("<li>");
@@ -114,7 +116,7 @@ function updatezero() {
 }
 
 function rescatter(zs) {
-
+   
     cpi = cpinfo(zs);
     var cps = cpi.cps;
     var cvs = cpi.cvs;
@@ -150,7 +152,8 @@ $(function() {
     } else {
 	zs = [
 	    c(0,0),
-	    c(.5, -.5)
+	    c(.5, -.5),
+	    c(.5, .5)
 	];
     }
 
@@ -186,6 +189,7 @@ function resizeCanvases() {
     resize("range", N, windowN, zoom*N);
     resize("rainbow", N, windowN, zoom*N);
     resize("regions", N, windowN, zoom*N);
+    resize("lines", N, windowN, zoom*N);
 }
 
 $(function() {
@@ -289,6 +293,69 @@ function zeroFromClick(canvas, e) {
     return c(x,y);
 }
 
+function minIndex(ar0) {
+    var x = ar0.reduce(function(p, v, i, ar) {
+	if(v < p.v) {
+	    return {v: v, i:i};
+	} else {
+	    return p;
+	}
+    }, ({v: ar0[0], i: 0}));
+    return x.i;	
+}
+
+function arrrot(arr, n) {
+    return arr.slice(n, arr.length).concat(arr.slice(0, n));
+}
+
+function drawPILines(t) {
+    var skip = parseInt($("#skippoints").val(), 10);
+    if(zs.length % skip != 0) {
+	alert("Cannot skip "+zs.length+" points by " + skip + ".");
+	return;
+    }
+
+    var z2 = c(numeric.cos(t), numeric.sin(t));
+    var bz2 = bpeval0(zs, z2);
+    var preimages = preimage(zs, bz2);
+    var piangles = preimages.map(function(cv) { return cv.angle();})
+	.sort(function(a,b) { return a-b; });
+    var z2i = minIndex(piangles.map(function(t1) { return numeric.abs(anglediff(t1-t));}));
+
+    piangles = arrrot(piangles, z2i);
+
+    console.log(t);
+    console.log(piangles);
+
+    var lines = document.getElementById("lines");
+    var ctx = lines.getContext("2d");
+    var N = $("#pixels").val();
+    var Nover2 = N/2;
+//    ctx.translate(Nover2,Nover2);
+
+    ctx.beginPath();
+
+    var i = 0;
+
+    function ttp(t0) {
+	return [Nover2*(1+numeric.cos(t0)), Nover2*(1-numeric.sin(t0))];
+    }
+
+    var t0 = piangles[i];
+
+    (ctx.moveTo).apply(ctx, ttp(t0));
+
+    for(i = skip; i < piangles.length; i+= skip) {
+	t0 = piangles[i];
+	(ctx.lineTo).apply(ctx, ttp(t0));
+    }
+    ctx.closePath();
+    ctx.stroke();
+
+//    ctx.restore();
+}
+
+
 function attachcanvasclicks() {
     var cf = function(e) {
 	var z = zeroFromClick($(this), e);
@@ -303,10 +370,20 @@ function attachcanvasclicks() {
 	    rescatter(zs);
 	}
     }
+    var joinpoints = function(e) {
+	var z = zeroFromClick($(this), e);
+	var t = z.angle();
+	drawPILines(t);
+    }
+    var clearlines = function(e) {
+	$("#lines")[0].getContext("2d").clear();
+    }
     $("#rainbow").on("dblclick", dc);
     $("#regions").on("dblclick", dc);
     $("#rainbow").on("click", cf);
-    $("#regions").on("click", cf);
+    $("#lines").on("click", joinpoints);
+    $("#clearlines").on("click", clearlines);
+    // $("#regions").on("click", cf);
     $("#clearpreimages").on("click", 
 			    function(e) {
 				cssscatter($("#regions"), [], "pi", true);
@@ -329,4 +406,19 @@ function attachcanvasclicks() {
 		var pidivs = cssscatter($("#regions"), preimages, "pi", false);
 	    }
 	});
+};
+
+
+CanvasRenderingContext2D.prototype.clear = 
+  CanvasRenderingContext2D.prototype.clear || function (preserveTransform) {
+    if (preserveTransform) {
+      this.save();
+      this.setTransform(1, 0, 0, 1, 0, 0);
+    }
+
+    this.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    if (preserveTransform) {
+      this.restore();
+    }           
 };

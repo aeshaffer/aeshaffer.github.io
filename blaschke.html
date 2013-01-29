@@ -15,8 +15,8 @@
 </head>
 <body>
   Rendered Size: <input id="pixels" value="200"></input>
-  Zoom Size: <input id="graphzoom" value="2"></input>
-  Window Width: <input id="windowpixels" value="400"></input> 
+  Zoom Size: <input id="graphzoom" value="1"></input>
+  Window Width: <input id="windowpixels" value="200"></input> 
   <button type="button" id="plotbutton">Plot</button>    
   <button type="button" id="clearpreimages">Clear Preimages</button>
   <br />
@@ -27,12 +27,15 @@
   <div class="canvaswrapper">
     <canvas id="regions" class="graph">
     </canvas>
+    <canvas id="lines" class="graph">
+    </canvas>
   </div>
   <div class="canvaswrapper">
     <canvas id="range">
     </canvas>
   </div>
   <br/>
+  Skip Points: <input id="skippoints" value="1"></input><button type="button" id="clearlines">Clear Lines</button><br/>
   Click: <span id="point" ></span><br />
   Dest:  <span id="dest" ></span><br/>
   <div style="display: block; float:left; width: 200px;">
@@ -54,4 +57,5 @@
   <br style="clear: both" />
   <textarea id="zsstring" style="width: 50%" ></textarea>
   <button type="button" id="loadbutton">Load</button>
+  <a id="permalink">Permalink</a>
 </html>
