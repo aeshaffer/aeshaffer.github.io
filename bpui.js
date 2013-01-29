@@ -331,28 +331,28 @@ function drawPILines(t) {
     var ctx = lines.getContext("2d");
     var N = $("#pixels").val();
     var Nover2 = N/2;
-//    ctx.translate(Nover2,Nover2);
-
-    ctx.beginPath();
-
-    var i = 0;
+    ctx.save();
+    ctx.translate(Nover2,Nover2);
+    ctx.scale(Nover2, -Nover2);
+    ctx.lineWidth = 1/Nover2;
 
     function ttp(t0) {
-	return [Nover2*(1+numeric.cos(t0)), Nover2*(1-numeric.sin(t0))];
+	return [numeric.cos(t0), numeric.sin(t0)];
     }
 
-    var t0 = piangles[i];
-
-    (ctx.moveTo).apply(ctx, ttp(t0));
-
-    for(i = skip; i < piangles.length; i+= skip) {
-	t0 = piangles[i];
-	(ctx.lineTo).apply(ctx, ttp(t0));
+    for(var j = 0; j < skip; j++) {
+	ctx.beginPath();
+	var i = j;
+	var t0 = piangles[i];
+	(ctx.moveTo).apply(ctx, ttp(t0));
+	for(i = j+skip; i < piangles.length; i+= skip) {
+	    t0 = piangles[i];
+	    (ctx.lineTo).apply(ctx, ttp(t0));
+	}
+	ctx.closePath();
+	ctx.stroke();
     }
-    ctx.closePath();
-    ctx.stroke();
-
-//    ctx.restore();
+    ctx.restore();
 }
 
 
