@@ -35,9 +35,16 @@
     </canvas>
   </div>
   <br/>
-  Skip Points: <input id="skippoints" value="1"></input><button type="button" id="clearlines">Clear Lines</button><br/>
-  Click: <span id="point" ></span><br />
-  Dest:  <span id="dest" ></span><br/>
+  <div>
+  Angle: <input id="theta" value="0"></input>
+  <button type="button" id="timesPI">*= &pi;</button>
+  <button type="button" id="plottheta">Plot Identified</button>
+  <br/>
+  Skip Points: <input id="skippoints" value="1"></input>
+  <button type="button" id="clearlines">Clear Lines</button><br/>
+  </div>
+  Click Location: <span id="point" ></span><br />
+  B(CL):  <span id="dest" ></span><br/>
   <div style="display: block; float:left; width: 200px;">
     <h3>Zeroes</h3>
     <ul id="zeroes">  </ul>

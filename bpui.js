@@ -382,6 +382,14 @@ function attachcanvasclicks() {
     $("#regions").on("dblclick", dc);
     $("#rainbow").on("click", cf);
     $("#lines").on("click", joinpoints);
+    $("#timesPI").on("click", function() {
+	var t = parseFloat($("#theta").val());
+	$("#theta").val(Math.PI*t);
+    });
+    $("#plottheta").on("click", function() {
+	var t = parseFloat($("#theta").val());
+	drawPILines(t);
+    });
     $("#clearlines").on("click", clearlines);
     // $("#regions").on("click", cf);
     $("#clearpreimages").on("click", 
