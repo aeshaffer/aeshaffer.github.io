@@ -287,6 +287,7 @@ function drawPILines(t) {
     var bz2 = bpeval0(zs, z2);
     var preimages = preimage(zs, bz2);
     var piangles = preimages.map(function(cv) { return cv.angle();})
+    piangles = piangles.sort(function(a,b){return a-b});
 
     var lines = document.getElementById("lines");
     var ctx = lines.getContext("2d");
