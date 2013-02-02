@@ -249,19 +249,39 @@ function resize(graphName, pd) {
 }
 
 
+var worker = new Worker("bpworker.js");
+
+$(function() {
+    $("#workergo").click(function() {
+	$("#workergo").css("background-color", "red");
+	worker.postMessage({as: zs, N: plotDims().N});
+	$("#progress").text("");
+    });
+});
+
+worker.onmessage = function(event) {
+    if(event.data.bpzs != null) {
+	$("#workergo").css("background-color", "");
+	bpzs = {bpzs: cifygrid(event.data.bpzs), zs: cgrid(event.data.bpzs.length)};
+	resizeCanvasesRescatter();
+	workerDrawPlot(bpzs, plotDims().N, cpi.cvangles);
+    }
+    if(event.data.rowComplete != null) {
+	$("#progress").text(event.data.rowComplete);
+    }
+}
+
 $(function() {
     attachcanvasclicks();
     $("#loadbutton").click(function() {
 	zs = parseZsString($("#zsstring").val());
-	resizeCanvases();
-	rescatter(zs);
+	resizeCanvasesRescatter();
     });
 });
 
 $(function() {
     $("#plotbutton").click(function() {
-	resizeCanvases();
-	rescatter(zs);
+	resizeCanvasesRescatter();
 	replot(zs, cpi);
     });
 });
@@ -291,7 +311,7 @@ function drawPILines(t) {
 
     var lines = document.getElementById("lines");
     var ctx = lines.getContext("2d");
-    var N = $("#pixels").val();
+    var N = plotDims().N;
     var Nover2 = N/2;
     ctx.save();
     ctx.translate(Nover2,Nover2);

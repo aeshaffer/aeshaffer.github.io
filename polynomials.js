@@ -2,6 +2,14 @@ function c(x,y) {
     return numeric.t(x,y);
 }
 
+function cifyrow(as) {
+    return as.map(function(a) { return c(a.x, a.y);});
+}
+
+function cifygrid(zs) {
+    return zs.map(function(r) { return cifyrow(r);});
+}
+
 function round2(n) {
     return Math.round(n*100)/100;
 }

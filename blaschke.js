@@ -12,7 +12,7 @@ function cgrid(N) {
     return retval;
 }
 
-function bpgrideval(N, as) {
+function bpgrideval(N, as, rowcallback) {
     var bpe = getBPF(as);
     grid = cgrid(N);
     var retval = Array(N);
@@ -21,6 +21,9 @@ function bpgrideval(N, as) {
 	for(var j = 0; j < N; j++) {
 	    var z = grid[i][j];
 	    retval[i][j] = bpe(z);
+	}
+	if(typeof(rowcallback) == "function") {
+	    rowcallback(i);
 	}
     }
     return {zs: grid, bpzs: retval};
@@ -70,11 +73,13 @@ function region(cvangles, z, bpz) {
     return 1.0*i/(cvangles.length);
 }
 
-function showRegions(idata, zs, bpzs, cvangles) {    
-    return mapOverbpzs(idata, zs, bpzs, function(z, bpz) { return region(cvangles, z, bpz); });
+function showRegions(idata, zs, bpzs, cvangles, rowcallback) {    
+    return mapOverbpzs(idata, zs, bpzs, 
+		       function(z, bpz) { return region(cvangles, z, bpz); },
+		       rowcallback);
 }
 
-function mapOverbpzs(idata, zs, bpzs, huefn) {
+function mapOverbpzs(idata, zs, bpzs, huefn, rowcallback) {
     var N = bpzs.length;
     for(var row = 0; row < N; row++) {
 	for(var col = 0; col < N; col++) {
@@ -86,25 +91,28 @@ function mapOverbpzs(idata, zs, bpzs, huefn) {
 		setRGB(idata, rgb, N, row, col);
 	    }
 	}
+	if(typeof(rowcallback) == "function") {
+	    rowcallback(row);
+	}
     }
     return {idata: idata};
 }
 
 function setRGB(idata, rgb, N, row, col) {
     var addr = (N*4)*((N-1)-col) + 4*row;
-    idata.data[addr] = rgb[0];
-    idata.data[addr+1] = rgb[1];
-    idata.data[addr+2] = rgb[2];
-    idata.data[addr+3] = 255;    
+    idata[addr] = rgb[0];
+    idata[addr+1] = rgb[1];
+    idata[addr+2] = rgb[2];
+    idata[addr+3] = 255;    
 }
 
-function draweval(idata, zs, bpzs) {
+function draweval(idata, zs, bpzs, rowcallback) {
     function angle(z, bpz) {
 	var thetapct = normalizeangle(bpz.angle())/(2*pi);
 	var t2 = Math.round(255*thetapct) % 256;
 	return t2/256;
     }
-    return mapOverbpzs(idata, zs, bpzs, angle);
+    return mapOverbpzs(idata, zs, bpzs, angle, rowcallback);
 }
 
 function lt(a) {
