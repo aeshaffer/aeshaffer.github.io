@@ -70,13 +70,12 @@ function region(cvangles, z, bpz) {
     return 1.0*i/(cvangles.length);
 }
 
-function showRegions(ctx, zs, bpzs, cvangles) {    
-    return mapOverbpzs(ctx, zs, bpzs, function(z, bpz) { return region(cvangles, z, bpz); });
+function showRegions(idata, zs, bpzs, cvangles) {    
+    return mapOverbpzs(idata, zs, bpzs, function(z, bpz) { return region(cvangles, z, bpz); });
 }
 
-function mapOverbpzs(ctx, zs, bpzs, huefn) {
+function mapOverbpzs(idata, zs, bpzs, huefn) {
     var N = bpzs.length;
-    var idata = ctx.createImageData(N, N);
     for(var row = 0; row < N; row++) {
 	for(var col = 0; col < N; col++) {
 	    var z = zs[row][col];
@@ -88,27 +87,24 @@ function mapOverbpzs(ctx, zs, bpzs, huefn) {
 	    }
 	}
     }
-    return {ctx: ctx, idata: idata};
+    return {idata: idata};
 }
 
 function setRGB(idata, rgb, N, row, col) {
-    function baddr(row,col) {
-	return (N*4)*((N-1)-col) + 4*row;
-    }
-    var addr = baddr(row, col);
+    var addr = (N*4)*((N-1)-col) + 4*row;
     idata.data[addr] = rgb[0];
     idata.data[addr+1] = rgb[1];
     idata.data[addr+2] = rgb[2];
     idata.data[addr+3] = 255;    
 }
 
-function draweval(ctx, zs, bpzs) {
+function draweval(idata, zs, bpzs) {
     function angle(z, bpz) {
 	var thetapct = normalizeangle(bpz.angle())/(2*pi);
 	var t2 = Math.round(255*thetapct) % 256;
 	return t2/256;
     }
-    return mapOverbpzs(ctx, zs, bpzs, angle);
+    return mapOverbpzs(idata, zs, bpzs, angle);
 }
 
 function lt(a) {
