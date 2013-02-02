@@ -134,8 +134,10 @@ function polyroots(incs) {
 	var newroots = new Array();
 
 	if(console.log != undefined) {
+/*
 	    console.log("");
 	    console.log("Roots: " + printzs(roots));
+*/
 	}
 
 	for(var i = 0; i < roots.length; i++) {
@@ -146,9 +148,11 @@ function polyroots(incs) {
 		    x = x.div(p.sub(roots[j]));
 		}
 	    }
+/*
 	    if(console.log != undefined) {
 		console.log(i + " P:" + printzs([p]) + " f(p):" + printzs([f(p)]) + " x:" + printzs([x]));
 	    }
+*/
 	    roots[i] = p.sub(x);
 	}
 
