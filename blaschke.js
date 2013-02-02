@@ -12,6 +12,55 @@ function cgrid(N) {
     return retval;
 }
 
+function bpgridevalArray(N, as, rowcallback) {
+    var bpe = getBPF(as);
+    // We want (-1,1) in the upper-left corner.
+    var xs = numeric.linspace(-1,1,N);
+    var ys = numeric.linspace(1,-1,N);
+    var realparts = new Float32Array(N*N);
+    var imagparts = new Float32Array(N*N);
+    var z;
+    var bpz;
+    for(var yi = 0; yi < N; yi++) {
+	for(var xi = 0; xi < N; xi++) {
+	    z = c(xs[xi], ys[yi]);
+	    if(z.abs().x <= 1) {
+		bpz = bpe(z);
+		var addr = N*yi + xi;
+		realparts[addr] = bpz.x;
+		imagparts[addr] = bpz.y;
+	    } else {
+		realparts[addr] = NaN;
+		imagparts[addr] = NaN;
+	    }
+	}
+	if(typeof(rowcallback) == "function") {
+	    rowcallback(yi);
+	}
+    }
+    return {realparts: realparts, imagparts: imagparts, N: N};
+}
+
+function rpipToHue(rpip, idata, huefn) {
+    var rp = rpip.realparts;
+    var ip = rpip.imagparts;
+    var N = Math.sqrt(rp.length);
+    var xs = numeric.linspace(-1,1,N);
+    var ys = numeric.linspace(1,-1,N);
+    for(var xi = 0; xi < N; xi++) {
+	for(var yi = 0; yi < N; yi++) {
+	    var z = c(xs[xi], ys[yi]);
+	    if(z.abs().x <= 1) {
+		var i = yi*N + xi;
+		var bpz = c(rp[i], ip[i]);		
+		var hue = huefn(bpz);
+		var rgb = hsvToRgb(hue, 1, 1);
+		setRGBInner(idata, rgb, 4*i);	    
+	    }
+	}
+    }
+}
+
 function bpgrideval(N, as, rowcallback) {
     var bpe = getBPF(as);
     grid = cgrid(N);
@@ -68,16 +117,17 @@ function anglediff(theta) {
     }
 }
 
-function region(cvangles, z, bpz) {
+function region(cvangles, bpz) {
     var i = getangleindex(bpz.angle(), cvangles);
     return 1.0*i/(cvangles.length);
 }
 
 function showRegions(idata, zs, bpzs, cvangles, rowcallback) {    
     return mapOverbpzs(idata, zs, bpzs, 
-		       function(z, bpz) { return region(cvangles, z, bpz); },
+		       function(z, bpz) { return region(cvangles, bpz); },
 		       rowcallback);
 }
+
 
 function mapOverbpzs(idata, zs, bpzs, huefn, rowcallback) {
     var N = bpzs.length;
@@ -98,20 +148,25 @@ function mapOverbpzs(idata, zs, bpzs, huefn, rowcallback) {
     return {idata: idata};
 }
 
-function setRGB(idata, rgb, N, row, col) {
-    var addr = (N*4)*((N-1)-col) + 4*row;
+function setRGBInner(idata, rgb, addr) {
     idata[addr] = rgb[0];
     idata[addr+1] = rgb[1];
     idata[addr+2] = rgb[2];
     idata[addr+3] = 255;    
 }
 
+function setRGB(idata, rgb, N, row, col) {
+    var addr = (N*4)*((N-1)-col) + 4*row;
+    setRGBInner(idata, rgb, addr);
+}
+
+function angle(bpz) {
+    var thetapct = normalizeangle(bpz.angle())/(2*pi);
+    var t2 = Math.round(255*thetapct) % 256;
+    return t2/256;
+}
+
 function draweval(idata, zs, bpzs, rowcallback) {
-    function angle(z, bpz) {
-	var thetapct = normalizeangle(bpz.angle())/(2*pi);
-	var t2 = Math.round(255*thetapct) % 256;
-	return t2/256;
-    }
     return mapOverbpzs(idata, zs, bpzs, angle, rowcallback);
 }
 

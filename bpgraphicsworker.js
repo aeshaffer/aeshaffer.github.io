@@ -14,31 +14,26 @@ function wonkify(idata) {
 
 self.onmessage = function(event) {
     var cvangles = event.data.cvangles;
-    var bpzs = event.data.bpzs.bpzs;
-    var zs = event.data.bpzs.zs;
+    var bprpip = event.data.bprpip;
     cvanges = cifyrow(cvangles);
-    bpzs = cifygrid(bpzs);
-    zs = cifygrid(zs);
 
     var rainbowidata = event.data.rainbowidata;
     if(rainbowidata != null) {
-	rainbowidata = new Uint8ClampedArray(4*bpzs.length*bpzs.length);
+	rainbowidata = new Uint8ClampedArray(4*bprpip.realparts.length);
 	var rainbowstatus = function(row) { 
-	    postMessage({rainbowrow: row});
-	} 
-	draweval(rainbowidata, zs, bpzs, rainbowstatus);
-	//wonkify(rainbowidata);
-	postMessage({rainbowidata: rainbowidata});
+	    postMessage({rainbowrow: row, senddate: (new Date()).getTime() });
+	}
+	rpipToHue(bprpip, rainbowidata, angle);
+	postMessage({rainbowidata: rainbowidata, senddate: (new Date()).getTime() });
     }
 
     var regionsidata = event.data.regionsidata;
     if(regionsidata != null) {
-	regionsidata = new Uint8ClampedArray(4*bpzs.length*bpzs.length);
+	regionsidata = new Uint8ClampedArray(4*bprpip.realparts.length);
 	var regionsstatus = function(row) { 
-	    postMessage({regionsrow: row});
+	    postMessage({regionsrow: row, senddate: (new Date()).getTime() });
 	}
-	showRegions(regionsidata, zs, bpzs, cvangles, regionsstatus);
-	//wonkify(regionsidata);
-	postMessage({regionsidata: regionsidata});
+	rpipToHue(bprpip, regionsidata, function(bpz) { return region(cvangles, bpz);});
+	postMessage({regionsidata: regionsidata, senddate: (new Date()).getTime() });
     }
 }

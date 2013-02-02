@@ -259,15 +259,39 @@ $(function() {
     });
 });
 
+function fastReplot(as, N, cpi) {
+    var startBPGE = (new Date()).getTime();
+    var rpip = bpgridevalArray(N, as, null);
+    var endBPGE = (new Date()).getTime();
+    $("#progress").append("NWRP " + N + " " + as.length + " " + (endBPGE - startBPGE));
+/*
+    var rgidata = new Uint8ClampedArray(4*N*N);
+    rpipToHue(rpip, rgidata, function(bpz) { return region(cpi.cvangles, bpz);});
+    finishCanvas(rgidata, "regions");
+
+    var rbidata = new Uint8ClampedArray(4*N*N);
+    rpipToHue(rpip, rbidata, angle);
+    finishCanvas(rbidata, "rainbow");
+*/
+}
+	     
 worker.onmessage = function(event) {
-    if(event.data.bpzs != null) {
-	$("#workergo").css("background-color", "");
-	bpzs = {bpzs: cifygrid(event.data.bpzs), zs: cgrid(event.data.bpzs.length)};
-	resizeCanvasesRescatter();
-	workerDrawPlot(bpzs, plotDims().N, cpi.cvangles);
+    if(event.data.rpip != null) {
+        $("#workergo").css("background-color", "");
+	var bpzs = cifyrpip(event.data.rpip);
+        bpzs = {bpzs: bpzs, zs: cgrid(bpzs.length)};
+	$("#progress").append(" COPY:" + ((new Date()).getTime() - event.data.senddate));
+	resizeCanvases();
+	$("#progress").append(" RC:" + ((new Date()).getTime() - event.data.senddate));
+	rescatter(zs);
+	$("#progress").append(" RE:" + ((new Date()).getTime() - event.data.senddate));
+        workerRainbow(event.data.rpip, plotDims().N, cpi.cvangles);
+	$("#progress").append(" WRB:" + ((new Date()).getTime() - event.data.senddate));
+        workerRegions(event.data.rpip, plotDims().N, cpi.cvangles);
+	$("#progress").append(" WRG:" + ((new Date()).getTime() - event.data.senddate));
     }
     if(event.data.rowComplete != null) {
-	$("#progress").text(event.data.rowComplete);
+	$("#progress").text(event.data.rowComplete + " " + event.data.comptime);
     }
 }
 
@@ -282,7 +306,7 @@ $(function() {
 $(function() {
     $("#plotbutton").click(function() {
 	resizeCanvasesRescatter();
-	replot(zs, cpi);
+	fastReplot(zs, plotDims().N, cpi);
     });
 });
 

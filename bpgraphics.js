@@ -3,17 +3,18 @@ var regionsworker = new Worker("bpgraphicsworker.js");
 
 workerhandler =  function(event) {
     var rsst = $("#drawstatus");
+    var dd = (new Date()).getTime();
     if(event.data.rainbowidata != null) {
 	finishCanvas(event.data.rainbowidata, "rainbow");
-    }
-    if(event.data.rainbowrow != null) {
-	$("#rainbowstatus").text(event.data.rainbowrow);
+	$("#rainbowstatus")
+	    .append($("<li>"+(dd - rainbowStart.getTime())+"</li>"))	
+	    .append($("<li>"+(dd - event.data.senddate)+"</li>"));
     }
     if(event.data.regionsidata != null) {
 	finishCanvas(event.data.regionsidata, "regions");
-    }
-    if(event.data.regionsrow != null) {
-	$("#regionsstatus").text(event.data.regionsrow);
+	$("#regionsstatus")
+	    .append($("<li>"+(dd - regionsStart.getTime())+"</li>"))
+	    .append($("<li>"+(dd - event.data.senddate)+"</li>"));
     }
 }
 
@@ -33,16 +34,24 @@ function finishCanvas(idata0, cname) {
     scatter(rainbowctx, zs, "#ffffff", N);
 }
 
-function workerDrawPlot(bpzs, N, cvangles) {    
+var rainbowStart;
+var regionsStart;
+
+function workerRainbow(bprpip, N, cvangles) {    
     $("#rainbowstatus").text("-1");
-    $("#regionsstatus").text("-1");
+    rainbowStart = new Date();
     rainbowworker.postMessage({rainbowidata: N, //getID("rainbow", N),
-				cvangles: cvangles,
-				bpzs: bpzs
+			       cvangles: cvangles,
+			       bprpip: bprpip
 			       });
+}
+
+function workerRegions(bprpip, N, cvangles) {
+    $("#regionsstatus").text("-1");
+    regionsStart = new Date();
     regionsworker.postMessage({regionsidata: N, //getID("regions", N),
-				cvangles: cvangles,
-				bpzs: bpzs
+			       cvangles: cvangles,
+			       bprpip: bprpip
 			       });
 }
 

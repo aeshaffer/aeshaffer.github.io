@@ -10,6 +10,21 @@ function cifygrid(zs) {
     return zs.map(function(r) { return cifyrow(r);});
 }
 
+function cifyrpip(rpip) {
+    var rp = rpip.realparts;
+    var ip = rpip.imagparts;
+    var N = Math.sqrt(rp.length);
+    var retval = Array(N);
+    for(var i = 0; i < N; i++) {
+	retval[i] = Array(N);
+	for(var j = 0; j < N; j++) {
+	    var addr = N*j+i;
+	    retval[i][j] = c(rp[addr], ip[addr]);
+	}
+    }
+    return retval;
+}
+
 function round2(n) {
     return Math.round(n*100)/100;
 }
