@@ -1,7 +1,5 @@
-var rainbowworker = new Worker("bpgraphicsworker.js");
-var regionsworker = new Worker("bpgraphicsworker.js");
 
-workerhandler =  function(event) {
+function graphicsWorkerHandler(event) {
     var rsst = $("#drawstatus");
     var dd = (new Date()).getTime();
     if(event.data.rainbowidata != null) {
@@ -18,8 +16,6 @@ workerhandler =  function(event) {
     }
 }
 
-rainbowworker.onmessage = workerhandler;
-regionsworker.onmessage = workerhandler;
 
 function finishCanvas(idata0, cname) {
     var N = Math.sqrt(idata0.length/4);
@@ -71,29 +67,78 @@ function doRange(bpzs, cpi, N) {
     scatter(rangecxt, cpi.cvs, "#000000", N);
 }
 
-function drawPlots(bpzs, N) {
-    if(bpzs == undefined) {return;}
 
-    doRange(bpzs, cpi, N);
-    
-    var rainbowidata = getID("rainbow", N).data;
-    draweval(rainbowidata, bpzs.zs, bpzs.bpzs);
-    finishCanvas(rainbowidata, "rainbow");
-    
-    var regionsidata = getID("regions", N).data;
-    showRegions(regionsidata, bpzs.zs, bpzs.bpzs, cpi.cvangles);
-    finishCanvas(regionsidata, "regions");
+function region(cvangles, bpz) {
+    var i = getangleindex(bpz.angle(), cvangles);
+    return 1.0*i/(cvangles.length);
 }
 
-function replot(zs, cpi) {
-    var N = $("#pixels").val();
-    resizeCanvases();    
-    var ctx;
-    if(true) {
-	bpzs = bpgrideval(N, zs);
-	drawPlots(bpzs, N);
-    } else {
-	var c=document.getElementById("graph");
-	var ctx=c.getContext("2d");
+function showRegions(idata, zs, bpzs, cvangles, rowcallback) {    
+    return mapOverbpzs(idata, zs, bpzs, 
+		       function(z, bpz) { return region(cvangles, bpz); },
+		       rowcallback);
+}
+
+
+function mapOverbpzs(idata, zs, bpzs, huefn, rowcallback) {
+    var N = bpzs.length;
+    for(var row = 0; row < N; row++) {
+	for(var col = 0; col < N; col++) {
+	    var z = zs[row][col];
+	    var bpz = bpzs[row][col];
+	    if(z.abs().x < 1) {
+		var hue = huefn(z, bpz);
+		var rgb = hsvToRgb(hue, 1, 1);
+		setRGB(idata, rgb, N, row, col);
+	    }
+	}
+	if(typeof(rowcallback) == "function") {
+	    rowcallback(row);
+	}
+    }
+    return {idata: idata};
+}
+
+function setRGBInner(idata, rgb, addr) {
+    idata[addr] = rgb[0];
+    idata[addr+1] = rgb[1];
+    idata[addr+2] = rgb[2];
+    idata[addr+3] = 255;    
+}
+
+function setRGB(idata, rgb, N, row, col) {
+    var addr = (N*4)*((N-1)-col) + 4*row;
+    setRGBInner(idata, rgb, addr);
+}
+
+function angle(bpz) {
+    var thetapct = normalizeangle(bpz.angle())/(2*pi);
+    var t2 = Math.round(255*thetapct) % 256;
+    return t2/256;
+}
+
+function draweval(idata, zs, bpzs, rowcallback) {
+    return mapOverbpzs(idata, zs, bpzs, angle, rowcallback);
+}
+
+
+
+function rpipToHue(rpip, idata, huefn) {
+    var rp = rpip.realparts;
+    var ip = rpip.imagparts;
+    var N = Math.sqrt(rp.length);
+    var xs = numeric.linspace(-1,1,N);
+    var ys = numeric.linspace(1,-1,N);
+    for(var xi = 0; xi < N; xi++) {
+	for(var yi = 0; yi < N; yi++) {
+	    var z = c(xs[xi], ys[yi]);
+	    if(z.abs().x <= 1) {
+		var i = yi*N + xi;
+		var bpz = c(rp[i], ip[i]);		
+		var hue = huefn(bpz);
+		var rgb = hsvToRgb(hue, 1, 1);
+		setRGBInner(idata, rgb, 4*i);	    
+	    }
+	}
     }
 }

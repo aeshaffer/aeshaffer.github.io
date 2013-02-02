@@ -1,3 +1,16 @@
+function cgrid(N) {
+    xs = numeric.linspace(-1,1,N);
+    ys = numeric.linspace(-1,1,N);
+    var retval = Array(N);
+    for(i in xs) {
+	retval[i] = Array(N);
+	for(j in ys) {
+	    retval[i][j] = c(xs[i], ys[j]);
+	}
+    }
+    return retval;
+}
+
 function c(x,y) {
     return numeric.t(x,y);
 }

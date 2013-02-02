@@ -16,8 +16,9 @@
 </head>
 <body>
   Rendered Size: <input id="pixels" value="200"></input>
-  Zoom Size: <input id="graphzoom" value="1"></input>
+  Zoom Size: <input id="graphzoom" value="2"></input>
   Window Scale: <input id="windowscale" value="1"></input> 
+  <br/>
   <button type="button" id="plotbutton">Plot</button>    
   <button type="button" id="clearpreimages">Clear Preimages</button>
   <button type="button" id="workergo">Fast Plot</button>
@@ -36,13 +37,11 @@
     <canvas id="range">
     </canvas>
   </div>
-  <br />
+  <div style="display: none">
   Eval: <div id="progress"></div>
   RB: <ul id="rainbowstatus"></ul>
   Reg: <ul id="regionsstatus"></ul>
-  <br />
-
-  <br/>
+  </div>
   <div>
   Angle: <input id="theta" value="0"></input>
   <button type="button" id="timesPI">*= &pi;</button>

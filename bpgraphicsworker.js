@@ -1,4 +1,6 @@
-importScripts('hsvToRGB.js', 'numeric-1.2.3.js', 'polynomials.js', 'blaschke.js'); 
+importScripts('hsvToRGB.js', 'numeric-1.2.3.js', 'polynomials.js', 'blaschke.js', 
+	      'bpgraphics.js'); 
+
 function wonkify(idata) {
     var N = Math.sqrt(idata.length);
     for(var row = 0; row < N; row++) {
@@ -11,6 +13,8 @@ function wonkify(idata) {
 	}
     }
 }
+
+var rpip;
 
 self.onmessage = function(event) {
     var cvangles = event.data.cvangles;

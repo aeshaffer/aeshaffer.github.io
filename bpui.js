@@ -248,8 +248,11 @@ function resize(graphName, pd) {
 */
 }
 
-
 var worker = new Worker("bpworker.js");
+var rainbowworker = new Worker("bpgraphicsworker.js");
+var regionsworker = new Worker("bpgraphicsworker.js");
+rainbowworker.onmessage = graphicsWorkerHandler;
+regionsworker.onmessage = graphicsWorkerHandler;
 
 $(function() {
     $("#workergo").click(function() {
@@ -262,9 +265,10 @@ $(function() {
 function fastReplot(as, N, cpi) {
     var startBPGE = (new Date()).getTime();
     var rpip = bpgridevalArray(N, as, null);
+    bpzs = rpipToBpzs(rpip);
     var endBPGE = (new Date()).getTime();
     $("#progress").append("NWRP " + N + " " + as.length + " " + (endBPGE - startBPGE));
-/*
+
     var rgidata = new Uint8ClampedArray(4*N*N);
     rpipToHue(rpip, rgidata, function(bpz) { return region(cpi.cvangles, bpz);});
     finishCanvas(rgidata, "regions");
@@ -272,14 +276,22 @@ function fastReplot(as, N, cpi) {
     var rbidata = new Uint8ClampedArray(4*N*N);
     rpipToHue(rpip, rbidata, angle);
     finishCanvas(rbidata, "rainbow");
-*/
+
+    doRange(bpzs, cpi, plotDims().N);
+
 }
+
+function rpipToBpzs(rpip) {
+    var bpzs = cifyrpip(rpip);
+    bpzs = {bpzs: bpzs, zs: cgrid(bpzs.length)};
+    return bpzs;
+}
+
 	     
 worker.onmessage = function(event) {
     if(event.data.rpip != null) {
+	bpzs = rpipToBpzs(event.data.rpip);
         $("#workergo").css("background-color", "");
-	var bpzs = cifyrpip(event.data.rpip);
-        bpzs = {bpzs: bpzs, zs: cgrid(bpzs.length)};
 	$("#progress").append(" COPY:" + ((new Date()).getTime() - event.data.senddate));
 	resizeCanvases();
 	$("#progress").append(" RC:" + ((new Date()).getTime() - event.data.senddate));
@@ -289,6 +301,7 @@ worker.onmessage = function(event) {
 	$("#progress").append(" WRB:" + ((new Date()).getTime() - event.data.senddate));
         workerRegions(event.data.rpip, plotDims().N, cpi.cvangles);
 	$("#progress").append(" WRG:" + ((new Date()).getTime() - event.data.senddate));
+	doRange(bpzs, cpi, plotDims().N);
     }
     if(event.data.rowComplete != null) {
 	$("#progress").text(event.data.rowComplete + " " + event.data.comptime);
@@ -400,24 +413,28 @@ function attachcanvasclicks() {
     // $("#regions").on("click", cf);
     $("#clearpreimages").on("click", 
 			    function(e) {
-				cssscatter($("#regions"), [], "pi", true);
+				cssscatter($("#regions").parent(".canvaswrapper"), 
+					   plotDims().graphN,
+					   [], "pi", true);
 			    }
 			   );
     var rangemd = false;
     $("#range")
 	.on("mouseleave", function(e) {
 	    rangemd = false;
+	    console.log("RangeMD: " + rangemd);
 	})
  	.on("click", function(e) {
 	    rangemd = !rangemd;
+	    console.log("RangeMD: " + rangemd);
 	})
 	.on("mousemove", function(e) {
-
-//	.on("click", function(e) {
 	    if(rangemd || e.which == 1) {
 		var z = zeroFromClick($(this), e);
 		var preimages = preimage(zs, z);
-		var pidivs = cssscatter($("#regions"), preimages, "pi", false);
+		var pidivs = cssscatter($("#regions").parent(".canvaswrapper"),
+					plotDims().graphN, preimages, "pi", false);
+		console.log("Scattering preimages.");
 	    }
 	});
 };

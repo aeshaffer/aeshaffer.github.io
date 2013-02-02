@@ -1,17 +1,4 @@
 
-function cgrid(N) {
-    xs = numeric.linspace(-1,1,N);
-    ys = numeric.linspace(-1,1,N);
-    var retval = Array(N);
-    for(i in xs) {
-	retval[i] = Array(N);
-	for(j in ys) {
-	    retval[i][j] = c(xs[i], ys[j]);
-	}
-    }
-    return retval;
-}
-
 function bpgridevalArray(N, as, rowcallback) {
     var bpe = getBPF(as);
     // We want (-1,1) in the upper-left corner.
@@ -39,43 +26,6 @@ function bpgridevalArray(N, as, rowcallback) {
 	}
     }
     return {realparts: realparts, imagparts: imagparts, N: N};
-}
-
-function rpipToHue(rpip, idata, huefn) {
-    var rp = rpip.realparts;
-    var ip = rpip.imagparts;
-    var N = Math.sqrt(rp.length);
-    var xs = numeric.linspace(-1,1,N);
-    var ys = numeric.linspace(1,-1,N);
-    for(var xi = 0; xi < N; xi++) {
-	for(var yi = 0; yi < N; yi++) {
-	    var z = c(xs[xi], ys[yi]);
-	    if(z.abs().x <= 1) {
-		var i = yi*N + xi;
-		var bpz = c(rp[i], ip[i]);		
-		var hue = huefn(bpz);
-		var rgb = hsvToRgb(hue, 1, 1);
-		setRGBInner(idata, rgb, 4*i);	    
-	    }
-	}
-    }
-}
-
-function bpgrideval(N, as, rowcallback) {
-    var bpe = getBPF(as);
-    grid = cgrid(N);
-    var retval = Array(N);
-    for(var i = 0; i < N; i++) {
-	retval[i] = Array(N);
-	for(var j = 0; j < N; j++) {
-	    var z = grid[i][j];
-	    retval[i][j] = bpe(z);
-	}
-	if(typeof(rowcallback) == "function") {
-	    rowcallback(i);
-	}
-    }
-    return {zs: grid, bpzs: retval};
 }
 
 function zsString(zs) {
@@ -115,59 +65,6 @@ function anglediff(theta) {
 	    return theta;
 	}
     }
-}
-
-function region(cvangles, bpz) {
-    var i = getangleindex(bpz.angle(), cvangles);
-    return 1.0*i/(cvangles.length);
-}
-
-function showRegions(idata, zs, bpzs, cvangles, rowcallback) {    
-    return mapOverbpzs(idata, zs, bpzs, 
-		       function(z, bpz) { return region(cvangles, bpz); },
-		       rowcallback);
-}
-
-
-function mapOverbpzs(idata, zs, bpzs, huefn, rowcallback) {
-    var N = bpzs.length;
-    for(var row = 0; row < N; row++) {
-	for(var col = 0; col < N; col++) {
-	    var z = zs[row][col];
-	    var bpz = bpzs[row][col];
-	    if(z.abs().x < 1) {
-		var hue = huefn(z, bpz);
-		var rgb = hsvToRgb(hue, 1, 1);
-		setRGB(idata, rgb, N, row, col);
-	    }
-	}
-	if(typeof(rowcallback) == "function") {
-	    rowcallback(row);
-	}
-    }
-    return {idata: idata};
-}
-
-function setRGBInner(idata, rgb, addr) {
-    idata[addr] = rgb[0];
-    idata[addr+1] = rgb[1];
-    idata[addr+2] = rgb[2];
-    idata[addr+3] = 255;    
-}
-
-function setRGB(idata, rgb, N, row, col) {
-    var addr = (N*4)*((N-1)-col) + 4*row;
-    setRGBInner(idata, rgb, addr);
-}
-
-function angle(bpz) {
-    var thetapct = normalizeangle(bpz.angle())/(2*pi);
-    var t2 = Math.round(255*thetapct) % 256;
-    return t2/256;
-}
-
-function draweval(idata, zs, bpzs, rowcallback) {
-    return mapOverbpzs(idata, zs, bpzs, angle, rowcallback);
 }
 
 function lt(a) {
