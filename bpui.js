@@ -332,9 +332,13 @@ function zeroFromClick(canvas, e) {
     return c(x,y);
 }
 
+function ttp(t0) {
+    return [numeric.cos(t0), numeric.sin(t0)];
+}
 
-function drawPILines(t) {
+function drawPILines(t, skip) {
     var skip = parseInt($("#skippoints").val(), 10);
+
     if(zs.length % skip != 0) {
 	alert("Cannot skip "+zs.length+" points by " + skip + ".");
 	return;
@@ -354,10 +358,6 @@ function drawPILines(t) {
     ctx.translate(Nover2,Nover2);
     ctx.scale(Nover2, -Nover2);
     ctx.lineWidth = 1/Nover2;
-
-    function ttp(t0) {
-	return [numeric.cos(t0), numeric.sin(t0)];
-    }
 
     for(var j = 0; j < skip; j++) {
 	ctx.beginPath();
@@ -394,6 +394,13 @@ function attachcanvasclicks() {
 	var t = z.angle();
 	drawPILines(t);
     }
+    var autojoinpoints = function(e) {	
+	var ajpct = parseInt($("#autolinespoints").val(), 10);
+	var adelta = Math.PI*2.0/ajpct;
+	for(var i = 0; i < ajpct; i++) {
+	    drawPILines(i*adelta);
+	}
+    }
     var clearlines = function(e) {
 	$("#lines")[0].getContext("2d").clear();
     }
@@ -401,6 +408,7 @@ function attachcanvasclicks() {
     $("#regions").on("dblclick", dc);
     $("#rainbow").on("click", cf);
     $("#lines").on("click", joinpoints);
+    $("#autolinesgo").on("click", autojoinpoints);
     $("#timesPI").on("click", function() {
 	var t = parseFloat($("#theta").val());
 	$("#theta").val(Math.PI*t);
