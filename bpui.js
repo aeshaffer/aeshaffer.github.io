@@ -7,20 +7,11 @@ var bpzs;
 
 function cssscatter(cw, canvaswidth, pts, cssclass, doclear) {
     if(doclear == undefined || doclear) {
-	cw.find(".circle").remove();
 	cw.find("."+cssclass).remove();
     }
     var offset = canvaswidth/2;
     console.log("Rescattering ", cw, cssclass, " at ", canvaswidth, offset);
 	
-    var circle = $('<div class="circle"></div>')
-	.css("width", canvaswidth+"px")
-	.css("height", canvaswidth+"px")
-	.css("border-radius", offset+"px")
-	.css("border-color", "black")
-	.css("border-style", "solid");
-    cw.append(circle);
-    
     for(i in pts) {
 	var z = pts[i];
 	var x = z.x;
@@ -118,6 +109,13 @@ function updatezero() {
 
 function rescatter(zs) {
    
+    if($("#reidonrplot").is(":checked")) {
+	autojoinpoints();
+	$("#rainbow")[0].getContext("2d").clear();
+	$("#regions")[0].getContext("2d").clear();
+	$("#range")[0].getContext("2d").clear();
+    }
+
     cpi = cpinfo(zs);
     var cps = cpi.cps;
     var cvs = cpi.cvs;
@@ -205,17 +203,26 @@ function plotDims() {
 
 function resizeCanvases() {
     var pd = plotDims();
-    resize("range", pd);
-    resize("rainbow", pd);
-    resize("regions", pd);
-    resize("lines", pd);
+    resize("#range", pd);
+    resize("#rainbow", pd);
+    resize("#regions", pd);
+    resize("#rglines", pd);
+    resize("#rblines", pd);
     // drawPlots(bpzs, N, zs, cpi);
 }
 
 // N is the number of pixels in the canvas
 // wrapperN is the size of the canvas wrapper
 function resize(graphName, pd) {
-    var cw = $("#"+graphName).parent(".canvaswrapper");
+    var cw = $(graphName).parent(".canvaswrapper");
+
+    $(cw).find(".circle")
+	.css("width", pd.graphN+"px")
+	.css("height", pd.graphN+"px")
+	.css("border-radius", pd.graphN/2+"px")
+	.css("border-color", "black")
+	.css("border-style", "solid");
+    
     cw
 	.css("width", pd.windowN+"px")
 	.css("height", pd.windowN+"px");
@@ -229,7 +236,7 @@ function resize(graphName, pd) {
 	    .addClass("canvaswrapperHidden");
     }
 
-    var graph = document.getElementById(graphName);
+    var graph = $(graphName)[0];
 /*
   var oldImgData = graph.toDataURL("image/png");
   var img = new Image(); img.src = oldImgData;
@@ -237,9 +244,16 @@ function resize(graphName, pd) {
     $(graph)
 	.css("width", pd.graphN+"px")
 	.css("height", pd.graphN+"px");
-    if(graph.width != pd.N) {
-	graph.width = pd.N;
-	graph.height = pd.N;
+    if($(graph).hasClass("lines")) {
+	if(graph.width != pd.windowN) {
+	    graph.width = pd.windowN;
+	    graph.height = pd.windowN;
+	}	
+    } else {
+	if(graph.width != pd.N) {
+	    graph.width = pd.N;
+	    graph.height = pd.N;
+	}
     }
 /*
     img.onload = function() {
@@ -336,9 +350,10 @@ function ttp(t0) {
     return [numeric.cos(t0), numeric.sin(t0)];
 }
 
-function drawPILines(t, skip) {
+function drawPILines(t) {
+    var rblines = $("#rblines")[0];
+    //var rglines = $("#rglines")[0];
     var skip = parseInt($("#skippoints").val(), 10);
-
     if(zs.length % skip != 0) {
 	alert("Cannot skip "+zs.length+" points by " + skip + ".");
 	return;
@@ -350,9 +365,14 @@ function drawPILines(t, skip) {
     var piangles = preimages.map(function(cv) { return cv.angle();})
     piangles = piangles.sort(function(a,b){return a-b});
 
-    var lines = document.getElementById("lines");
+    drawPILinesInner(rblines, piangles, skip);
+    //drawPILinesInner(rglines, piangles, skip);
+}
+
+function drawPILinesInner(lines, piangles, skip){
+
     var ctx = lines.getContext("2d");
-    var N = plotDims().N;
+    var N = plotDims().windowN;
     var Nover2 = N/2;
     ctx.save();
     ctx.translate(Nover2,Nover2);
@@ -374,40 +394,49 @@ function drawPILines(t, skip) {
     ctx.restore();
 }
 
+var cf = function(e) {
+    var z = zeroFromClick($(this), e);
+    var val = bpeval(zs, c(z.x,z.y));
+    $("#point").text(round2(z.x) + " " + round2(z.y) + "i");
+    $("#dest").text(dcomplex(val) + " " + getangleindex(val.angle(), cpi.cvangles));	
+};
+var addpoint = function(e) {
+    var z = zeroFromClick($(this), e);
+    if(z.abs().x <=1) {
+	zs.push(z);
+	rescatter(zs);
+    }
+}
+var joinpoints = function(e) {
+    var z = zeroFromClick($(this), e);
+    var t = z.angle();
+    drawPILines(t);
+}
+var autojoinpoints = function() {	
+    clearlines();
+    var ajpct = parseInt($("#autolinespoints").val(), 10);
+    var adelta = Math.PI*2.0/ajpct;
+    for(var i = 0; i < ajpct; i++) {
+	drawPILines(i*adelta);
+    }
+}
+
+var clearlines = function() {
+    $("#rglines")[0].getContext("2d").clear();
+    $("#rblines")[0].getContext("2d").clear();
+}
+
+var clearplots = function() {
+    resizeCanvasesRescatter();
+    $(".graph").each(function(i) {$(this)[0].getContext("2d").clear();});
+}
 
 function attachcanvasclicks() {
-    var cf = function(e) {
-	var z = zeroFromClick($(this), e);
-	var val = bpeval(zs, c(z.x,z.y));
-	$("#point").text(round2(z.x) + " " + round2(z.y) + "i");
-	$("#dest").text(dcomplex(val) + " " + getangleindex(val.angle(), cpi.cvangles));	
-    };
-    var dc = function(e) {
-	var z = zeroFromClick($(this), e);
-	if(z.abs().x <=1) {
-	    zs.push(z);
-	    rescatter(zs);
-	}
-    }
-    var joinpoints = function(e) {
-	var z = zeroFromClick($(this), e);
-	var t = z.angle();
-	drawPILines(t);
-    }
-    var autojoinpoints = function(e) {	
-	var ajpct = parseInt($("#autolinespoints").val(), 10);
-	var adelta = Math.PI*2.0/ajpct;
-	for(var i = 0; i < ajpct; i++) {
-	    drawPILines(i*adelta);
-	}
-    }
-    var clearlines = function(e) {
-	$("#lines")[0].getContext("2d").clear();
-    }
-    $("#rainbow").on("dblclick", dc);
-    $("#regions").on("dblclick", dc);
+    $("#rglines").on("dblclick", addpoint);
+    $("#rainbow").on("dblclick", addpoint);
+    $("#rblines").on("dblclick", addpoint);
     $("#rainbow").on("click", cf);
-    $("#lines").on("click", joinpoints);
+    $("#rglines").on("click", joinpoints);
     $("#autolinesgo").on("click", autojoinpoints);
     $("#timesPI").on("click", function() {
 	var t = parseFloat($("#theta").val());
@@ -417,6 +446,7 @@ function attachcanvasclicks() {
 	var t = parseFloat($("#theta").val());
 	drawPILines(t);
     });
+    $("#clearplots").on("click", clearplots);
     $("#clearlines").on("click", clearlines);
     // $("#regions").on("click", cf);
     $("#clearpreimages").on("click", 

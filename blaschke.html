@@ -22,19 +22,24 @@
   <button type="button" id="plotbutton">Plot</button>    
   <button type="button" id="clearpreimages">Clear Preimages</button>
   <button type="button" id="workergo">Fast Plot</button>
+  <button type="button" id="clearplots">Clear Plots</button>
   <br/>
   <div class="canvaswrapper">
+    <div class="circle"></div>
     <canvas id="rainbow" class="graph">
     </canvas>
+    <canvas id="rblines" class="graph lines">
+    </canvas>
   </div>
   <div class="canvaswrapper">
+    <div class="circle"></div>
     <canvas id="regions" class="graph">
     </canvas>
-    <canvas id="lines" class="graph">
+    <canvas id="rglines" class="graph lines">
     </canvas>
   </div>
   <div class="canvaswrapper">
-    <canvas id="range">
+    <canvas id="range" class="graph">
     </canvas>
   </div>
   <div style="display: none">
@@ -47,8 +52,9 @@
   Angle: <input id="theta" value="0"></input>
   <button type="button" id="timesPI">*= &pi;</button>
   <button type="button" id="plottheta">Plot Identified</button><br/>
-  Auto Plot Points: <input id="autolinespoints" value="16"></input>
-  <button type="button" id="autolinesgo">Auto Plot</button></br>
+  Auto Identify Points: <input id="autolinespoints" value="16"></input>
+  <button type="button" id="autolinesgo">Auto Plot</button><br />
+  Auto Re-Draw:<input id="reidonrplot" value="false" type="checkbox"></input>
   </div>
   Click Location: <span id="point" ></span><br />
   B(CL):  <span id="dest" ></span><br/>
