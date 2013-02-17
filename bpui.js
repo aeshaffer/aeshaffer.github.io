@@ -363,7 +363,7 @@ function rpipToBpzs(rpip) {
     return bpzs;
 }
 
-	     
+$(function() {	     
 worker.onmessage = function(event) {
     if(event.data.rpip != null) {
 	bpzs = rpipToBpzs(event.data.rpip);
@@ -383,6 +383,7 @@ worker.onmessage = function(event) {
 	progress.text(event.data.rowComplete + " " + event.data.comptime);
     }
 }
+});
 
 $(function() {
     attachcanvasclicks();

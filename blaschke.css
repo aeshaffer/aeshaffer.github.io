@@ -26,8 +26,8 @@ div.cv {
 canvas.graph{
     position: relative;
 }
-#rglines, #rblines {
-    position: absolute; left: 0px; top: 0px;
+canvas.rglines, canvas.rblines {
+    position: absolute !important; left: 0px; top: 0px;
 }
 
 /*canvas {
