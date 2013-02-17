@@ -1,4 +1,64 @@
 
+function getTables() {
+    return {
+	criticalpoints: $("#criticalpoints"),
+	criticalvalues: $("#criticalvalues"),
+	criticalangles: $("#criticalangles"),
+	zeroes: $("#zeroes"),
+	permalink: $("#permalink"),
+	point: $("#point"),
+	dest: $("#dest")
+    };
+}
+
+function getPlots() {
+    return {
+	rainbow: $("#rainbow"),
+	regions: $("#regions"),
+	range: $("#range"),
+	rblines: $("#rblines"),
+	rglines: $("#rglines")
+    };
+}
+
+function getInputs() {
+    return {
+	reidonrplot: $("#reidonrplot"),
+	windowscale: $("#windowscale"),
+	graphzoom: $("#graphzoom"),
+	pixels: $("#pixels"),
+	workergo: $("#workergo"),
+	progress: $("#progress"),
+	loadbutton: $("#loadbutton"),
+	zsstring: $("#zsstring"),
+	plotbutton: $("#plotbutton"),
+	skippoints: $("#skippoints"),
+	autolinespoints: $("#autolinespoints"),
+	theta: $("#theta"),
+	clearplots: $("#clearplots"),
+	clearlines: $("#clearlines"),
+	autolinesgo: $("#autolinesgo"),
+	timesPI: $("#timesPI"),
+	plottheta: $("#plottheta"),
+	clearpreimages: $("#clearpreimages")
+    };	
+}
+
+$(function() {
+    var inputs = getInputs();
+    var plots = getPlots();
+    var tables = getTables();
+    for(var i in inputs) {
+	window[i] = inputs[i];
+    }
+    for(var i in plots) {
+	window[i] = plots[i];
+    }
+    for(var i in tables) {
+	window[i] = tables[i];
+    }
+});
+
 //zs = bpcompose(zeroonehalf, [c(0,0), c(.51, 0)] );
 
 var zs;
@@ -48,31 +108,31 @@ function scatter(ctx, pts, color, N) {
 }
 
 function displayTables(zs, cpi) {
-    $("#criticalpoints").empty();
+    criticalpoints.empty();
     for(var i = 0; i < cpi.cps.length; i++) {
 	var li = $("<li>");
 	li.text(dcomplex(cpi.cps[i]));
-	$("#criticalpoints").append(li);
+	criticalpoints.append(li);
     }    
-    $("#zeroes").empty();
+    zeroes.empty();
     for(var i = 0; i < zs.length; i++) {
 	var li = $("<li>");
 	li.text(dcomplex(zs[i]));
-	$("#zeroes").append(li);
+	zeroes.append(li);
     }    
-    $("#zsstring").val("");
+    zsstring.val("");
     var zscode = zsString(zs);
-    $("#zsstring").val(zscode);
-    $("#zsstring").attr("rows", zs.length);
+    zsstring.val(zscode);
+    zsstring.attr("rows", zs.length);
     var wl = window.location.href.replace(window.location.search, "");
-    $("#permalink").attr("href", wl+"?"+zscode);
-    $("#criticalvalues").empty();
+    permalink.attr("href", wl+"?"+zscode);
+    criticalvalues.empty();
     for(var i = 0; i < cpi.cvs.length; i++) {
 	var li = $("<li>");
 	li.text(dcomplex(cpi.cvs[i]));
-	$("#criticalvalues").append(li);
+	criticalvalues.append(li);
     }   
-    $("#criticalangles").empty();
+    criticalangles.empty();
     var rolledcvangles = roll(cpi.cvangles);
     for(var i = 0; i < cpi.cvangles.length; i++) {
 	var li = $("<li>");
@@ -82,16 +142,16 @@ function displayTables(zs, cpi) {
 	function H(n) { n = Math.round(n); return (n < 16 ? "0" : "") + n.toString(16); }
 	var rgbstring = "#"+H(rgb[0]) + H(rgb[1]) + H(rgb[2]);
 	li.css("background-color", rgbstring);
-	$("#criticalangles").append(li);
+	criticalangles.append(li);
     }   
 }
 
 function updatezero() {
-    var unit = $("#rainbow").width() /2.0;
     var nudge = Math.floor((1.0/2.0)*$(this).width());
     var zeroid = $(this).attr("id").replace("zero", "");
     var cw = $(this).parent(".canvaswrapper");
     var canvas = cw.find("canvas");
+    var unit = canvas.width() /2.0;
     var p = $(this).position();
     var newpos = {
 	left: p.left - canvas.position().left + nudge,
@@ -108,12 +168,12 @@ function updatezero() {
 }
 
 function rescatter(zs) {
-   
-    if($("#reidonrplot").is(":checked")) {
+
+    if(reidonrplot.is(":checked")) {
 	autojoinpoints();
-	$("#rainbow")[0].getContext("2d").clear();
-	$("#regions")[0].getContext("2d").clear();
-	$("#range")[0].getContext("2d").clear();
+	rainbow[0].getContext("2d").clear();
+	regions[0].getContext("2d").clear();
+	range[0].getContext("2d").clear();
     }
 
     cpi = cpinfo(zs);
@@ -123,7 +183,6 @@ function rescatter(zs) {
 
     displayTables(zs, cpi);
     
-    var rainbow = $("#rainbow");
     var cw = rainbow.parent(".canvaswrapper");
     var cwidth = plotDims().graphN;
 
@@ -136,7 +195,7 @@ function rescatter(zs) {
 
     for(var i = 0; i < zs.length; i++) {
 	if(zs[i].abs().x == 0) {
-	    $("#zero"+i).removeClass("draggable")
+	    cw.find(".zero"+i).removeClass("draggable")
 		.removeClass("ui-draggable")
 		.removeClass("ui-widget-content")
 		.addClass("zerozero")
@@ -183,8 +242,8 @@ $(function() {
 });
 
 $(function() {
-    $("#windowscale").change(resizeCanvasesRescatter);
-    $("#graphzoom").change(resizeCanvasesRescatter);
+    windowscale.change(resizeCanvasesRescatter);
+    graphzoom.change(resizeCanvasesRescatter);
 });
 
 function resizeCanvasesRescatter() {
@@ -193,28 +252,28 @@ function resizeCanvasesRescatter() {
 }    
 
 function plotDims() {
-    var N = parseFloat($("#pixels").val());
-    var zoom = parseFloat($("#graphzoom").val());
-    var windowscale = parseFloat($("#windowscale").val());
-    var windowN = zoom*N*1.0/windowscale;
+    var N = parseFloat(pixels.val());
+    var zoom = parseFloat(graphzoom.val());
+    var windowscaleval = parseFloat(windowscale.val());
+    var windowN = zoom*N*1.0/windowscaleval;
     var graphN = zoom*N;
     return {N: N, zoom: zoom, windowN: windowN, graphN: graphN};
 }
 
 function resizeCanvases() {
     var pd = plotDims();
-    resize("#range", pd);
-    resize("#rainbow", pd);
-    resize("#regions", pd);
-    resize("#rglines", pd);
-    resize("#rblines", pd);
+    resize(range, pd);
+    resize(rainbow, pd);
+    resize(regions, pd);
+    resize(rglines, pd);
+    resize(rblines, pd);
     // drawPlots(bpzs, N, zs, cpi);
 }
 
 // N is the number of pixels in the canvas
 // wrapperN is the size of the canvas wrapper
-function resize(graphName, pd) {
-    var cw = $(graphName).parent(".canvaswrapper");
+function resize(g, pd) {
+    var cw = $(g).parent(".canvaswrapper");
 
     $(cw).find(".circle")
 	.css("width", pd.graphN+"px")
@@ -236,7 +295,7 @@ function resize(graphName, pd) {
 	    .addClass("canvaswrapperHidden");
     }
 
-    var graph = $(graphName)[0];
+    var graph = $(g)[0];
 /*
   var oldImgData = graph.toDataURL("image/png");
   var img = new Image(); img.src = oldImgData;
@@ -269,10 +328,10 @@ rainbowworker.onmessage = graphicsWorkerHandler;
 regionsworker.onmessage = graphicsWorkerHandler;
 
 $(function() {
-    $("#workergo").click(function() {
-	$("#workergo").css("background-color", "red");
+    workergo.click(function() {
+	workergo.css("background-color", "red");
 	worker.postMessage({as: zs, N: plotDims().N});
-	$("#progress").text("");
+	progress.text("");
     });
 });
 
@@ -281,7 +340,7 @@ function fastReplot(as, N, cpi) {
     var rpip = bpgridevalArray(N, as, null);
     bpzs = rpipToBpzs(rpip);
     var endBPGE = (new Date()).getTime();
-    $("#progress").append("NWRP " + N + " " + as.length + " " + (endBPGE - startBPGE));
+    progress.append("NWRP " + N + " " + as.length + " " + (endBPGE - startBPGE));
 
     var rgidata = new Uint8ClampedArray(4*N*N);
     rpipToHue(rpip, rgidata, function(bpz) { return region(cpi.cvangles, bpz);});
@@ -305,33 +364,33 @@ function rpipToBpzs(rpip) {
 worker.onmessage = function(event) {
     if(event.data.rpip != null) {
 	bpzs = rpipToBpzs(event.data.rpip);
-        $("#workergo").css("background-color", "");
-	$("#progress").append(" COPY:" + ((new Date()).getTime() - event.data.senddate));
+        workergo.css("background-color", "");
+	progress.append(" COPY:" + ((new Date()).getTime() - event.data.senddate));
 	resizeCanvases();
-	$("#progress").append(" RC:" + ((new Date()).getTime() - event.data.senddate));
+	progress.append(" RC:" + ((new Date()).getTime() - event.data.senddate));
 	rescatter(zs);
-	$("#progress").append(" RE:" + ((new Date()).getTime() - event.data.senddate));
+	progress.append(" RE:" + ((new Date()).getTime() - event.data.senddate));
         workerRainbow(event.data.rpip, plotDims().N, cpi.cvangles);
-	$("#progress").append(" WRB:" + ((new Date()).getTime() - event.data.senddate));
+	progress.append(" WRB:" + ((new Date()).getTime() - event.data.senddate));
         workerRegions(event.data.rpip, plotDims().N, cpi.cvangles);
-	$("#progress").append(" WRG:" + ((new Date()).getTime() - event.data.senddate));
+	progress.append(" WRG:" + ((new Date()).getTime() - event.data.senddate));
 	doRange(bpzs, cpi, plotDims().N);
     }
     if(event.data.rowComplete != null) {
-	$("#progress").text(event.data.rowComplete + " " + event.data.comptime);
+	progress.text(event.data.rowComplete + " " + event.data.comptime);
     }
 }
 
 $(function() {
     attachcanvasclicks();
-    $("#loadbutton").click(function() {
-	zs = parseZsString($("#zsstring").val());
+    loadbutton.click(function() {
+	zs = parseZsString(zsstring.val());
 	resizeCanvasesRescatter();
     });
 });
 
 $(function() {
-    $("#plotbutton").click(function() {
+    plotbutton.click(function() {
 	resizeCanvasesRescatter();
 	fastReplot(zs, plotDims().N, cpi);
     });
@@ -351,9 +410,7 @@ function ttp(t0) {
 }
 
 function drawPILines(t) {
-    var rblines = $("#rblines")[0];
-    //var rglines = $("#rglines")[0];
-    var skip = parseInt($("#skippoints").val(), 10);
+    var skip = parseInt(skippoints.val(), 10);
     if(zs.length % skip != 0) {
 	alert("Cannot skip "+zs.length+" points by " + skip + ".");
 	return;
@@ -365,7 +422,7 @@ function drawPILines(t) {
     var piangles = preimages.map(function(cv) { return cv.angle();})
     piangles = piangles.sort(function(a,b){return a-b});
 
-    drawPILinesInner(rblines, piangles, skip);
+    drawPILinesInner(rblines[0], piangles, skip);
     //drawPILinesInner(rglines, piangles, skip);
 }
 
@@ -397,9 +454,10 @@ function drawPILinesInner(lines, piangles, skip){
 var cf = function(e) {
     var z = zeroFromClick($(this), e);
     var val = bpeval(zs, c(z.x,z.y));
-    $("#point").text(round2(z.x) + " " + round2(z.y) + "i");
-    $("#dest").text(dcomplex(val) + " " + getangleindex(val.angle(), cpi.cvangles));	
+    point.text(round2(z.x) + " " + round2(z.y) + "i");
+    dest.text(dcomplex(val) + " " + getangleindex(val.angle(), cpi.cvangles));	
 };
+
 var addpoint = function(e) {
     var z = zeroFromClick($(this), e);
     if(z.abs().x <=1) {
@@ -413,51 +471,51 @@ var joinpoints = function(e) {
     drawPILines(t);
 }
 var autojoinpoints = function() {	
-    clearlines();
-    var ajpct = parseInt($("#autolinespoints").val(), 10);
+    doclearlines();
+    var ajpct = parseInt(autolinespoints.val(), 10);
     var adelta = Math.PI*2.0/ajpct;
     for(var i = 0; i < ajpct; i++) {
 	drawPILines(i*adelta);
     }
 }
 
-var clearlines = function() {
-    $("#rglines")[0].getContext("2d").clear();
-    $("#rblines")[0].getContext("2d").clear();
+var doclearlines = function() {
+    rglines[0].getContext("2d").clear();
+    rblines[0].getContext("2d").clear();
 }
 
-var clearplots = function() {
+var doclearplots = function() {
     resizeCanvasesRescatter();
     $(".graph").each(function(i) {$(this)[0].getContext("2d").clear();});
 }
 
 function attachcanvasclicks() {
-    $("#rglines").on("dblclick", addpoint);
-    $("#rainbow").on("dblclick", addpoint);
-    $("#rblines").on("dblclick", addpoint);
-    $("#rainbow").on("click", cf);
-    $("#rglines").on("click", joinpoints);
-    $("#autolinesgo").on("click", autojoinpoints);
-    $("#timesPI").on("click", function() {
-	var t = parseFloat($("#theta").val());
-	$("#theta").val(Math.PI*t);
+    rglines.on("dblclick", addpoint);
+    rainbow.on("dblclick", addpoint);
+    rblines.on("dblclick", addpoint);
+    rainbow.on("click", cf);
+    rglines.on("click", joinpoints);
+    autolinesgo.on("click", autojoinpoints);
+    timesPI.on("click", function() {
+	var t = parseFloat(theta.val());
+	theta.val(Math.PI*t);
     });
-    $("#plottheta").on("click", function() {
-	var t = parseFloat($("#theta").val());
+    plottheta.on("click", function() {
+	var t = parseFloat(theta.val());
 	drawPILines(t);
     });
-    $("#clearplots").on("click", clearplots);
-    $("#clearlines").on("click", clearlines);
+    clearplots.on("click", doclearplots);
+    clearlines.on("click", doclearlines);
     // $("#regions").on("click", cf);
-    $("#clearpreimages").on("click", 
-			    function(e) {
-				cssscatter($("#regions").parent(".canvaswrapper"), 
-					   plotDims().graphN,
-					   [], "pi", true);
-			    }
-			   );
+    clearpreimages.on("click", 
+		      function(e) {
+			  cssscatter(regions.parent(".canvaswrapper"), 
+				     plotDims().graphN,
+				     [], "pi", true);
+		      }
+		     );
     var rangemd = false;
-    $("#range")
+    range
 	.on("mouseleave", function(e) {
 	    rangemd = false;
 	    console.log("RangeMD: " + rangemd);
@@ -470,7 +528,7 @@ function attachcanvasclicks() {
 	    if(rangemd || e.which == 1) {
 		var z = zeroFromClick($(this), e);
 		var preimages = preimage(zs, z);
-		var pidivs = cssscatter($("#regions").parent(".canvaswrapper"),
+		var pidivs = cssscatter(regions.parent(".canvaswrapper"),
 					plotDims().graphN, preimages, "pi", false);
 		console.log("Scattering preimages.");
 	    }
