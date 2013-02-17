@@ -15,67 +15,67 @@
 
 </head>
 <body>
-  Rendered Size: <input id="pixels" value="200"></input>
-  Zoom Size: <input id="graphzoom" value="2"></input>
-  Window Scale: <input id="windowscale" value="1"></input> 
+  Rendered Size: <input class="pixels" value="200"></input>
+  Zoom Size: <input class="graphzoom" value="2"></input>
+  Window Scale: <input class="windowscale" value="1"></input> 
   <br/>
-  <button type="button" id="plotbutton">Plot</button>    
-  <button type="button" id="clearpreimages">Clear Preimages</button>
-  <button type="button" id="workergo">Fast Plot</button>
-  <button type="button" id="clearplots">Clear Plots</button>
+  <button type="button" class="plotbutton">Plot</button>    
+  <button type="button" class="clearpreimages">Clear Preimages</button>
+  <button type="button" class="workergo">Fast Plot</button>
+  <button type="button" class="clearplots">Clear Plots</button>
   <br/>
   <div class="canvaswrapper">
     <div class="circle"></div>
-    <canvas id="rainbow" class="graph">
+    <canvas class="rainbow graph">
     </canvas>
-    <canvas id="rblines" class="graph lines">
+    <canvas class="rblines graph lines">
     </canvas>
   </div>
   <div class="canvaswrapper">
     <div class="circle"></div>
-    <canvas id="regions" class="graph">
+    <canvas class="regions graph">
     </canvas>
-    <canvas id="rglines" class="graph lines">
+    <canvas class="rglines graph lines">
     </canvas>
   </div>
   <div class="canvaswrapper">
-    <canvas id="range" class="graph">
+    <canvas class="range graph">
     </canvas>
   </div>
   <div style="display: none">
-  Eval: <div id="progress"></div>
-  RB: <ul id="rainbowstatus"></ul>
-  Reg: <ul id="regionsstatus"></ul>
+  Eval: <div class="progress"></div>
+  RB: <ul class="rainbowstatus"></ul>
+  Reg: <ul class="regionsstatus"></ul>
   </div>
   <div>
-  Skip Points: <input id="skippoints" value="1"></input>  <button type="button" id="clearlines">Clear Lines</button></br>
-  Angle: <input id="theta" value="0"></input>
-  <button type="button" id="timesPI">*= &pi;</button>
-  <button type="button" id="plottheta">Plot Identified</button><br/>
-  Auto Identify Points: <input id="autolinespoints" value="16"></input>
-  <button type="button" id="autolinesgo">Auto Plot</button><br />
-  Auto Re-Draw:<input id="reidonrplot" value="false" type="checkbox"></input>
+  Skip Points: <input class="skippoints" value="1"></input>  <button type="button" class="clearlines">Clear Lines</button></br>
+  Angle: <input class="theta" value="0"></input>
+  <button type="button" class="timesPI">*= &pi;</button>
+  <button type="button" class="plottheta">Plot Identified</button><br/>
+  Auto Identify Points: <input class="autolinespoints" value="16"></input>
+  <button type="button" class="autolinesgo">Auto Plot</button><br />
+  Auto Re-Draw:<input class="reidonrplot" value="false" type="checkbox"></input>
   </div>
-  Click Location: <span id="point" ></span><br />
-  B(CL):  <span id="dest" ></span><br/>
+  Click Location: <span class="point" ></span><br />
+  B(CL):  <span class="dest" ></span><br/>
   <div style="display: block; float:left; width: 200px;">
     <h3>Zeroes</h3>
-    <ul id="zeroes">  </ul>
+    <ul class="zeroes">  </ul>
   </div>
   <div style="display: block; float:left; width: 200px;">
     <h3>Critical Points</h3>
-    <ul id="criticalpoints">  </ul>
+    <ul class="criticalpoints">  </ul>
   </div>
   <div style="display: block; float:left; width: 200px;">
     <h3>Critical Values</h3>
-    <ul id="criticalvalues"></ul>
+    <ul class="criticalvalues"></ul>
   </div>
   <div style="display: block; float:left; width: 300px;">
     <h3>Ordered Ct. Angles</h3>
-    <ul id="criticalangles"></ul>
+    <ul class="criticalangles"></ul>
   </div>
   <br style="clear: both" />
-  <textarea id="zsstring" style="width: 50%" ></textarea>
-  <button type="button" id="loadbutton">Load</button>
-  <a id="permalink">Permalink</a>
+  <textarea class="zsstring" style="width: 50%" ></textarea>
+  <button type="button" class="loadbutton">Load</button>
+  <a class="permalink">Permalink</a>
 </html>

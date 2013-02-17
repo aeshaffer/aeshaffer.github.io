@@ -1,15 +1,15 @@
 
-function graphicsWorkerHandler(event) {
+function graphicsWorkerHandler(event, rainbow, regions) {
     var rsst = $("#drawstatus");
     var dd = (new Date()).getTime();
     if(event.data.rainbowidata != null) {
-	finishCanvas(event.data.rainbowidata, "rainbow");
+	finishCanvas(event.data.rainbowidata, rainbow);
 	$("#rainbowstatus")
 	    .append($("<li>"+(dd - rainbowStart.getTime())+"</li>"))	
 	    .append($("<li>"+(dd - event.data.senddate)+"</li>"));
     }
     if(event.data.regionsidata != null) {
-	finishCanvas(event.data.regionsidata, "regions");
+	finishCanvas(event.data.regionsidata, regions);
 	$("#regionsstatus")
 	    .append($("<li>"+(dd - regionsStart.getTime())+"</li>"))
 	    .append($("<li>"+(dd - event.data.senddate)+"</li>"));
@@ -17,10 +17,9 @@ function graphicsWorkerHandler(event) {
 }
 
 
-function finishCanvas(idata0, cname) {
+function finishCanvas(idata0, canvas) {
     var N = Math.sqrt(idata0.length/4);
-    var rainbowctx = document.getElementById(cname)
-	.getContext("2d");
+    var rainbowctx = canvas.getContext("2d");
     var idata1 = rainbowctx.createImageData(N, N);
     for(var i = 0; i < idata0.length; i++) {
 	idata1.data[i] = idata0[i];
@@ -51,17 +50,17 @@ function workerRegions(bprpip, N, cvangles) {
 			       });
 }
 
-function getCtx(cname) {
-    return document.getElementById(cname).getContext("2d");
+function getCtx(canvas) {
+    return canvas.getContext("2d");
 }
 
-function getID(cname, N) {
-    return getCtx(cname).createImageData(N,N);
+function getID(canvas, N) {
+    return getCtx(canvas).createImageData(N,N);
 }
 
-function doRange(bpzs, cpi, N) {
-    var rangecxt = getCtx("range");
-    var rangeidata = getID("range", N);
+function doRange(canvas, bpzs, cpi, N) {
+    var rangecxt = getCtx(canvas);
+    var rangeidata = getID(canvas, N);
     showRegions(rangeidata.data, bpzs.zs, bpzs.zs, cpi.cvangles);
     rangecxt.putImageData(rangeidata, 0, 0);
     scatter(rangecxt, cpi.cvs, "#000000", N);

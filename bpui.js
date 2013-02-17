@@ -1,46 +1,46 @@
 
 function getTables() {
     return {
-	criticalpoints: $("#criticalpoints"),
-	criticalvalues: $("#criticalvalues"),
-	criticalangles: $("#criticalangles"),
-	zeroes: $("#zeroes"),
-	permalink: $("#permalink"),
-	point: $("#point"),
-	dest: $("#dest")
+	criticalpoints: $(".criticalpoints"),
+	criticalvalues: $(".criticalvalues"),
+	criticalangles: $(".criticalangles"),
+	zeroes: $(".zeroes"),
+	permalink: $(".permalink"),
+	point: $(".point"),
+	dest: $(".dest")
     };
 }
 
 function getPlots() {
     return {
-	rainbow: $("#rainbow"),
-	regions: $("#regions"),
-	range: $("#range"),
-	rblines: $("#rblines"),
-	rglines: $("#rglines")
+	rainbow: $(".rainbow"),
+	regions: $(".regions"),
+	range: $(".range"),
+	rblines: $(".rblines"),
+	rglines: $(".rglines")
     };
 }
 
 function getInputs() {
     return {
-	reidonrplot: $("#reidonrplot"),
-	windowscale: $("#windowscale"),
-	graphzoom: $("#graphzoom"),
-	pixels: $("#pixels"),
-	workergo: $("#workergo"),
-	progress: $("#progress"),
-	loadbutton: $("#loadbutton"),
-	zsstring: $("#zsstring"),
-	plotbutton: $("#plotbutton"),
-	skippoints: $("#skippoints"),
-	autolinespoints: $("#autolinespoints"),
-	theta: $("#theta"),
-	clearplots: $("#clearplots"),
-	clearlines: $("#clearlines"),
-	autolinesgo: $("#autolinesgo"),
-	timesPI: $("#timesPI"),
-	plottheta: $("#plottheta"),
-	clearpreimages: $("#clearpreimages")
+	reidonrplot: $(".reidonrplot"),
+	windowscale: $(".windowscale"),
+	graphzoom: $(".graphzoom"),
+	pixels: $(".pixels"),
+	workergo: $(".workergo"),
+	progress: $(".progress"),
+	loadbutton: $(".loadbutton"),
+	zsstring: $(".zsstring"),
+	plotbutton: $(".plotbutton"),
+	skippoints: $(".skippoints"),
+	autolinespoints: $(".autolinespoints"),
+	theta: $(".theta"),
+	clearplots: $(".clearplots"),
+	clearlines: $(".clearlines"),
+	autolinesgo: $(".autolinesgo"),
+	timesPI: $(".timesPI"),
+	plottheta: $(".plottheta"),
+	clearpreimages: $(".clearpreimages")
     };	
 }
 
@@ -64,6 +64,10 @@ $(function() {
 var zs;
 var cpi;
 var bpzs;
+
+var worker = new Worker("bpworker.js");
+var rainbowworker = new Worker("bpgraphicsworker.js");
+var regionsworker = new Worker("bpgraphicsworker.js");
 
 function cssscatter(cw, canvaswidth, pts, cssclass, doclear) {
     if(doclear == undefined || doclear) {
@@ -321,11 +325,10 @@ function resize(g, pd) {
 */
 }
 
-var worker = new Worker("bpworker.js");
-var rainbowworker = new Worker("bpgraphicsworker.js");
-var regionsworker = new Worker("bpgraphicsworker.js");
-rainbowworker.onmessage = graphicsWorkerHandler;
-regionsworker.onmessage = graphicsWorkerHandler;
+$(function() {
+    rainbowworker.onmessage = function(e) {graphicsWorkerHandler(e, rainbow[0], regions[0]);}
+    regionsworker.onmessage = function(e) {graphicsWorkerHandler(e, rainbow[0], regions[0]);}
+});
 
 $(function() {
     workergo.click(function() {
@@ -344,13 +347,13 @@ function fastReplot(as, N, cpi) {
 
     var rgidata = new Uint8ClampedArray(4*N*N);
     rpipToHue(rpip, rgidata, function(bpz) { return region(cpi.cvangles, bpz);});
-    finishCanvas(rgidata, "regions");
+    finishCanvas(rgidata, regions[0]);
 
     var rbidata = new Uint8ClampedArray(4*N*N);
     rpipToHue(rpip, rbidata, angle);
-    finishCanvas(rbidata, "rainbow");
+    finishCanvas(rbidata, rainbow[0]);
 
-    doRange(bpzs, cpi, plotDims().N);
+    doRange(range[0], bpzs, cpi, plotDims().N);
 
 }
 
@@ -374,7 +377,7 @@ worker.onmessage = function(event) {
 	progress.append(" WRB:" + ((new Date()).getTime() - event.data.senddate));
         workerRegions(event.data.rpip, plotDims().N, cpi.cvangles);
 	progress.append(" WRG:" + ((new Date()).getTime() - event.data.senddate));
-	doRange(bpzs, cpi, plotDims().N);
+	doRange(range[0], bpzs, cpi, plotDims().N);
     }
     if(event.data.rowComplete != null) {
 	progress.text(event.data.rowComplete + " " + event.data.comptime);
