@@ -1,15 +1,15 @@
 
-function graphicsWorkerHandler(event, rainbow, regions) {
+function graphicsWorkerHandler(event, rainbow, regions, cpi, zs) {
     var rsst = $("#drawstatus");
     var dd = (new Date()).getTime();
     if(event.data.rainbowidata != null) {
-	finishCanvas(event.data.rainbowidata, rainbow);
+	finishCanvas(event.data.rainbowidata, rainbow, cpi, zs);
 	$("#rainbowstatus")
 	    .append($("<li>"+(dd - rainbowStart.getTime())+"</li>"))	
 	    .append($("<li>"+(dd - event.data.senddate)+"</li>"));
     }
     if(event.data.regionsidata != null) {
-	finishCanvas(event.data.regionsidata, regions);
+	finishCanvas(event.data.regionsidata, regions, cpi, zs);
 	$("#regionsstatus")
 	    .append($("<li>"+(dd - regionsStart.getTime())+"</li>"))
 	    .append($("<li>"+(dd - event.data.senddate)+"</li>"));
@@ -17,7 +17,7 @@ function graphicsWorkerHandler(event, rainbow, regions) {
 }
 
 
-function finishCanvas(idata0, canvas) {
+function finishCanvas(idata0, canvas, cpi, zs) {
     var N = Math.sqrt(idata0.length/4);
     var rainbowctx = canvas.getContext("2d");
     var idata1 = rainbowctx.createImageData(N, N);
@@ -32,7 +32,7 @@ function finishCanvas(idata0, canvas) {
 var rainbowStart;
 var regionsStart;
 
-function workerRainbow(bprpip, N, cvangles) {    
+function workerRainbow(rainbowworker, bprpip, N, cvangles) {    
     $("#rainbowstatus").text("-1");
     rainbowStart = new Date();
     rainbowworker.postMessage({rainbowidata: N, //getID("rainbow", N),
@@ -41,7 +41,7 @@ function workerRainbow(bprpip, N, cvangles) {
 			       });
 }
 
-function workerRegions(bprpip, N, cvangles) {
+function workerRegions(regionsworker, bprpip, N, cvangles) {
     $("#regionsstatus").text("-1");
     regionsStart = new Date();
     regionsworker.postMessage({regionsidata: N, //getID("regions", N),
