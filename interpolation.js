@@ -13,6 +13,19 @@ function pf(lastentry,numterms) {
     }
 }
 
+function mindiff(xs) {
+    var retval = undefined;
+    for(var i = 1; i <= xs.length; i++) {
+	for(var j = i+1; j <= xs.length; j++) {
+	    var d = Math.abs(xs[i] - xs[j]);
+	    if(retval == undefined || d < retval) {
+		retval = d;
+	    }
+	}
+    }
+    return retval;
+}
+
 function chunk(ns) {
     // ns.length >= 2
     var p = ns.slice(0, ns.length - 2);
@@ -21,21 +34,42 @@ function chunk(ns) {
     return {p: p, mn: mn, mnm1: mnm1};
 }	    
 
+Array.prototype.sum = function(){
+    for(var i=0,sum=0;i<this.length;sum+=this[i++]);
+    return sum;
+}
+
 function interp(inxs, ints, inas) {
     var table = new Object();
-    table.xs = new Array();
-    table.ts = new Array();
-    table.as = new Array();
+    table.xs = inxs;
+    table.ts = ints;
+    table.as = inas;
 
-    for(var i = 0; i < inxs.length; i++) {
-	table.xs[i+1] = inxs[i];
-	table.ts[i+1] = ints[i];
-	table.as[i+1] = inas[i];
+    table.x = function(i) { return this.xs[i-1];}
+    table.t = function(i) { return this.ts[i-1];}
+    table.a = function(i) { return this.as[i-1];}
+
+    table.Cs = function() {
+	var retval = new Array();
+	for(var i = 1; i <= this.xs.length; i++) {
+	    var key = pf(i,i).join(",");
+	    var C = this[key];
+	    retval.push(C);
+	}
+	return retval;
+    }
+    
+    table.lambdastar = function() {
+	var n = this.xs.length;
+	var m = mindiff(this.xs);
+	var xna1 = Math.pow((this.x(n) - this.a(1))/m, n -1);
+	var tsum = this.ts.sum();
+	return xna1*tsum - this.Cs().sum();
     }
 
     table.xasterm = function(mn, mnm1) {
-	var num = (this.xs[mn]-this.as[mnm1]);
-	var den = (this.xs[mn]-this.xs[mnm1]);
+	var num = (this.x(mn)-this.a(mnm1));
+	var den = (this.x(mn)-this.x(mnm1));
 	return num/den;
     }
 
@@ -47,7 +81,7 @@ function interp(inxs, ints, inas) {
 	print("Computing " + key);
 	if(ns.length == 1) {
 	    var n = ns[0];
-	    this[key] = this.ts[n];
+	    this[key] = this.t(n);
 	} else {
 	    var c = chunk(ns);
 	    var nk = (c.p).concat(c.mn);
@@ -68,19 +102,29 @@ function interp(inxs, ints, inas) {
 	for(var x in this) { print ("C["+x+"]="+this[x]);}
     }
 
+    table.xsas = function(z) {
+	var retval = 1;
+	for(var j = 1; j <= this.xs.length; j++) {
+	    retval = retval * (z-this.x(j)) / (z-this.a(j));
+	}
+	return retval;
+    }
+
     table.evaltable = function(x) {
 	var retval = 0;
 	var accum = 1;
-	for(var i = 1; i <= this.xs.length - 1; i++) {
+	for(var i = 1; i <= this.xs.length; i++) {
 	    print("C["+pf(i,i)+"]");
 	    var ns = pf(i, i).join(",");
 	    var term = this[ns];
 	    if(i > 1) {
-		accum = accum * (x - this.xs[i-1]) / (x - this.as[i-1]);
+		accum = accum * (x - this.x(i-1)) / (x - this.a(i-1));
 	    }
 	    retval = retval + this[ns]*accum;
 	}
-	return retval;
+	var ls = this.lambdastar();
+	
+	return retval + (ls*this.xsas(x));
     }
 
     table.te(pf(ints.length, ints.length));
@@ -89,5 +133,5 @@ function interp(inxs, ints, inas) {
 }
 
 
-var table = interp([1,2,3,4], [1,2,3,4], [1.5,2.5,3.5,4.5]);
+var table = interp([1,2,3,4], [1.2,2.3,3.4,4.5], [.5,1.5,2.5,3.5]);
 //for(var x in table) { print ("C["+x+"]="+table[x]);}
