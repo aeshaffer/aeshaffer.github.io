@@ -315,8 +315,12 @@ BPWidget.prototype.fastReplot = function(as, N, cpi) {
 BPWidget.prototype.drawPILines = function(t) {
     var skip = parseInt(this.skippoints.val(), 10);
     if(this.zs.length % skip != 0) {
-	alert("Cannot skip "+this.zs.length+" points by " + skip + ".");
+	this.skippoints.css("background-color", "red");
+	this.skippoints.attr("title", "Cannot skip "+this.zs.length+" points by " + skip + ".");
 	return;
+    } else {
+	this.skippoints.css("background-color", "");
+	this.skippoints.attr("title", "");
     }
 
     var z2 = c(numeric.cos(t), numeric.sin(t));
@@ -340,9 +344,10 @@ BPWidget.prototype.drawPILinesInner = function(lines, piangles, skip){
     ctx.lineWidth = 1/Nover2;
 
     for(var j = 0; j < skip; j++) {
-	ctx.beginPath();
 	var i = j;
 	var t0 = piangles[i];
+
+	ctx.beginPath();
 	(ctx.moveTo).apply(ctx, ttp(t0));
 	for(i = j+skip; i < piangles.length; i+= skip) {
 	    t0 = piangles[i];
@@ -350,6 +355,7 @@ BPWidget.prototype.drawPILinesInner = function(lines, piangles, skip){
 	}
 	ctx.closePath();
 	ctx.stroke();
+
     }
     ctx.restore();
 }

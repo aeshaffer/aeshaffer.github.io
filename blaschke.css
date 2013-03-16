@@ -29,7 +29,9 @@ canvas.graph{
 canvas.rglines, canvas.rblines {
     position: absolute !important; left: 0px; top: 0px;
 }
-
+#rangewrapper {
+    display: none;
+}
 /*canvas {
   background-color: #eeeeee;
   }*/
