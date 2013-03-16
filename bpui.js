@@ -151,9 +151,15 @@ function BPWidget(obj) {
     this.cpi = {};
     this.bpzs = {};
     
-    this.worker = new Worker("bpworker.js");
-    this.rainbowworker = new Worker("bpgraphicsworker.js");
-    this.regionsworker = new Worker("bpgraphicsworker.js");    
+    try {
+	this.worker = new Worker("bpworker.js");
+	this.rainbowworker = new Worker("bpgraphicsworker.js");
+	this.regionsworker = new Worker("bpgraphicsworker.js");    
+    } catch (seex) {
+	this.worker = null;
+	this.rainbowworker = null;
+	this.regionsworker = null;
+    }
 }
 
 BPWidget.prototype.wireup = function() {
@@ -301,13 +307,13 @@ BPWidget.prototype.fastReplot = function(as, N, cpi) {
 
     var rgidata = new Uint8ClampedArray(4*N*N);
     rpipToHue(rpip, rgidata, function(bpz) { return region(cpi.cvangles, bpz);});
-    finishCanvas(rgidata, regions[0]);
+    finishCanvas(rgidata, this.regions[0], cpi);
 
     var rbidata = new Uint8ClampedArray(4*N*N);
     rpipToHue(rpip, rbidata, angle);
-    finishCanvas(rbidata, rainbow[0]);
+    finishCanvas(rbidata, this.rainbow[0], cpi);
 
-    doRange(range[0], bpzs, cpi, plotDims().N);
+    doRange(this.range[0], bpzs, cpi, this.plotDims().N);
 }
 
 
@@ -484,18 +490,7 @@ BPWidget.prototype.setup = function() {
     this.windowscale.change(function() { that.resizeCanvasesRescatter(); });
     this.graphzoom.change(function() { that.resizeCanvasesRescatter(); });
 
-    this.rainbowworker.onmessage = function(e) {
-	graphicsWorkerHandler(e, that.rainbow[0], that.regions[0], that.cpi, that.zs);
-    }
-    this.regionsworker.onmessage = function(e) {
-	graphicsWorkerHandler(e, that.rainbow[0], that.regions[0], that.cpi, that.zs);
-    }
-    this.workergo.click(function() {
-	that.workergo.css("background-color", "red");
-	that.worker.postMessage({as: that.zs, N: that.plotDims().N});
-	that.progress.text("");
-    });
-    this.worker.onmessage = function(event) {
+    var wom = function(event) {
 	if(event.data.rpip != null) {
 	    bpzs = rpipToBpzs(event.data.rpip);
 	    that.workergo.css("background-color", "");
@@ -513,6 +508,22 @@ BPWidget.prototype.setup = function() {
 	if(event.data.rowComplete != null) {
 	    that.progress.text(event.data.rowComplete + " " + event.data.comptime);
 	}
+    }
+    if(this.worker != null) {
+	this.rainbowworker.onmessage = function(e) {
+	    graphicsWorkerHandler(e, that.rainbow[0], that.regions[0], that.cpi, that.zs);
+	}
+	this.regionsworker.onmessage = function(e) {
+	    graphicsWorkerHandler(e, that.rainbow[0], that.regions[0], that.cpi, that.zs);
+	}    
+	this.worker.onmessage = wom;
+	this.workergo.click(function() {
+	    that.workergo.css("background-color", "red");
+	    that.worker.postMessage({as: that.zs, N: that.plotDims().N});
+	    that.progress.text("");	    
+	});
+    } else {
+	this.workergo.hide();
     }
     this.attachcanvasclicks();
     this.loadbutton.click(function() {
