@@ -365,6 +365,7 @@ BPWidget.prototype.autojoinpoints = function() {
     var ajpct = parseInt(this.autolinespoints.val(), 10);
     var adelta = Math.PI*2.0/ajpct;
     for(var i = 0; i < ajpct; i++) {
+	console.log("Joining points that map to"+i*adelta);
 	this.drawPILines(i*adelta);
     }
 }
@@ -515,7 +516,7 @@ BPWidget.prototype.setup = function() {
     }
     this.attachcanvasclicks();
     this.loadbutton.click(function() {
-	zs = parseZsString(that.zsstring.val());
+	that.zs = parseZsString(that.zsstring.val());
 	that.resizeCanvasesRescatter();
     });
     this.plotbutton.click(function() {
