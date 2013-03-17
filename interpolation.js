@@ -120,6 +120,7 @@ function interp(inxs, ints, inas) {
 	    if(i > 1) {
 		accum = accum * (x - this.x(i-1)) / (x - this.a(i-1));
 	    }
+	    print(this[ns]*accum);
 	    retval = retval + this[ns]*accum;
 	}
 	var ls = this.lambdastar();
@@ -132,6 +133,86 @@ function interp(inxs, ints, inas) {
     return table;
 }
 
+function maxinterval(thetas) {
+    var ts = thetas.map(normalizeangle).sort(function(a,b) { return a-b; });
+    var maxdiff = 0;
+    var maxind = 0;
+    for(var i = 0; i < thetas.length; i++) {
+	var t0 = ts[i];
+	var t1 = ts[(i+1) % ts.length];
+	var diff = Math.abs(normalizeangle(t1-t0));
+	//print("" + t0 + " " + t1 + " " + " "+diff);
+	if(diff > maxdiff) {
+	    maxdiff = diff;
+	    maxind = i;
+	}
+    }
+    var td = ts[maxind] + maxdiff/2;
+    var rot = (Math.PI/2 - td);
+    return {rot : rot,
+	    td : maxdiff,
+	    ts : ts.map(function(t) { return t + rot; })};
+}
 
-var table = interp([1,2,3,4], [1.2,2.3,3.4,4.5], [.5,1.5,2.5,3.5]);
+function ttcp(t) {
+    return c(numeric.cos(t), numeric.sin(t));
+}
+
+function DtoR(z) {
+    var num = z.add(ni);
+    var den = ni.mul(z).add(none);
+//    print(dcomplex(num));
+//    print(dcomplex(den));
+    var res = (num.div(den));
+//    print(dcomplex(res));
+    return res.x;
+}
+
+function RtoD(x) {
+    var x2 = c(x,0);
+    var num = x2.sub(ni);
+    var den = ni.mul(-1).mul(x2).add(none);
+    var res = (num.div(den));
+    return res;
+}
+
+function amb(a,b) {
+    return a-b;
+}
+
+function nudge(e,i,a) {
+    if(i == 0) {
+	return e-1;
+    } else {
+	var prev = a[i-1];
+	var next = a[i];
+	return (next + prev)/2;
+    }
+}
+
+function findBP(thetas) {
+    var thetas2 = thetas.map(normalizeangle).sort(amb);
+    var os = maxinterval(thetas2);
+    // This sort should, strictly speaking, be unnecessary.
+    var xs = os.ts.map(ttcp).map(DtoR).sort(amb);
+    var ts = xs.map(function(x) { return 1; });
+    var as = xs.map(nudge);
+    var table = interp(xs, ts, as);
+    return xs;
+}
+
+function gotest() {
+    return interp([1,2,3,4], [1.2,2.3,3.4,4.5], [.5,1.5,2.5,3.5]);
+}
+
+function testmap(N) {
+    var ts = new Array();
+    for(var i = 0; i < N; i++) {
+	ts.push(Math.PI*2/N*i);
+    }
+    var os = maxinterval(ts);
+    var xs = os.ts.map(ttcp).map(DtoR);
+    print(os.td, Math.max.apply(null, xs.map(Math.abs)));
+    return xs;
+}
 //for(var x in table) { print ("C["+x+"]="+table[x]);}

@@ -60,6 +60,7 @@ pi = 3.1415;
 
 var nzero = numeric.t(0,0);
 var none = numeric.t(1,0);
+var ni = numeric.t(0.0, 1.0);
 
 function iszero(z) {
     return z.abs().x == 0;

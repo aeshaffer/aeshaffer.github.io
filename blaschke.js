@@ -42,6 +42,7 @@ function parseZsString(s) {
     return retval;
 }
 
+// Normalize to between 0 and 2Pi.
 function normalizeangle(theta) {
     while(true) {
 	if(theta > 2*Math.PI) {
