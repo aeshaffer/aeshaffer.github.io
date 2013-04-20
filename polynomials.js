@@ -1,3 +1,15 @@
+Array.prototype.sum = function(){
+    for(var i=0,sum=0;i<this.length;sum+=this[i++]);
+    return sum;
+}
+
+
+Array.prototype.csum = function() {
+    for(var i=0,sum=c(0,0);i<this.length;sum = sum.add(this[i++]));
+    return sum;
+}
+
+
 function cgrid(N) {
     xs = numeric.linspace(-1,1,N);
     ys = numeric.linspace(-1,1,N);
@@ -9,6 +21,10 @@ function cgrid(N) {
 	}
     }
     return retval;
+}
+
+function rt2c(r, t) {
+    return ni.mul(t).exp().mul(r);
 }
 
 function c(x,y) {
@@ -60,6 +76,7 @@ pi = 3.1415;
 
 var nzero = numeric.t(0,0);
 var none = numeric.t(1,0);
+var nnone = numeric.t(-1,0);
 var ni = numeric.t(0.0, 1.0);
 
 function iszero(z) {
@@ -106,8 +123,13 @@ function cps(zs) {
 }
 
 function peval(coeffs, z) {    
-    var retval = nzero;
-    for(var i = 0; i < coeffs.length; i++) {
+    var retval;
+    if(coeffs.length == 0) {
+	return nzero;
+    } else {
+	retval = coeffs[0];
+    }
+    for(var i = 1; i < coeffs.length; i++) {
 	var zn = z.pow(i);
 	var term = zn.mul(coeffs[i]);
 	retval = retval.add(term);
@@ -160,9 +182,11 @@ function polyroots(incs) {
     for(var i = 0; i < deg; i++) {
 	roots[i] = c(.4, .9).pow(i);
     }
-    if(console.log) { 
-	console.log(pypoly(incs)); 
-	console.log(pypoly(cs));
+    if(console != undefined) {
+	if(console.log) { 
+//	    console.log(pypoly(incs)); 
+//	    console.log(pypoly(cs));
+	}
     }
     var n = 0;
     while(n < 100) {
@@ -170,7 +194,7 @@ function polyroots(incs) {
 	var deltas = new Array();
 	var newroots = new Array();
 
-	if(console.log != undefined) {
+	if(console != undefined && console.log != undefined) {
 /*
 	    console.log("");
 	    console.log("Roots: " + printzs(roots));

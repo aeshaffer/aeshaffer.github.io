@@ -44,6 +44,7 @@ function scatter(ctx, pts, color, N) {
 function ttp(t0) {
     return [numeric.cos(t0), numeric.sin(t0)];
 }
+
 var zeroFromClick = function(canvas, e) {
     var unit = $(canvas).width() / 2.0;
     var mouseX = e.pageX - $(canvas).offset().left;

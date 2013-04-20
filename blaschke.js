@@ -35,7 +35,7 @@ function zsString(zs) {
 function parseZsString(s) {
     var zs = s.replace(/\n/g, "").replace(/z=/g, "").split("&");
     var retval = new Array();
-    for(i in zs) {
+    for(var i= 0; i < zs.length; i++) {
 	var parts = zs[i].split(",");
 	retval.push(c(parseFloat(parts[0]), parseFloat(parts[1])));
     }
@@ -82,7 +82,7 @@ function getBPFExpr(as) {
     var asVars = new Array();
     var l = none;
     function toc(a) { return "c("+a.x+","+a.y+")"; }
-    for(i in as) {
+    for(var i  = 0; i < as.length; i++) {
 	var a = as[i];
 	asVars.push("var a"+i+" = "+toc(a));
 	if(iszero(a)) {
@@ -124,7 +124,7 @@ function bpeval(as, z) {
     }
 
     var retval = none;
-    for(i in as) {
+    for(var i = 0; i < as.length; i++) {
 	var term = bpterm(as[i], z);
 	retval = retval.mul(term);
     }
@@ -145,7 +145,7 @@ function bpeval2(as, z) {
 
 function l(as) {
     var l = none;
-    for(i in as) {
+    for(var i = 0; i < as.length; i++) {
 	var a = as[i];
 	l = l.mul(lt(a));
     }
@@ -155,7 +155,7 @@ function l(as) {
 function bpnum(as) {
     // cancel the sign on the z (as[i] == 0) term.
     var num = [none.mul(-1)];
-    for(i in as) {
+    for(var i = 0; i < as.length; i++) {
 	var polyterm;
 	polyterm = [as[i], none.mul(-1)];
 	num = polymult(polyterm, num);
@@ -165,7 +165,7 @@ function bpnum(as) {
 
 function bpden(as) {
     var den = [none];
-    for(i in as) {
+    for(var i =0; i < as.length; i++) {
 	var polyterm = [none, as[i].conj().mul(-1)];
 	den = polymult(polyterm, den);
     }
@@ -193,7 +193,7 @@ function preimage(zs, beta) {
 
 function bpcompose2(zs1, zs2) {
     var retval = Array();
-    for(i in zs1) {
+    for(var i = 0; i < zs1.length; i++) {
 	// Find points that zs2 maps to alpha.
 	alpha = zs1[i];
 	alpharoots = preimage(zs2, alpha);
@@ -226,7 +226,7 @@ function cpinfo(zs) {
     // The above shows that all the roots are indeed close to zero...
     var cps = polyroots(bpp);
     var circlecps = new Array();
-    for(i in cps) {
+    for(var i=0; i < cps.length;i++) {
 	var cp = cps[i];
 	if(cp.abs().x < 1) {
 	    circlecps.push(cp);
