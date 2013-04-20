@@ -1,12 +1,22 @@
 // load("numeric-1.2.3.js");
 // load("polynomials.js");
 
-function abpolynomial(alphas, betas) {
+function o(a,b) { return a-b; }
+function t2c(t) { return rt2c(1,t); }
+
+function abpolynomial(inalphas, inbetas) {
+    var alphas = inalphas.map(normalizeangle);
+    var betas = inbetas.map(normalizeangle);
+    alphas.sort(o);
+    betas.sort(o);
+    var flipab = !(alphas[0] < betas[0]);
+    if(flipab) {
+	var temp = alphas; alphas = betas; betas = temp;
+    }
     var alpha = alphas.sum();
     var beta = betas.sum();
-    var f = function(t) { return rt2c(1,t);};
-    var azeroes = alphas.map(f);
-    var bzeroes = betas.map(f);
+    var azeroes = alphas.map(t2c);
+    var bzeroes = betas.map(t2c);
     var apoly = coeffs(azeroes);
     var bpoly = coeffs(bzeroes);
     var alphac = ni.mul(alpha).div(2).mul(-1).exp();
@@ -15,7 +25,9 @@ function abpolynomial(alphas, betas) {
     var p = polymult([alphac], apoly);
     var q = polymult([betac], bpoly);
 
-    var retval = {p: p, q: q, check: 0};
+    var retval = {p: p, q: q, 
+		  phi : flipab ? function(z) { return z.mul(-1);} : function(z) { return z; }, 
+		  check: 0};
 
     retval.check = randalphasbetas(100).alphas.map(function(a) { return pqeval(retval, rt2c(1, a)); }).map(function(z) { return z.abs().x;}).sum();
 
@@ -25,7 +37,8 @@ function abpolynomial(alphas, betas) {
 function pqeval(pq, z) {
     var pe = peval(pq.p, z);
     var qe = peval(pq.q, z);
-    return qe.sub(ni.mul(pe)).div(qe.add(ni.mul(pe)));
+    var retval = qe.sub(ni.mul(pe)).div(qe.add(ni.mul(pe)));
+    return pq.phi(retval);
 }
 
 function randalphasbetas(N) {
@@ -41,9 +54,18 @@ function randalphasbetas(N) {
     return {alphas: alphas, betas: betas};
 }
 
-function pqzeroes(pq) {
-    var poly = polysub(pq.q, polymult([ni], pq.p));
+function pqpreimages(pq, c) {
+    var q = pq.q, ip = polymult([ni], pq.p);
+    var num = polysub(q, ip);
+    var den = polyadd(q, ip);
+    var poly = polysub(num, polymult([c], den));
     return polyroots(poly);
+}
+
+function pqzeroes(pq) {
+    var q = pq.q, ip = polymult([ni], pq.p);
+    var num = polysub(q, ip);
+    return polyroots(num);
 }
 
 function test(ab, pq) {
@@ -61,42 +83,70 @@ function test(ab, pq) {
 }
 
 function spacedpreimages(b, z, N) {
-    var pis = preimage(b, z);
-    function t(z) { return normalizeangle(z.angle()); }
-    function o(a,b) { return a-b; }
-    var pithetas = pis.map(t);
+    var pithetas = piangles(b, z.angle());
     pithetas.sort(o);
     var spacedthetas = [];
+    var spacedthetas2 = [];
     for(var i = 0; i < b.length; i += N) {
 	spacedthetas.push(pithetas[i]);
+	spacedthetas2.push(pithetas[i+1]);
     }
-    return {pis: pis, spaced: spacedthetas};
+    return [spacedthetas, spacedthetas2];
 }
 
 function piangles(b, t) {
-    return preimage(b, rt2c(1,t)).map(function(z) { return z.angle(); });
+    return preimage(b, rt2c(1,t)).map(function(z) { return normalizeangle(z.angle()); });
+}
+
+function bppqcompare(b1) {
+    var b1onethetas = piangles(b1, 0);
+    var b1nonethetas = piangles(b1, pi);
+    var pq1 = abpolynomial(b1onethetas, b1nonethetas);
+    var pq1zeroes = pqzeroes(pq1);
+    console.log(pq1zeroes.map(dcp));
+    console.log(b1onethetas.map(function(t) { return pqeval(pq1, rt2c(1, t));}).map(dcp));
+    console.log(b1nonethetas.map(function(t) { return pqeval(pq1, rt2c(1, t));}).map(dcp));
 }
 
 function algorithmtest(b1, b2) {
     var b3 = bpcompose(b1, b2);
 
-    console.log(piangles(b1, 0));
-    console.log(piangles(b1, pi));
-    console.log(piangles(b2, 0));
-    console.log(piangles(b2, pi));
-    console.log(piangles(b3, 0));
-    console.log(piangles(b3, pi));
     
-    var nonethetas = spacedpreimages(b3, nnone, b1.length);
-    var onethetas = spacedpreimages(b3, none, b1.length);
+    var Binvs = spacedpreimages(b3, nnone, b1.length);
+    piangles(b3, nnone.angle());
+    Binvs[0].map(function(t) { return bpeval(b3, t2c(t));}).map(dcp);
+    Binvs[1].map(function(t) { return bpeval(b3, t2c(t));}).map(dcp);
+    var z1 = t2c(Binvs[0][0]);
+    var z2 = t2c(Binvs[1][0]);
+
+    var cz1 = bpeval(b2, z1);
+    var cz2 = bpeval(b2, z2);    
+    
+    // Identifies the two sets of points, but not to the 
+    // correct angle.
+    var pq = abpolynomial(Binvs[0], Binvs[1]);
+    Binvs[0].map(function(t) { return pqeval(pq, t2c(t));}).map(dcp);
+    Binvs[1].map(function(t) { return pqeval(pq, t2c(t));}).map(dcp);
+
+    var w0 = pqeval(pq, nzero);
+    var wz1 = pqeval(pq, z1);
+    var wz2 = pqeval(pq, z2);
+
+    var ws = [w0, wz1, wz2];
+    var zs = [nzero, cz1, cz2];
+    var phi = gettransform(ws, zs);
+
+    innerzeroes = pqpreimages(pq, w0);
+
+    
+    
+    //var onethetas = spacedpreimages(b3, none, b1.length);
+/*
     console.log(nonethetas);
     console.log(onethetas);
     var pq = abpolynomial(onethetas.spaced, nonethetas.spaced);
     console.log(pq.p.map(dcp));
     console.log(pq.q.map(dcp));
-
-    console.log(nonethetas.spaced.map(function(t) { return pqeval(pq, rt2c(1, t));}).map(dcp));
-    console.log(onethetas.spaced.map(function(t) { return pqeval(pq, rt2c(1, t));}).map(dcp));
 
     var innerzeroes = pqzeroes(pq);
 
@@ -104,7 +154,16 @@ function algorithmtest(b1, b2) {
     console.log(innerzeroes.map(function(z) { return z.abs().x; }));
     console.log(innerzeroes.map(function(z) { return pqeval(pq, z);} ).map(dcp));
 
+    function pqe(t) { return dcp(pqeval(pq, t2c(t))); }
+    function bpe(t) { return dcp(bpeval(innerzeroes, t2c(t))); }
+    
+    console.log(nonethetas.spaced.map(pqe));
+    console.log(nonethetas.spaced.map(bpe));
+    console.log(onethetas.spaced.map(pqe));
+    console.log(onethetas.spaced.map(bpe));
+
     return innerzeroes;
+*/
 }
 
 b1 = [nzero, none.div(2), ni.div(2)];

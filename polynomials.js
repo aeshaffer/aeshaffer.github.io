@@ -78,6 +78,7 @@ var nzero = numeric.t(0,0);
 var none = numeric.t(1,0);
 var nnone = numeric.t(-1,0);
 var ni = numeric.t(0.0, 1.0);
+var nni = numeric.t(0.0, -1.0);
 
 function iszero(z) {
     return z.abs().x == 0;
@@ -138,13 +139,17 @@ function peval(coeffs, z) {
 }
 
 function polysub(cs1, cs2) {
+    return polyadd(cs1, cs2.map(function(z) { return z.mul(-1);}));
+}
+
+function polyadd(cs1, cs2) {
     var retval = Array();
     for(var i = 0; i < Math.max(cs1.length, cs2.length); i++) {
 	var c1 = nzero;
 	var c2 = nzero;
 	if(cs1[i] != undefined) {c1 = cs1[i];}
 	if(cs2[i] != undefined) {c2 = cs2[i];}
-	retval[i] = c1.sub(c2);
+	retval[i] = c1.add(c2);
     }
     return retval;
 }
