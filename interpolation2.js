@@ -108,27 +108,33 @@ function bppqcompare(b1) {
     console.log(b1nonethetas.map(function(t) { return pqeval(pq1, rt2c(1, t));}).map(dcp));
 }
 
-function algorithmtest(b1, b2) {
-    var b3 = bpcompose(b1, b2);
+function comparepes(bp, pq, z) {
+    return {
+	pqvals : preimage(b2, z).map(function(z) { return pqeval(pq, z); }).map(dcp),
+	bpvals : pqpreimages(pq, z).map(function(z) { return bpeval(bp, z); }).map(dcp)
+    };
+}
 
-    
-    var Binvs = spacedpreimages(b3, nnone, b1.length);
-    piangles(b3, nnone.angle());
-    Binvs[0].map(function(t) { return bpeval(b3, t2c(t));}).map(dcp);
-    Binvs[1].map(function(t) { return bpeval(b3, t2c(t));}).map(dcp);
+function algorithmtest0(b1, b2) {
+    var b3 = bpcompose(b1, b2);
+    var N = b1.length;
+    var retval =  algorithmtest(b3, N);
+
+    var Binvs = retval.Binvs;
+    var w0 = retval.w0;
+    var pq = retval.pq;
+
     var z1 = t2c(Binvs[0][0]);
     var z2 = t2c(Binvs[1][0]);
-
     var cz1 = bpeval(b2, z1);
     var cz2 = bpeval(b2, z2);    
-    
-    // Identifies the two sets of points, but not to the 
-    // correct angle.
-    var pq = abpolynomial(Binvs[0], Binvs[1]);
+
+    var origpqzeroes = pqzeroes(pq);
     Binvs[0].map(function(t) { return pqeval(pq, t2c(t));}).map(dcp);
     Binvs[1].map(function(t) { return pqeval(pq, t2c(t));}).map(dcp);
+    Binvs[0].map(function(t) { return bpeval(b2, t2c(t));}).map(dcp);
+    Binvs[1].map(function(t) { return bpeval(b2, t2c(t));}).map(dcp);
 
-    var w0 = pqeval(pq, nzero);
     var wz1 = pqeval(pq, z1);
     var wz2 = pqeval(pq, z2);
 
@@ -136,7 +142,26 @@ function algorithmtest(b1, b2) {
     var zs = [nzero, cz1, cz2];
     var phi = gettransform(ws, zs);
 
-    innerzeroes = pqpreimages(pq, w0);
+    return retval;
+
+}
+ 
+function algorithmtest(b3, N) {
+    var Binvs = spacedpreimages(b3, nnone, N);
+    piangles(b3, nnone.angle());
+    Binvs[0].map(function(t) { return bpeval(b3, t2c(t));}).map(dcp);
+    Binvs[1].map(function(t) { return bpeval(b3, t2c(t));}).map(dcp);
+    
+    // Identifies the two sets of points, but not to the 
+    // correct angle.
+    var pq = abpolynomial(Binvs[0], Binvs[1]);
+    var w0 = pqeval(pq, nzero);
+    var innerzeroes = pqpreimages(pq, w0);
+
+    return {zeroes: innerzeroes, Binvs : Binvs, pq: pq, w0: w0};
+}
+
+
 
     
     
@@ -161,11 +186,8 @@ function algorithmtest(b1, b2) {
     console.log(nonethetas.spaced.map(bpe));
     console.log(onethetas.spaced.map(pqe));
     console.log(onethetas.spaced.map(bpe));
-
-    return innerzeroes;
 */
-}
 
 b1 = [nzero, none.div(2), ni.div(2)];
 
-b2 = [nzero, none.div(-3), ni.div(-3), ni.add(none).div(3)];
+b2 = [nzero, none.div(-3), ni.div(-3), ni.add(none).div(3), ni.div(2).sub(none.div(2))];
