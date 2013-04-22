@@ -9,13 +9,13 @@ function doCompose() {
     $("#preimages tbody").empty();
     var composedobjs = bpcompose2(zs1, zs2);
     $("#preimages #ipimgs").attr('colspan', composedobjs.length);
-    for(i in composedobjs) {
+    for(var i = 0; i < composedobjs.length; i++) {
 	var o = composedobjs[i];
 	var tr = $("<tr>");
 	var td1 = $("<td>");
 	td1.text(dc(o.outerzero));
 	tr.append(td1);
-	for(j in o.preimages) {
+	for(var j = 0; j < o.preimages.length; j++) {
 	    var pimg = o.preimages[i];
 	    var td2 = $("<td>");
 	    td2.text(dc(pimg));

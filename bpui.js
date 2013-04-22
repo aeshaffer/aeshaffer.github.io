@@ -5,7 +5,7 @@ function cssscatter(cw, canvaswidth, pts, cssclass, doclear) {
     var offset = canvaswidth/2;
     console.log("Rescattering ", cw, cssclass, " at ", canvaswidth, offset);
     
-    for(i in pts) {
+    for(var i = 0; i < pts.length; i++) {
 	var z = pts[i];
 	var x = z.x;
 	var y = z.y == undefined ? 0: z.y;
@@ -16,9 +16,13 @@ function cssscatter(cw, canvaswidth, pts, cssclass, doclear) {
 	div.addClass("scatterpoint");
 	div.addClass(cssclass+i);
 	div.attr("zeroid", i);
-	var nudge = Math.floor((1.0)/(2.0)*div.width());
-	div.css("top",  offset - offset*y - nudge);
-	div.css("left", offset + offset*x - nudge);
+	var nudge = Math.round(div.width())/2;
+	div.css("top",  offset - Math.round(offset*y) - nudge);
+	div.css("left", offset + Math.round(offset*x) - nudge);
+	console.log(cssclass+i, " at ", 
+		    offset - offset*y, div.css("top"), 
+		    offset - offset*x, div.css("left"), 
+		    nudge, div.width());
     }
     return cw.find("."+cssclass);
 }
@@ -241,7 +245,7 @@ BPWidget.prototype.rescatter = function() {
 	this.regions[0].getContext("2d").clear();
 	this.range[0].getContext("2d").clear();
     }
-    
+
     this.cpi = cpinfo(this.zs);
     var cps = this.cpi.cps;
     var cvs = this.cpi.cvs;
@@ -251,6 +255,20 @@ BPWidget.prototype.rescatter = function() {
     
     var cw = this.rainbow.parent(".canvaswrapper");
     var cwidth = this.plotDims().graphN;
+
+    var innertest = [];
+    if(this.skippoints.val() != "") {
+	var innerguess = parseInt(this.skippoints.val(), 10);
+	if(innerguess == 1 || innerguess == this.zs.length || 
+	   this.zs.length % innerguess != 0) {
+	    cssscatter(cw, cwidth, [], "innerzero", true);
+	} else {
+	    innertest = algorithmtest(this.zs, innerguess);
+	    var innertestdivs = cssscatter(cw, cwidth, innertest.zeroes, "innerzero");
+	}
+    } 
+    
+
     
     var zerodivs = cssscatter(cw, cwidth, this.zs, "zero");
     var that = this;
@@ -488,6 +506,7 @@ BPWidget.prototype.setup = function() {
     var that = this;
     this.resizeCanvasesRescatter();
 
+    this.skippoints.change(function() { that.rescatter(); });
     this.windowscale.change(function() { that.resizeCanvasesRescatter(); });
     this.graphzoom.change(function() { that.resizeCanvasesRescatter(); });
 
