@@ -123,15 +123,23 @@ function cps(zs) {
     return polyroots(dcs);
 }
 
-function peval(coeffs, z) {    
-    var retval;
-    if(coeffs.length == 0) {
-	return nzero;
-    } else {
-	retval = coeffs[0];
+function zpowers(z,n) {
+    var zpowers = new Array();
+    var zn = none;
+    zpowers.push(zn);
+    for(var i = 0; i < n; i++) {
+	zn = zn.mul(z);
+	zpowers.push(zn);
     }
-    for(var i = 1; i < coeffs.length; i++) {
-	var zn = z.pow(i);
+    return zpowers;
+}
+
+function peval(coeffs, z) {    
+    var retval = nzero;
+    var zs = zpowers(z, coeffs.length);
+
+    for(var i = 0; i < coeffs.length; i++) {
+	var zn = zs[i];
 	var term = zn.mul(coeffs[i]);
 	retval = retval.add(term);
     }

@@ -265,6 +265,7 @@ BPWidget.prototype.rescatter = function() {
 	} else {
 	    innertest = algorithmtest(this.zs, innerguess);
 	    var innertestdivs = cssscatter(cw, cwidth, innertest.zeroes, "innerzero");
+	    console.log("PQ Zeroes:", innertest.pqzeroes);
 	}
     } 
     
@@ -280,6 +281,7 @@ BPWidget.prototype.rescatter = function() {
 	    stop: function() { that.updatezero($(this));}
 	});
     
+
     for(var i = 0; i < this.zs.length; i++) {
 	if(this.zs[i].abs().x == 0) {
 	    cw.find(".zero"+i).removeClass("draggable")
@@ -550,9 +552,12 @@ BPWidget.prototype.setup = function() {
 	that.zs = parseZsString(that.zsstring.val());
 	that.resizeCanvasesRescatter();
     });
-    this.plotbutton.click(function() {
+    this.replotMe = function() {
 	that.resizeCanvasesRescatter();
 	that.fastReplot(that.zs, that.plotDims().N, that.cpi);
+    }
+    this.plotbutton.click(function() {
+	that.replotMe();
     });
 }
 

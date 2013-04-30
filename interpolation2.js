@@ -155,10 +155,11 @@ function algorithmtest(b3, N) {
     // Identifies the two sets of points, but not to the 
     // correct angle.
     var pq = abpolynomial(Binvs[0], Binvs[1]);
+    var pqzeroes = pqpreimages(pq, nzero);
     var w0 = pqeval(pq, nzero);
     var innerzeroes = pqpreimages(pq, w0);
 
-    return {zeroes: innerzeroes, Binvs : Binvs, pq: pq, w0: w0};
+    return {zeroes: innerzeroes, Binvs : Binvs, pq: pq, w0: w0, pqzeroes: pqzeroes};
 }
 
 

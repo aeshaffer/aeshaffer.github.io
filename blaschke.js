@@ -1,6 +1,17 @@
 
-function bpgridevalArray(N, as, rowcallback) {
+function bpgridevalArrayOrig(N, as, rowcallback) {
     var bpe = getBPF(as);
+    return bpgridevalArrayInner(bpe, N, as, rowcallback);
+}
+
+// function bpgridevalArrayPolys(N, as, rowcallback) {
+//     var bpe = bpepolys(as);
+//     return bpgridevalArrayInner(bpe, N, as, rowcallback);
+// }
+
+var bpgridevalArray = bpgridevalArrayOrig;
+
+function bpgridevalArrayInner(bpe, N, as, rowcallback) {
     // We want (-1,1) in the upper-left corner.
     var xs = numeric.linspace(-1,1,N);
     var ys = numeric.linspace(1,-1,N);
@@ -108,6 +119,14 @@ function bpeval0(as, z) {
     return f(z);
 }
 
+function bpepolys(as) {
+    var num = bpnum(as);
+    var den = bpden(as);
+    var lambda = l(as);
+    return function(z) {
+	return lambda.mul(peval(num, z)).div(peval(den, z));
+    }
+}
 
 function bpeval(as, z) {
 
