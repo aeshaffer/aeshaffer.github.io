@@ -107,6 +107,6 @@ void main()
         float theta = atan(bpz.y, bpz.x) + 3.14;
         gl_FragColor = hsv_to_rgb(theta/6.28, 1.0, 1.0,1.0);
     } else {
-        gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+        gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
     }        
 }
