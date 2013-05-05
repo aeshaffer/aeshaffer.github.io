@@ -64,14 +64,10 @@ vec2 dt(vec2 z, vec2 a) {
     return vec2(1.0, 0.0) - cmul(conj(a), z);
 }
 
-const vec2 z0 = vec2(0.0,0.0);
-const vec2 z1 = vec2(0.5,0.0);
-const vec2 z2 = vec2(-.5,0.5);
-
 const int MAX_ZS = 16;
 
-vec2 zeroes[MAX_ZS];
-const int numzeroes = 3;
+uniform vec2 zeroes[MAX_ZS];
+uniform int numzeroes;
 
 numden bpeval2(vec2 z) {
     vec2 num = vec2(1.0,0.0);
@@ -100,9 +96,9 @@ float ntheta(float theta) {
 
 void main()
 {
-    zeroes[0] = z0;
-    zeroes[1] = z1;
-    zeroes[2] = z2;
+    /* zeroes[0] = z0; */
+    /* zeroes[1] = z1; */
+    /* zeroes[2] = z2; */
     vec2 uv = vTextureCoord;
     vec2 z = uv*2.0 - vec2(1.0,1.0);  
     numden nd = bpeval2(z);

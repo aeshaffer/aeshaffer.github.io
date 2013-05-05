@@ -1,3 +1,13 @@
+function flatten(array){
+    var flat = [];
+    for (var i = 0, l = array.length; i < l; i++){
+        var type = Object.prototype.toString.call(array[i]).split(' ').pop().split(']').shift().toLowerCase();
+        if (type) { flat = flat.concat(/^(array|collection|arguments|object)$/.test(type) ? flatten(array[i]) : array[i]); }
+    }
+    return flat;
+}
+
+
 var canvas;
 var gl;
 
@@ -17,6 +27,60 @@ var vertexPositionAttribute;
 var textureCoordAttribute;
 var perspectiveMatrix;
 
+
+var locations = [
+    [0, 0], [.5,.5], [-.5,-.5], [-.5,0]
+];
+
+function tocoords(me) {
+    var w = $(canvas).width();
+    var w2 = w/2;
+    var h = $(canvas).height();
+    var h2 = h/2;
+    var x = (me.clientX - w2)/w2;
+    var y = -1*(me.clientY - h2)/h2;
+    return {x:x, y:y};
+}
+
+$(function() {
+    var locationindex = -1;
+    $("#glcanvas")
+	.mouseenter(function(me) {
+	    locationindex = -1;
+	    $(this).removeClass("moving");
+	})
+	.mouseleave(function(me) {
+	    locationindex = -1;
+	    $(this).removeClass("moving");
+	})
+	.mousemove(function(me) {
+	    if(locationindex != -1) {
+		var z = tocoords(me);
+		locations[locationindex] = [z.x, z.y];
+	    }
+	})
+	.mousedown(function(me) {	    
+	    var z = tocoords(me);
+	    var closepoints = locations.map(function(e,i) { 
+		return {i:i, d: Math.pow(e[0] - z.x, 2) + 
+			Math.pow(e[1] - z.y, 2)}; })
+		.filter(function(id) { return id.d < .1; });
+	    console.log(closepoints);
+	    if(closepoints.length > 0) {
+		locationindex = closepoints[0].i;
+		$(this).addClass("moving");
+	    } else {
+		locationindex = -1;
+		$(this).removeClass("moving");
+	    }
+	    console.log(z, locations[locationindex]);
+	})
+	.mouseup(function() {
+	    locationindex = -1;
+	    $(this).removeClass("moving");
+	});
+});
+
 //
 // start
 //
@@ -24,6 +88,11 @@ var perspectiveMatrix;
 //
 function start() {
   canvas = document.getElementById("glcanvas");
+
+    $(canvas).on("dblclick", function(me) {
+	var xy = tocoords(me);
+	locations.push([xy.x,xy.y]);
+    });
 
   initWebGL(canvas);      // Initialize the GL context
   
@@ -414,11 +483,16 @@ function mvTranslate(v) {
 }
 
 function setMatrixUniforms() {
-  var pUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
-  gl.uniformMatrix4fv(pUniform, false, new Float32Array(perspectiveMatrix.flatten()));
-
-  var mvUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
-  gl.uniformMatrix4fv(mvUniform, false, new Float32Array(mvMatrix.flatten()));
+    var pUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
+    gl.uniformMatrix4fv(pUniform, false, new Float32Array(perspectiveMatrix.flatten()));
+    
+    var mvUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
+    gl.uniformMatrix4fv(mvUniform, false, new Float32Array(mvMatrix.flatten()));
+    
+    var zeroesUniform = gl.getUniformLocation(shaderProgram, "zeroes");
+    gl.uniform2fv(zeroesUniform, flatten(locations));
+    var numzeroesUniform = gl.getUniformLocation(shaderProgram, "numzeroes");
+    gl.uniform1i(numzeroesUniform, locations.length);
 }
 
 var mvMatrixStack = [];
