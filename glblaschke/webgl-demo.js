@@ -33,12 +33,13 @@ var locations = [
 ];
 
 function tocoords(me) {
-    var w = $(canvas).width();
+    var c = me.currentTarget;
+    var w = $(c).width();
     var w2 = w/2;
-    var h = $(canvas).height();
+    var h = $(c).height();
     var h2 = h/2;
-    var x = (me.clientX - w2)/w2;
-    var y = -1*(me.clientY - h2)/h2;
+    var x = (me.offsetX - c.clientLeft - w2)/w2;
+    var y = -1*(me.offsetY - c.clientTop - h2)/h2;
     return {x:x, y:y};
 }
 

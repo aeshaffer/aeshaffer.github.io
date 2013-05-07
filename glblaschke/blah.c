@@ -52,9 +52,18 @@ vec2 cdiv(vec2 z1, vec2 z2) {
 }
 
 struct numden {
-    vec2 num;
-    vec2 den;
+  vec2 lambda;
+  vec2 num;
+  vec2 den;
 };
+
+vec2 lt(vec2 z) {
+  if(z.x == 0.0 && z.y == 0.0) {
+    return vec2(1.0,0.0);
+  } else {
+    return conj(z) / cnorm(z);
+  }
+}
 
 vec2 nt(vec2 z, vec2 a) {
     return z-a;
@@ -70,18 +79,21 @@ uniform vec2 zeroes[MAX_ZS];
 uniform int numzeroes;
 
 numden bpeval2(vec2 z) {
-    vec2 num = vec2(1.0,0.0);
-    vec2 den = vec2(1.0,0.0);
-    for(int i = 0; i < MAX_ZS; i++) {
-      if(i < numzeroes) {
-        num = cmul(num, nt(z, zeroes[i]));
-        den = cmul(den, dt(z, zeroes[i]));
-      }
+  vec2 lambda = vec2(1.0,0.0);
+  vec2 num = vec2(1.0,0.0);
+  vec2 den = vec2(1.0,0.0);
+  for(int i = 0; i < MAX_ZS; i++) {
+    if(i < numzeroes) {
+      lambda = cmul(lambda, lt(zeroes[i]));
+      num = cmul(num, nt(z, zeroes[i]));
+      den = cmul(den, dt(z, zeroes[i]));
     }
-    numden retval;
-    retval.num = num;
-    retval.den = den;
-    return retval;
+  }
+  numden retval;
+  retval.lambda = lambda;
+  retval.num = num;
+  retval.den = den;
+  return retval;
 }
 
 float ntheta(float theta) {
@@ -103,6 +115,7 @@ void main()
     vec2 z = uv*2.0 - vec2(1.0,1.0);  
     numden nd = bpeval2(z);
     vec2 bpz = cdiv(nd.num, nd.den);
+    bpz = cmul(nd.lambda, bpz);
     if(cnorm(z) <= 1.0) {
         float theta = atan(bpz.y, bpz.x) + 3.14;
         gl_FragColor = hsv_to_rgb(theta/6.28, 1.0, 1.0,1.0);
