@@ -32,6 +32,21 @@ var locations = [
     [0, 0], [.5,.5], [-.5,-.5], [-.5,0]
 ];
 
+function recalcBP() {
+    if($("#plotcps").is(":checked")) {
+	bproots = cpinfo(locations.map(xytoc));
+	cssscatter($(".canvaswrapper"), 640, bproots.cps, "cp", true);
+    } else {
+	cssscatter($(".canvaswrapper"), 640, [], "cp", true);
+    }
+}
+
+var bproots = [];
+
+$(function() {
+    recalcBP();
+});
+
 function tocoords(me) {
     var c = me.currentTarget;
     var w = $(c).width();
@@ -41,6 +56,10 @@ function tocoords(me) {
     var x = (me.offsetX - c.clientLeft - w2)/w2;
     var y = -1*(me.offsetY - c.clientTop - h2)/h2;
     return {x:x, y:y};
+}
+
+function xytoc(xy) {
+    return c(xy[0], xy[1]);
 }
 
 $(function() {
@@ -54,10 +73,16 @@ $(function() {
 	    locationindex = -1;
 	    $(this).removeClass("moving");
 	})
+	.on("dblclick", function(me) {
+	    var xy = tocoords(me);
+	    locations.push([xy.x,xy.y]);
+	    recalcBP();
+	})
 	.mousemove(function(me) {
 	    if(locationindex != -1) {
 		var z = tocoords(me);
 		locations[locationindex] = [z.x, z.y];
+		recalcBP();
 	    }
 	})
 	.mousedown(function(me) {	    
@@ -83,6 +108,7 @@ $(function() {
 		$(this).removeClass("moving");
 	    }
 	    console.log(z, locations[locationindex]);
+	    me.originalEvent.preventDefault();
 	})
 	.mouseup(function() {
 	    locationindex = -1;
@@ -97,11 +123,6 @@ $(function() {
 //
 function start() {
   canvas = document.getElementById("glcanvas");
-
-    $(canvas).on("dblclick", function(me) {
-	var xy = tocoords(me);
-	locations.push([xy.x,xy.y]);
-    });
 
   initWebGL(canvas);      // Initialize the GL context
   

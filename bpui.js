@@ -3,7 +3,7 @@ function cssscatter(cw, canvaswidth, pts, cssclass, doclear) {
 	cw.find("."+cssclass).remove();
     }
     var offset = canvaswidth/2;
-    console.log("Rescattering ", cw, cssclass, " at ", canvaswidth, offset);
+    //console.log("Rescattering ", cw, cssclass, " at ", canvaswidth, offset);
     
     for(var i = 0; i < pts.length; i++) {
 	var z = pts[i];
@@ -19,10 +19,12 @@ function cssscatter(cw, canvaswidth, pts, cssclass, doclear) {
 	var nudge = Math.round(div.width())/2;
 	div.css("top",  offset - Math.round(offset*y) - nudge);
 	div.css("left", offset + Math.round(offset*x) - nudge);
+/*
 	console.log(cssclass+i, " at ", 
 		    offset - offset*y, div.css("top"), 
 		    offset - offset*x, div.css("left"), 
 		    nudge, div.width());
+*/
     }
     return cw.find("."+cssclass);
 }
