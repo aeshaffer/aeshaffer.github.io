@@ -53,25 +53,28 @@ canvas.rglines, canvas.rblines {
   }*/
 .circle {
     position: absolute;
-    top: 0px;
-    left: 0px;
     border: 1px solid black;
+/*
+    left: -2px;
+    top: -2px;
+*/
+    border-radius: 50%;
     background-color: transparent;
     z-index: -1;
 }
 
-.canvaswrapper {
+.zeroesholder {
     user-select: none;
-    border: 2px solid black; 
+    //border: 2px solid black; 
     width: 10px; 
     height: 10px; 
     position: relative; 
     display: inline-block;
 }
-.canvaswrapperHidden {
+.zeroesholderHidden {
     overflow: hidden !important;
 }
-.canvaswrapperScroll {
+.zeroesholderScroll {
     overflow: scroll !important;
 }
 .workingbutton {

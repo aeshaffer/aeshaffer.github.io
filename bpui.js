@@ -63,26 +63,23 @@ var zeroFromClick = function(canvas, e) {
 // N is the number of pixels in the canvas
 // wrapperN is the size of the canvas wrapper
 function resize(g, pd) {
-    var cw = $(g).parent(".canvaswrapper");
+    var cw = $(g).parent(".zeroesholder");
 
     $(cw).find(".circle")
-	.css("width", pd.graphN+"px")
-	.css("height", pd.graphN+"px")
-	.css("border-radius", pd.graphN/2+"px")
-	.css("border-color", "black")
-	.css("border-style", "solid");
+	.css("width", (pd.graphN-2)+"px")
+	.css("height",(pd.graphN-2)+"px");
     
     cw
 	.css("width", pd.windowN+"px")
 	.css("height", pd.windowN+"px");
     if(pd.graphN > pd.windowN) {
 	cw
-	    .addClass("canvaswrapperScroll")
-	    .removeClass("canvaswrapperHidden");
+	    .addClass("zeroesholderScroll")
+	    .removeClass("zeroesholderHidden");
     } else {
 	cw
-	    .removeClass("canvaswrapperScroll")
-	    .addClass("canvaswrapperHidden");
+	    .removeClass("zeroesholderScroll")
+	    .addClass("zeroesholderHidden");
     }
 
     var graph = $(g)[0];
@@ -222,7 +219,7 @@ BPWidget.prototype.displayTables = function(zs, cpi) {
 BPWidget.prototype.updatezero = function(zdiv) {
     var nudge = Math.floor((1.0/2.0)*$(zdiv).width());
     var zeroid = $(zdiv).attr("zeroid");
-    var cw = $(zdiv).parent(".canvaswrapper");
+    var cw = $(zdiv).parent(".zeroesholder");
     var canvas = cw.find("canvas");
     var unit = canvas.width() /2.0;
     var p = $(zdiv).position();
@@ -256,7 +253,7 @@ BPWidget.prototype.rescatter = function() {
     
     this.displayTables(this.zs, this.cpi);
     
-    var cw = this.rainbow.parent(".canvaswrapper");
+    var cw = this.rainbow.parent(".zeroesholder");
     var cwidth = this.plotDims().graphN;
 
     var innertest = [];
@@ -280,7 +277,7 @@ BPWidget.prototype.rescatter = function() {
 	.addClass("ui-draggable")
 	.addClass("ui-widget-content")
 	.draggable({
-	    containment: ".canvaswrapper", scroll: false,
+	    containment: ".zeroesholder", scroll: false,
 	    stop: function() { that.updatezero($(this));}
 	});
     
@@ -462,7 +459,7 @@ BPWidget.prototype.attachcanvasclicks = function() {
     // $("#regions").on("click", cf);
     this.clearpreimages.on("click", 
 		      function(e) {
-			  cssscatter(that.regions.parent(".canvaswrapper"), 
+			  cssscatter(that.regions.parent(".zeroesholder"), 
 				     that.plotDims().graphN,
 				     [], "pi", true);
 		      }
@@ -481,7 +478,7 @@ BPWidget.prototype.attachcanvasclicks = function() {
 	    if(rangemd || e.which == 1) {
 		var z = zeroFromClick($(this), e);
 		var preimages = preimage(zs, z);
-		var pidivs = cssscatter(that.regions.parent(".canvaswrapper"),
+		var pidivs = cssscatter(that.regions.parent(".zeroesholder"),
 					that.plotDims().graphN, preimages, "pi", false);
 		console.log("Scattering preimages.");
 	    }
