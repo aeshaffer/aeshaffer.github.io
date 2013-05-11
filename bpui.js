@@ -138,6 +138,7 @@ function BPWidget(obj) {
 
     this.reidonrplot= g(".reidonrplot");
     this.windowscale= g(".windowscale");
+    this.rayThreshold = g(".raythreshold");
     this.graphzoom= g(".graphzoom");
     this.pixels= g(".pixels");
     this.workergo= g(".workergo");
@@ -201,7 +202,7 @@ BPWidget.prototype.displayTables = function(zs, cpi) {
     var rolledcvangles = roll(cpi.cvangles);
     for(var i = 0; i < cpi.cvangles.length; i++) {
 	var li = $("<li>");
-	li.text(round2(cpi.cvangles[i]) +"-" + round2(rolledcvangles[i]));
+	li.text(round5(cpi.cvangles[i]) +"-" + round5(rolledcvangles[i]));
 	var rgb = hsvToRgb(1.0*i/(cpi.cvangles.length), 1, 1);
 	li.attr("id", "ca"+i);
 	function H(n) { n = Math.round(n); return (n < 16 ? "0" : "") + n.toString(16); }
@@ -321,7 +322,7 @@ BPWidget.prototype.resizeCanvases = function() {
     // drawPlots(bpzs, N, zs, cpi);
 }
 
-BPWidget.prototype.fastReplot = function(as, N, cpi) {
+BPWidget.prototype.fastReplot = function(as, N, cpi, raythreshold) {
     var startBPGE = (new Date()).getTime();
     var rpip = bpgridevalArray(N, as, null);
     bpzs = rpipToBpzs(rpip);
@@ -332,8 +333,20 @@ BPWidget.prototype.fastReplot = function(as, N, cpi) {
     rpipToHue(rpip, rgidata, function(bpz) { return region(cpi.cvangles, bpz);});
     finishCanvas(rgidata, this.regions[0], cpi);
 
+    var bad = biggestanglediff(cpi.cps.map(function(bpz) { return bpz.angle();}));
+
+    var valfun = function(bpz) {
+	if(th == 0) { return 1; }
+	if(isNaN(bpz.x) || isNaN(bpz.y)) { return 1; }
+	var th = raythreshold;
+	var ad = anglediff(bad.midpt - bpz.angle());
+	var aad = Math.abs(ad);
+	var val = (1.0/(4.0*th))*aad;
+	if (val > 1) { return 1; } else { return val; }
+    }	
+
     var rbidata = new Uint8ClampedArray(4*N*N);
-    rpipToHue(rpip, rbidata, angle);
+    rpipToHue(rpip, rbidata, anglehue, valfun);
     finishCanvas(rbidata, this.rainbow[0], cpi);
 
     doRange(this.range[0], bpzs, cpi, this.plotDims().N);
@@ -416,7 +429,7 @@ BPWidget.prototype.attachcanvasclicks = function() {
     function cf(e) {
 	var z = zeroFromClick($(this), e);
 	var val = bpeval(zs, c(z.x,z.y));
-	point.text(round2(z.x) + " " + round2(z.y) + "i");
+	point.text(round5(z.x) + " " + round5(z.y) + "i");
 	dest.text(dcomplex(val) + " " + getangleindex(val.angle(), cpi.cvangles));	
     };
     function joinpoints(e) {
@@ -556,7 +569,8 @@ BPWidget.prototype.setup = function() {
     });
     this.replotMe = function() {
 	that.resizeCanvasesRescatter();
-	that.fastReplot(that.zs, that.plotDims().N, that.cpi);
+	that.fastReplot(that.zs, that.plotDims().N, that.cpi, 
+			parseFloat(that.rayThreshold.val()));
     }
     this.plotbutton.click(function() {
 	that.replotMe();

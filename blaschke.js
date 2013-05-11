@@ -79,6 +79,25 @@ function anglediff(theta) {
     }
 }
 
+function biggestanglediff(ts) {
+    var maxdiff = 0;
+    var maxind = 0;
+    for(var i = 0; i < ts.length; i++) {
+	var t0 = ts[i];
+	var t1 = ts[(i+1) % ts.length];
+	var diff = Math.abs(normalizeangle(t1-t0));
+	//print("" + t0 + " " + t1 + " " + " "+diff);
+	if(diff > maxdiff) {
+	    maxdiff = diff;
+	    maxind = i;
+	}
+    }
+    var retval = {t0:ts[maxind], t1: ts[(maxind+1) % ts.length]};
+    retval.midpt = Math.abs(anglediff((t1+t0)/2));
+    return retval;
+}
+
+
 function lt(a) {
     if(a.abs().x == 0) {
 	return c(1);

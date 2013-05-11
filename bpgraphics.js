@@ -110,19 +110,24 @@ function setRGB(idata, rgb, N, row, col) {
     setRGBInner(idata, rgb, addr);
 }
 
-function angle(bpz) {
-    var thetapct = normalizeangle(bpz.angle())/(2*pi);
+function anglehue(bpz) {
+    var t = bpz.angle();
+    return tanglehue(t);
+}
+
+function tanglehue(t) {
+    var thetapct = normalizeangle(t)/(2*pi);
     var t2 = Math.round(255*thetapct) % 256;
     return t2/256;
 }
 
 function draweval(idata, zs, bpzs, rowcallback) {
-    return mapOverbpzs(idata, zs, bpzs, angle, rowcallback);
+    return mapOverbpzs(idata, zs, bpzs, anglehue, rowcallback);
 }
 
 
 
-function rpipToHue(rpip, idata, huefn) {
+function rpipToHue(rpip, idata, huefn, valfn) {
     var rp = rpip.realparts;
     var ip = rpip.imagparts;
     var N = Math.sqrt(rp.length);
@@ -135,7 +140,8 @@ function rpipToHue(rpip, idata, huefn) {
 		var i = yi*N + xi;
 		var bpz = c(rp[i], ip[i]);		
 		var hue = huefn(bpz);
-		var rgb = hsvToRgb(hue, 1, 1);
+		var val = (valfn == undefined) ? 1 : valfn(bpz);
+		var rgb = hsvToRgb(hue, 1, val);
 		setRGBInner(idata, rgb, 4*i);	    
 	    }
 	}

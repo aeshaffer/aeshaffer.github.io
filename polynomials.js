@@ -54,22 +54,22 @@ function cifyrpip(rpip) {
     return retval;
 }
 
-function round2(n) {
-    return Math.round(n*100)/100;
+function round5(n) {
+    return Math.round(n*100000)/100000;
 }
 
 function dc(z) {
     var y = z.y == undefined ? 0 : z.y;
-    return round2(z.x) + " " + (y >= 0 ? "+": "") +round2(y) + "i";
+    return round5(z.x) + " " + (y >= 0 ? "+": "") +round5(y) + "i";
 }
 
 function dcp(z) {
     var y = z.y == undefined ? 0 : z.y;
-    return round2(z.x) + " " + (y >= 0 ? "+": "") +round2(y) + "j";
+    return round5(z.x) + " " + (y >= 0 ? "+": "") +round5(y) + "j";
 }
 
 function dcomplex(z) {
-    return dc(z) + " (" + round2(normalizeangle(z.angle())) + ")";
+    return dc(z) + " (" + round5(normalizeangle(z.angle())) + ")";
 }
 
 pi = 3.1415;
