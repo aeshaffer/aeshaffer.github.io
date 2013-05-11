@@ -16,9 +16,11 @@ function cssscatter(cw, canvaswidth, pts, cssclass, doclear) {
 	div.addClass("scatterpoint");
 	div.addClass(cssclass+i);
 	div.attr("zeroid", i);
-	var nudge = Math.round(div.width())/2;
-	div.css("top",  offset - Math.round(offset*y) - nudge);
-	div.css("left", offset + Math.round(offset*x) - nudge);
+	var nudge = div.width()/2;
+	var lnudge = nudge + parseFloat(div.css("border-left-width").replace("px", ""), 10);
+	var tnudge = nudge + parseFloat(div.css("border-top-width").replace("px", ""), 10);
+	div.css("top",  Math.round(offset - offset*y - lnudge));
+	div.css("left", Math.round(offset + offset*x - tnudge));
 /*
 	console.log(cssclass+i, " at ", 
 		    offset - offset*y, div.css("top"), 

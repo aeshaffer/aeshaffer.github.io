@@ -9,7 +9,7 @@ div.scatterpoint {
     width: 9px;
     height: 9px;
     position: absolute;
-    border-radius: 5px;
+    border-radius: 50%;
 }  
 
 div.innerzero {
@@ -17,12 +17,12 @@ div.innerzero {
     height: 13px;
     background-color: black;
     border: 1px solid black;
-    border-radius: 7px;
+    border-radius: 50%;
 }
 
 div.zero {
     background-color: white;
-    border: 1px solid black;
+    border: 2px solid black;
     cursor: crosshair;
 }
 div.zerozero {
@@ -33,7 +33,7 @@ div.pi {
     border-radius: 3px;
 }
 div.cp {
-    border: 1px solid #444444;
+    border: 2px solid #444444;
     background-color: #888888;
 }
 div.cv {
