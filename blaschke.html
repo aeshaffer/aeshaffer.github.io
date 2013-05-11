@@ -25,26 +25,32 @@
 </head>
 <body>
   <div>
-  Rendered Size: <input class="pixels" value="400"></input>
-  Zoom Size: <input class="graphzoom" value="1"></input>
-  Window Scale: <input class="windowscale" value="1"></input> 
-  <br/>
-  <button type="button" class="plotbutton">Plot</button>    
-  <button type="button" class="clearpreimages">Clear Preimages</button>
-  <button type="button" class="workergo">Fast Plot</button>
-  <button type="button" class="clearplots">Clear Plots</button>
+    Rendered Size: <input class="pixels" value="400"></input>
+    Zoom Size: <input class="graphzoom" value="1"></input>
+    Window Scale: <input class="windowscale" value="1"></input> 
+    <br/>
+    <button type="button" class="plotbutton">Plot</button>    
+    <button type="button" class="workergo">Fast Plot</button>
+    <button type="button" class="clearplots">Clear Plots</button>
+    &nbsp;
+    <button type="button" class="clearpreimages">Clear Preimages</button>
+    <select class="showpreimages">
+      <option value="none" selected="selected">Hide Range</option>
+      <option value="regions">Regions Plot</option>
+      <option value="both">Both</option>
+    </select>
+    B. Line Threshold: <input class="raythreshold" value="0"></input>
   </div>
   <div>
-  Skip Points: <input class="skippoints" value="1" style="width: 50px;"></input>
-  <!-- Angle: <input class="theta" value="0"></input>
-  <button type="button" class="timesPI">*= &pi;</button>
-  <button type="button" class="plottheta">Plot Identified</button><br/>
-  -->
-  Auto Identify Points: <input class="autolinespoints" value="16" style="width: 50px;"></input>
-  <button type="button" class="clearlines">Clear Lines</button>
-  <button type="button" class="autolinesgo">Redraw Lines</button>
-  Auto Re-Draw:<input class="reidonrplot" value="false" type="checkbox"></input>
-  RT: <input class="raythreshold" value="0"></input>
+    Skip Points: <input class="skippoints" value="1" style="width: 50px;"></input>
+    <!-- Angle: <input class="theta" value="0"></input>
+	 <button type="button" class="timesPI">*= &pi;</button>
+	 <button type="button" class="plottheta">Plot Identified</button><br/>
+	 -->
+    Auto Identify Points: <input class="autolinespoints" value="16" style="width: 50px;"></input>
+    <button type="button" class="clearlines">Clear Lines</button>
+    <button type="button" class="autolinesgo">Redraw Lines</button>
+    Auto Re-Draw:<input class="reidonrplot" value="false" type="checkbox"></input>
   </div>
   <br/>
   <div class="zeroesholder">
@@ -62,6 +68,7 @@
     </canvas>
   </div>
   <div class="zeroesholder" id="rangewrapper">
+    <div class="circle"></div>
     <canvas class="range graph">
     </canvas>
   </div>

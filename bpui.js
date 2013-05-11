@@ -158,6 +158,8 @@ function BPWidget(obj) {
     this.timesPI= g(".timesPI");
     this.plottheta= g(".plottheta");
     this.clearpreimages= g(".clearpreimages");
+    this.showpreimages = g(".showpreimages");
+
     this.zs = {};
     this.cpi = {};
     this.bpzs = {};
@@ -431,9 +433,9 @@ BPWidget.prototype.attachcanvasclicks = function() {
     }
     function cf(e) {
 	var z = zeroFromClick($(this), e);
-	var val = bpeval(zs, c(z.x,z.y));
-	point.text(round5(z.x) + " " + round5(z.y) + "i");
-	dest.text(dcomplex(val) + " " + getangleindex(val.angle(), cpi.cvangles));	
+	var val = bpeval(that.zs, c(z.x,z.y));
+	that.point.text(round5(z.x) + " " + round5(z.y) + "i");
+	that.dest.text(dcomplex(val) + " " + getangleindex(val.angle(), that.cpi.cvangles));	
     };
     function joinpoints(e) {
 	var z = zeroFromClick($(this), e);
@@ -446,11 +448,10 @@ BPWidget.prototype.attachcanvasclicks = function() {
 	$(".graph").each(function(i) {$(this)[0].getContext("2d").clear();});
     }
 
-    this.rglines.on("dblclick", addpoint);
-    this.rainbow.on("dblclick", addpoint);
     this.rblines.on("dblclick", addpoint);
-    this.rainbow.on("click", cf);
+    this.rblines.on("click", cf);
     this.rglines.on("click", joinpoints);
+
     this.autolinesgo.on("click", function() {that.autojoinpoints();});
     this.timesPI.on("click", function() {
 	var t = parseFloat(that.theta.val());
@@ -463,13 +464,7 @@ BPWidget.prototype.attachcanvasclicks = function() {
     this.clearplots.on("click", doclearplots);
     this.clearlines.on("click", function() {that.doclearlines();});
     // $("#regions").on("click", cf);
-    this.clearpreimages.on("click", 
-		      function(e) {
-			  cssscatter(that.regions.parent(".zeroesholder"), 
-				     that.plotDims().graphN,
-				     [], "pi", true);
-		      }
-		     );
+   
     var rangemd = false;
     this.range
 	.on("mouseleave", function(e) {
@@ -483,12 +478,40 @@ BPWidget.prototype.attachcanvasclicks = function() {
 	.on("mousemove", function(e) {
 	    if(rangemd || e.which == 1) {
 		var z = zeroFromClick($(this), e);
-		var preimages = preimage(zs, z);
-		var pidivs = cssscatter(that.regions.parent(".zeroesholder"),
-					that.plotDims().graphN, preimages, "pi", false);
+		var preimages = preimage(that.zs, z);
+		var v = that.showpreimages.val();
+		if(v == "both") {
+		    var pidivs = cssscatter(that.rainbow.parent(".zeroesholder"),
+					    that.plotDims().graphN, preimages, "pi", false);
+		}
+		if(v == "regions" || v == "both") {
+		    var pidivs = cssscatter(that.regions.parent(".zeroesholder"),
+					    that.plotDims().graphN, preimages, "pi", false);
+		}
 		console.log("Scattering preimages.");
 	    }
 	});
+    this.clearpreimages.on("click", 
+			   function(e) {
+			       cssscatter(that.regions.parent(".zeroesholder"), 
+					  that.plotDims().graphN,
+					  [], "pi", true);
+			       cssscatter(that.rainbow.parent(".zeroesholder"), 
+					  that.plotDims().graphN,
+					  [], "pi", true);
+			   }
+			  );
+    this.showpreimages.on("change", function(e) {
+	var v = $(e.target).val();
+	if(v == "none") {
+	    that.range.parent("div").hide();
+	} else {
+	    that.range.parent("div").show();
+	}
+    });
+
+    this.showpreimages.change();
+
 };
 
 BPWidget.prototype.setup = function() {	     
