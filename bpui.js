@@ -1,3 +1,9 @@
+function getNudge(div) {
+    var nudge = div.width()/2;
+    nudge += parseFloat(div.css("border-left-width").replace("px", ""), 10);
+    return nudge;
+}
+
 function cssscatter(cw, canvaswidth, pts, cssclass, doclear) {
     if(doclear == undefined || doclear) {
 	cw.find("."+cssclass).remove();
@@ -16,11 +22,9 @@ function cssscatter(cw, canvaswidth, pts, cssclass, doclear) {
 	div.addClass("scatterpoint");
 	div.addClass(cssclass+i);
 	div.attr("zeroid", i);
-	var nudge = div.width()/2;
-	var lnudge = nudge + parseFloat(div.css("border-left-width").replace("px", ""), 10);
-	var tnudge = nudge + parseFloat(div.css("border-top-width").replace("px", ""), 10);
-	div.css("top",  Math.round(offset - offset*y - lnudge));
-	div.css("left", Math.round(offset + offset*x - tnudge));
+	var nudge = getNudge(div);
+	div.css("top",  Math.round(offset - offset*y - nudge));
+	div.css("left", Math.round(offset + offset*x - nudge));
 /*
 	console.log(cssclass+i, " at ", 
 		    offset - offset*y, div.css("top"), 
@@ -219,7 +223,7 @@ BPWidget.prototype.displayTables = function(zs, cpi) {
 }
 
 BPWidget.prototype.updatezero = function(zdiv) {
-    var nudge = Math.floor((1.0/2.0)*$(zdiv).width());
+    var nudge = getNudge($(zdiv));
     var zeroid = $(zdiv).attr("zeroid");
     var cw = $(zdiv).parent(".zeroesholder");
     var canvas = cw.find("canvas");
