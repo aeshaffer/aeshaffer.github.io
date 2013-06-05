@@ -278,6 +278,8 @@ BPWidget.prototype.rescatter = function() {
 		console.log("PQ Zeroes:", innertest.pqzeroes);
 	    }
 	} 
+    } else {
+	cssscatter(cw, cwidth, [], "innerzero", true);
     }
     
 
