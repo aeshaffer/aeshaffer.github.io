@@ -140,6 +140,7 @@ function BPWidget(obj) {
     this.rglines= g(".rglines");
 
     this.reidonrplot= g(".reidonrplot");
+    this.plotinterp = g(".plotinterp");
     this.windowscale= g(".windowscale");
     this.rayThreshold = g(".raythreshold");
     this.graphzoom= g(".graphzoom");
@@ -265,17 +266,19 @@ BPWidget.prototype.rescatter = function() {
     var cwidth = this.plotDims().graphN;
 
     var innertest = [];
-    if(this.skippoints.val() != "") {
-	var innerguess = parseInt(this.skippoints.val(), 10);
-	if(innerguess == 1 || innerguess == this.zs.length || 
-	   this.zs.length % innerguess != 0) {
-	    cssscatter(cw, cwidth, [], "innerzero", true);
-	} else {
-	    innertest = algorithmtest(this.zs, innerguess);
-	    var innertestdivs = cssscatter(cw, cwidth, innertest.zeroes, "innerzero");
-	    console.log("PQ Zeroes:", innertest.pqzeroes);
-	}
-    } 
+    if(this.plotinterp.is(":checked")) {
+	if(this.skippoints.val() != "") {
+	    var innerguess = parseInt(this.skippoints.val(), 10);
+	    if(innerguess == 1 || innerguess == this.zs.length || 
+	       this.zs.length % innerguess != 0) {
+		cssscatter(cw, cwidth, [], "innerzero", true);
+	    } else {
+		innertest = algorithmtest(this.zs, innerguess);
+		var innertestdivs = cssscatter(cw, cwidth, innertest.zeroes, "innerzero");
+		console.log("PQ Zeroes:", innertest.pqzeroes);
+	    }
+	} 
+    }
     
 
     
