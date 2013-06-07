@@ -5,6 +5,19 @@ ul.criticalpoints, ul.zeroes, ul.criticalvalues, ul.criticalangles {
     padding: 0px;
 }
 
+ul.criticalvalues li {
+    width: 200px;
+    float: left;
+}
+
+#clicklocation {
+    margin-left: 420px;
+}
+
+#zeroeslistdiv {
+    margin-left: 20px;
+}
+
 div.scatterpoint {
     width: 9px;
     height: 9px;

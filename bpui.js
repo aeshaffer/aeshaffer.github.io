@@ -306,7 +306,20 @@ BPWidget.prototype.rescatter = function() {
     }
     
     cssscatter(cw, cwidth, this.cpi.cps, "cp");
+    for(var i = 0; i < this.cpi.cps.length; i++) {
+	var pt = cw.find(".cp"+i);
+	var cp = this.cpi.cps[i];
+	var that = this;
+	bindCPClick(pt, cp, that);
+    }
 };
+
+function bindCPClick(pt, cp, that) {
+    var cp2 = cp;
+    pt.bind("click", function() {
+	showClick(cp2, that);
+    });
+}
 
 BPWidget.prototype.resizeCanvasesRescatter = function() {
     this.resizeCanvases();
@@ -427,6 +440,12 @@ BPWidget.prototype.doclearlines = function () {
     this.rblines[0].getContext("2d").clear();
 }
 
+function showClick(z, that) {
+    var val = bpeval(that.zs, c(z.x,z.y));
+    that.point.text(round5(z.x) + " " + round5(z.y) + "i");
+    that.dest.text(dcomplex(val) + " " + getangleindex(val.angle(), that.cpi.cvangles));
+}
+
 BPWidget.prototype.attachcanvasclicks = function() {
     var that = this;
     function addpoint(e) {
@@ -438,9 +457,7 @@ BPWidget.prototype.attachcanvasclicks = function() {
     }
     function cf(e) {
 	var z = zeroFromClick($(this), e);
-	var val = bpeval(that.zs, c(z.x,z.y));
-	that.point.text(round5(z.x) + " " + round5(z.y) + "i");
-	that.dest.text(dcomplex(val) + " " + getangleindex(val.angle(), that.cpi.cvangles));	
+	showClick(z, that);
     };
     function joinpoints(e) {
 	var z = zeroFromClick($(this), e);

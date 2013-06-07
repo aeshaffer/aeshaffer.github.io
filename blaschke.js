@@ -253,6 +253,23 @@ function roll(ar) {
     return retval;
 }
 
+function zeroToNm1(N) {
+    var foo = [];
+    
+    for (var i = 0; i < N; i++) {
+	foo.push(i);
+    }
+    return foo;
+}
+
+function sortBy(vals, indices) {
+    var foo = []; 
+    for(i = 0; i < indices.length; i++) { 
+	foo.push(vals[indices[i]]); 
+    }
+    return foo;
+}
+
 function cpinfo(zs) {
 
     var bpp = getBPprime(zs);
@@ -270,11 +287,18 @@ function cpinfo(zs) {
 	    circlecps.push(cp);
 	}
     }
-    var cvs = circlecps.map(function(cp) {return bpeval(zs, cp);});
 
-    var cvangles = cvs.map(function(cv) {return cv.angle();}).map(normalizeangle);
+    var cvs = circlecps.map(function(cp) {return bpeval(zs, cp);});
+    var perm = zeroToNm1(cvs.length);
+    var perm2 = perm.sort(function(i,j) { return normalizeangle(cvs[i].angle()) - normalizeangle(cvs[j].angle());});
+
+    var sortedcvs = sortBy(cvs, perm2);
+    var sortedcps = sortBy(circlecps, perm2);
+
+    var cvangles = sortedcvs.map(function(cv) {return cv.angle();}).map(normalizeangle);
     cvangles.sort(function(a,b) {return a-b});
-    return {"cps": circlecps, "cvs": cvs, "cvangles": cvangles};
+    // circlecps.sort(function(a,b) { return normalizeangle(a.angle()) - normalizeangle(b.angle()); });
+    return {"cps": sortedcps, "cvs": sortedcvs, "cvangles": cvangles};
 }
 
 function getangleindex(theta, ts) {
