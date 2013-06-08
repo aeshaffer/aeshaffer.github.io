@@ -52,6 +52,11 @@ div.cp {
     border: 1px solid #444444;
     background-color: #888888;
 }
+div.cp.picked {
+    background-color: #000088;
+    border: 1px solid yellow;
+}
+
 div.cv {
     background-color: #444444;
 }

@@ -198,15 +198,51 @@ BPWidget.prototype.displayTables = function(zs, cpi) {
 	}
     }
 
+    var groups = {};
+
+    function dccp(i) { return dcomplex(cpi.cps[i]); }
+    function dccv(i) { return dcomplex(cpi.cvs[i]); }
+
+    for(var i = 0; i < cpi.cvs.length; i++) { groups[dccv(i)] = []; }
+    for(var i = 0; i < cpi.cvs.length; i++) { groups[dccv(i)].push(i); }
+
+    function clearPicked() { $(".cp").removeClass("picked");}
+
     for(var i = 0; i < cpi.cps.length; i++) {
 	var cpli = $("<li>");
-	cpli.text(dcomplex(cpi.cps[i]));
+	cpli.text(dccp(i));
 	this.criticalpoints.append(cpli);
 
 	var cvli = $("<li>");
 	var dc = dcomplex(cpi.cvs[i]);
 	cvli.text(dc);
 	this.criticalvalues.append(cvli);
+
+	/*
+	var rgb = hsvToRgb(anglehue(cpi.cvs[i]), 1, 1);
+	function H(n) { n = Math.round(n); return (n < 16 ? "0" : "") + n.toString(16); }
+	var rgbstring = "#"+H(rgb[0]) + H(rgb[1]) + H(rgb[2]);
+	cvli.css("background-color", rgbstring);
+	*/
+
+	(function() {
+	    var j = i;	    
+	    var group = groups[dccv(j)];
+	    cpli
+		.on("mouseover", function() {
+			clearPicked();
+			$(".cp"+j).addClass("picked");
+		    })
+		.on("mouseleave", clearPicked);
+	    cvli
+		.on("mouseover", function() {
+			clearPicked();
+			for(var k = 0; k < group.length; k++) {
+			    $(".cp"+group[k]).addClass("picked");			 
+			}
+		    })
+		.on("mouseleave", clearPicked);
+	})();
 
 	if(doclear && i - 1 >= 0) {
 	    var dc0 = dcomplex(cpi.cvs[i-1]);
@@ -228,12 +264,14 @@ BPWidget.prototype.displayTables = function(zs, cpi) {
     var rolledcvangles = roll(cpi.cvangles);
     for(var i = 0; i < cpi.cvangles.length; i++) {
 	var li = $("<li>");
+	li.attr("id", "ca"+i);
 	li.text(round5(cpi.cvangles[i]) +"-" + round5(rolledcvangles[i]));
 	var rgb = hsvToRgb(1.0*i/(cpi.cvangles.length), 1, 1);
-	li.attr("id", "ca"+i);
+
 	function H(n) { n = Math.round(n); return (n < 16 ? "0" : "") + n.toString(16); }
 	var rgbstring = "#"+H(rgb[0]) + H(rgb[1]) + H(rgb[2]);
 	li.css("background-color", rgbstring);
+
 	this.criticalangles.append(li);
     }   
     
