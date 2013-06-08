@@ -57,7 +57,7 @@ function ttp(t0) {
     return [numeric.cos(t0), numeric.sin(t0)];
 }
 
-var zeroFromClick = function(canvas, e) {
+function zeroFromClick(canvas, e) {
     var unit = $(canvas).width() / 2.0;
     var mouseX = e.pageX - $(canvas).offset().left;
     var mouseY = e.pageY - $(canvas).offset().top;
@@ -70,7 +70,7 @@ var zeroFromClick = function(canvas, e) {
 // wrapperN is the size of the canvas wrapper
 function resize(g, pd) {
     var cw = $(g).parent(".zeroesholder");
-
+    
     $(cw).find(".circle")
 	.css("width", (pd.graphN-2)+"px")
 	.css("height",(pd.graphN-2)+"px");
@@ -181,7 +181,7 @@ BPWidget.prototype.wireup = function() {
     //zs = bpcompose(zeroonehalf, [c(0,0), c(.51, 0)] );
 
     this.setup();
-}
+};
 
 BPWidget.prototype.displayTables = function(zs, cpi) {
     this.criticalpoints.empty();
@@ -223,7 +223,7 @@ BPWidget.prototype.displayTables = function(zs, cpi) {
     this.zsstring.attr("rows", zs.length);
     var wl = window.location.href.replace(window.location.search, "");
     this.permalink.attr("href", wl+"?"+zscode);
-}
+};
 
 BPWidget.prototype.updatezero = function(zdiv) {
     var nudge = getNudge($(zdiv));
@@ -244,7 +244,7 @@ BPWidget.prototype.updatezero = function(zdiv) {
     }
     
     this.rescatter();
-}
+};
 
 BPWidget.prototype.rescatter = function() {
     
@@ -316,16 +316,14 @@ BPWidget.prototype.rescatter = function() {
 
 function bindCPClick(pt, cp, that) {
     var cp2 = cp;
-    pt.bind("click", function() {
-	showClick(cp2, that);
-    });
+    pt.bind("click", function() { showClick(cp2, that);	});
 }
 
 BPWidget.prototype.resizeCanvasesRescatter = function() {
     this.resizeCanvases();
     this.rescatter();
-}    
-
+};
+    
 BPWidget.prototype.plotDims = function() {
     var N = parseFloat(this.pixels.val());
     var zoom = parseFloat(this.graphzoom.val());
@@ -333,7 +331,7 @@ BPWidget.prototype.plotDims = function() {
     var windowN = zoom*N*1.0/windowscaleval;
     var graphN = zoom*N;
     return {N: N, zoom: zoom, windowN: windowN, graphN: graphN};
-}
+};
 
 BPWidget.prototype.resizeCanvases = function() {
     var pd = this.plotDims();
@@ -343,7 +341,7 @@ BPWidget.prototype.resizeCanvases = function() {
     resize(this.rglines, pd);
     resize(this.rblines, pd);
     // drawPlots(bpzs, N, zs, cpi);
-}
+};
 
 BPWidget.prototype.fastReplot = function(as, N, cpi, raythreshold) {
     var startBPGE = (new Date()).getTime();
@@ -373,7 +371,7 @@ BPWidget.prototype.fastReplot = function(as, N, cpi, raythreshold) {
     finishCanvas(rbidata, this.rainbow[0], cpi);
 
     doRange(this.range[0], bpzs, cpi, this.plotDims().N);
-}
+};
 
 
 
@@ -393,10 +391,10 @@ BPWidget.prototype.drawPILines = function(t) {
     var preimages = preimage(this.zs, bz2);
     var piangles = preimages.map(function(cv) { return cv.angle();})
     piangles = piangles.sort(function(a,b){return a-b});
-
+    
     this.drawPILinesInner(this.rblines[0], piangles, skip);
     //drawPILinesInner(rglines, piangles, skip);
-}
+};
 
 BPWidget.prototype.drawPILinesInner = function(lines, piangles, skip){
 
@@ -406,7 +404,7 @@ BPWidget.prototype.drawPILinesInner = function(lines, piangles, skip){
     ctx.save();
     ctx.translate(Nover2,Nover2);
     ctx.scale(Nover2, -Nover2);
-    ctx.lineWidth = 1/Nover2;
+    ctx.lineWidth = 1.00001/Nover2;
 
     for(var j = 0; j < skip; j++) {
 	var i = j;
@@ -423,7 +421,7 @@ BPWidget.prototype.drawPILinesInner = function(lines, piangles, skip){
 
     }
     ctx.restore();
-}
+};
 
 BPWidget.prototype.autojoinpoints = function() {	
     this.doclearlines();
@@ -433,18 +431,18 @@ BPWidget.prototype.autojoinpoints = function() {
 	console.log("Joining points that map to"+i*adelta);
 	this.drawPILines(i*adelta);
     }
-}
+};
 
 BPWidget.prototype.doclearlines = function () {
     this.rglines[0].getContext("2d").clear();
     this.rblines[0].getContext("2d").clear();
-}
+};
 
 function showClick(z, that) {
     var val = bpeval(that.zs, c(z.x,z.y));
-    that.point.text(round5(z.x) + " " + round5(z.y) + "i");
+    that.point.text(dcomplex(z));
     that.dest.text(dcomplex(val) + " " + getangleindex(val.angle(), that.cpi.cvangles));
-}
+};
 
 BPWidget.prototype.attachcanvasclicks = function() {
     var that = this;
@@ -623,7 +621,7 @@ BPWidget.prototype.setup = function() {
     this.plotbutton.click(function() {
 	that.replotMe();
     });
-}
+};
 
 
 CanvasRenderingContext2D.prototype.clear = 
