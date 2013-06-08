@@ -54,6 +54,10 @@ function cifyrpip(rpip) {
     return retval;
 }
 
+function round2(n) {
+    return Math.round(n*100)/100;
+}
+
 function round5(n) {
     return Math.round(n*100000)/100000;
 }
@@ -69,7 +73,7 @@ function dcp(z) {
 }
 
 function dcomplex(z) {
-    return dc(z) + " (" + round5(normalizeangle(z.angle())) + ")";
+    return dc(z) + " (arg=" + round2(normalizeangle(z.angle())) + ")";
 }
 
 pi = 3.1415;
