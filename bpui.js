@@ -48,7 +48,10 @@ function scatter(ctx, pts, color, N) {
 	//ctx.linewidth=10;
 	ctx.closePath();
 	ctx.fillStyle=color;
+	ctx.strokeStyle="#000000";
 	ctx.fill();
+	ctx.lineWidth = 1;
+	ctx.stroke();
     }
     ctx.restore();
 }
@@ -185,25 +188,42 @@ BPWidget.prototype.wireup = function() {
 
 BPWidget.prototype.displayTables = function(zs, cpi) {
     this.criticalpoints.empty();
+    this.criticalvalues.empty();
+
+    var doclear = false;
+
+    for(var i = 1; i < cpi.cps.length; i++) {
+	if(dcomplex(cpi.cvs[i]) == dcomplex(cpi.cvs[i-1])) {
+	    doclear = true;
+	}
+    }
+
     for(var i = 0; i < cpi.cps.length; i++) {
-	var li = $("<li>");
-	li.text(dcomplex(cpi.cps[i]));
-	this.criticalpoints.append(li);
+	var cpli = $("<li>");
+	cpli.text(dcomplex(cpi.cps[i]));
+	this.criticalpoints.append(cpli);
+
+	var cvli = $("<li>");
+	var dc = dcomplex(cpi.cvs[i]);
+	cvli.text(dc);
+	this.criticalvalues.append(cvli);
+
+	if(doclear && i - 1 >= 0) {
+	    var dc0 = dcomplex(cpi.cvs[i-1]);
+	    if (dc != dc0) {
+		cpli.css("clear", "left");
+		cvli.css("clear", "left");
+	    }
+	}
     }    
+
     this.zeroes.empty();
     for(var i = 0; i < zs.length; i++) {
 	var li = $("<li>");
 	li.text(dcomplex(zs[i]));
 	this.zeroes.append(li);
     }    
-    
-    this.criticalvalues.empty();
-    for(var i = 0; i < cpi.cvs.length; i++) {
-	var li = $("<li>");
-	li.text(dcomplex(cpi.cvs[i]));
-	this.criticalvalues.append(li);
-    }   
-    
+        
     this.criticalangles.empty();
     var rolledcvangles = roll(cpi.cvangles);
     for(var i = 0; i < cpi.cvangles.length; i++) {
@@ -352,7 +372,7 @@ BPWidget.prototype.fastReplot = function(as, N, cpi, raythreshold) {
 
     var rgidata = new Uint8ClampedArray(4*N*N);
     rpipToHue(rpip, rgidata, function(bpz) { return region(cpi.cvangles, bpz);});
-    finishCanvas(rgidata, this.regions[0], cpi);
+    finishCanvas(rgidata, this.regions[0], cpi, as);
 
     var bad = biggestanglediff(cpi.cps.map(function(bpz) { return bpz.angle();}));
 

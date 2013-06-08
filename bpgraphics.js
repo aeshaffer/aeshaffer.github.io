@@ -25,7 +25,7 @@ function finishCanvas(idata0, canvas, cpi, zs) {
 	idata1.data[i] = idata0[i];
     }
     rainbowctx.putImageData(idata1, 0, 0);
-    scatter(rainbowctx, cpi.cps, "#000000", N);
+    scatter(rainbowctx, cpi.cps, "#888888", N);
     scatter(rainbowctx, zs, "#ffffff", N);
 }
 
