@@ -33,12 +33,21 @@ function resizeMe() {
 
 $(function() {
     $("#composebutton").on("click", doCompose);
-    $("#composedzs").on("change", resizeMe);
-    $("#composedzs").on("change", function() {
-	$("#permalink").attr("href", "./blaschke.html?"+$("#composedzs").val());
-    });
-    $("#innerzs").on("change", resizeMe);    
-    $("#outerzs").on("change", resizeMe);
+    $("#composedzs")
+	.on("change", resizeMe)
+	.on("change", function() {
+		$("#permalink").attr("href", "./blaschke.html?"+$(this).val());
+	    });
+    $("#innerzs")
+	.on("change", resizeMe)
+	.on("change", function() {
+		$("#innerpermalink").attr("href", "./blaschke.html?"+$(this).val());
+	    });    
+    $("#outerzs")
+	.on("change", resizeMe)
+	.on("change", function() {
+		$("#outerpermalink").attr("href", "./blaschke.html?"+$(this).val());
+	    });   
     $("#testbutton").on("click", function() {
 	$("#outerzs").val("z=-0.5,-0.5&z=0,0.75&z=0,0&z=0.5,0");
 	$("#innerzs").val("z=-0.5,-0.5&z=0,0.75&z=0,0&z=0.5,0");
