@@ -5,17 +5,19 @@ ul.criticalpoints, ul.zeroes, ul.criticalvalues, ul.criticalangles {
     padding: 0px;
 }
 
-ul.criticalvalues li {
+ul.criticalvalues li, ul.criticalpoints li, ul.zeroes li {
     width: 200px;
     float: left;
 }
 
-#clicklocation {
-    margin-left: 420px;
+div.statsblock h3 {
+    margin-top: 0px;
 }
 
-#zeroeslistdiv {
-    margin-left: 20px;
+div.statsblock {
+    display: inline-block;
+    width: 400px; /* float: left; */
+    vertical-align: top;
 }
 
 div.scatterpoint {

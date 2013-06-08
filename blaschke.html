@@ -53,6 +53,19 @@
     Auto Re-Draw:<input class="reidonrplot" value="false" type="checkbox"></input>    
     Plot Interp:<input class="plotinterp" value="false" type="checkbox"></input>
   </div>
+  <div id="clicklocation">
+    <span style="display: inline-block; width: 300px;">
+      Click Location: <span class="point" ></span>
+    </span>
+    <span style="display: inline-block; width: 300px;">
+      B(CL):  <span class="dest" ></span>
+    </span>
+  </div>
+  <div style="display: none">
+  Eval: <div class="progress"></div>
+  RB: <ul class="rainbowstatus"></ul>
+  Reg: <ul class="regionsstatus"></ul>
+  </div>
   <br/>
   <div class="zeroesholder">
     <div class="circle"></div>
@@ -60,6 +73,14 @@
     </canvas>
     <canvas class="rblines graph lines">
     </canvas>
+  </div>
+  <div class="statsblock">
+    <h3>Critical Values</h3>
+    <ul class="criticalvalues"></ul>
+  </div>
+  <div class="statsblock">
+    <h3>Critical Points</h3>
+    <ul class="criticalpoints">  </ul>
   </div>
   <div class="zeroesholder">
     <div class="circle"></div>
@@ -73,34 +94,19 @@
     <canvas class="range graph">
     </canvas>
   </div>
-  <div style="display: none">
-  Eval: <div class="progress"></div>
-  RB: <ul class="rainbowstatus"></ul>
-  Reg: <ul class="regionsstatus"></ul>
-  </div>
-  <br/>
-  <div style="display: block; float:left; width: 400px;">
-    <h3 style="margin-top: 0px">Critical Values</h3>
-    <ul class="criticalvalues"></ul>
-  </div>
-  <div id="clicklocation">
-  Click Location: <span class="point" ></span><br />
-  B(CL):  <span class="dest" ></span>
-  </div>
-  <div id="zeroeslistdiv" style="display: block; float:left; width: 200px;">
+  <div style="clear: left" class="statsblock">
     <h3>Zeroes</h3>
     <ul class="zeroes">  </ul>
   </div>
-  <div style="display: block; float:left; width: 200px;">
-    <h3>Critical Points</h3>
-    <ul class="criticalpoints">  </ul>
-  </div>
-  <div style="display: block; float:left; width: 300px;">
+  <div style="display: none; float:left; width: 200px;" class="statsblock">
     <h3>Ordered Ct. Angles</h3>
     <ul class="criticalangles"></ul>
   </div>
+  <div class="statsblock">
+    <h3>Load/Edit</h3>
+    <button type="button" class="loadbutton">Load</button>
+    <a class="permalink">Permalink</a>
+    <textarea class="zsstring" style="width: 100%" ></textarea>
+  </div>
   <br style="clear: both" />
-  <textarea class="zsstring" style="width: 50%" ></textarea>
-  <button type="button" class="loadbutton">Load</button>
-  <a class="permalink">Permalink</a>
 </html>
