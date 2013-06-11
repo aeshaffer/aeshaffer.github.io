@@ -1,0 +1,20 @@
+\documentclass[12pt]{article}
+\usepackage{amsfonts,amsmath}
+
+\begin{document}
+
+% Begin Excerpt
+This applet was written to investigate the properties of finite Blaschke products, functions $B$ defined by $$B(z) = \lambda\prod_{j = 1}^n \frac{z - a_j}{1 - \overline{a_j}z}, ~\mbox{where}~ |a_j| < 1~\mbox{and}~|\lambda| = 1.$$ This class of functions is precisely the set of functions analytic on the open unit disk $\mathbb{D}$, continuous on its closure, mapping $\mathbb{D}$ to itself and the unit circle, $\mathbb{T}$ to itself.
+% End Excerpt
+
+On the applet, the small white circles indicate the zeroes ${a_j}$ of a Blaschke product $B$, and the gray circles are the ``critical points,'' points where $B'(0) = 0$.  The applet also displays a table of coordinates for the critical points as well as a table of $B$'s critical values, points $B(z)$ such that $B'(z) = 0$.
+
+One can move the zeroes of the Blaschke product by dragging the white circles.  New zeroes can be added by double-clicking on a point on the graph and a zero can be removed by dragging it outside of the circle.  (It is assumed that $B(0) = 0$, so the zero at zero cannot be changed.)  Hovering the mouse cursor over a critical point in the table will highlight it on the graph, and doing the same to a critical value will highlight every critical point that maps to the selected critical value.  Clicking on the plot will display the coordinates of that click under ``Click Location'' as well as the value of the Blaschke product at that point.
+
+Once the zeroes have been configured, clicking the ``Plot'' button will generate a color plot of $arg(B)$ over the disk.  One can then move, add, or delete zeroes, and then click ``Plot'' again to generate a new graph.  
+
+The applet also generates a pair of plots which divide the disk into regions.  The right plot divides the disk into sectors based on the arguments of the critical values, and the left plot shows the preimages of those sectors.  Clicking in the right plot and moving the mouse will draw preimages of those points in the left plot, and the ``Clear Preimages'' button will remove these points.  Note that in this pair of plots each zero is adjacent to its own region of each color.  This shows that a Blaschke product with $n$ zeroes maps the disk to itself $n$ times, since putting all the regions together makes a complete copy of the disk.
+
+Another feature of the applet is the ability to draw connecting lines between sets of points on the boundary which $B$ identifies.  Clicking on a point $re^{i\theta}$ in the left plot will connect all points $z$ where $B(z) =e^{i\theta}$ in order of increasing argument.  Entering a value $N$ in the ``Skip Points'' box will connect every $N$th point instead.  Clicking ``Redraw Lines'' will automatically identify several points (the number of such points is controlled by the ``Auto Identify Points'' parameter.)  Finally, checking ``Auto Re-Draw'' will automatically draw lines as the zeroes of the Blaschke product are manipulated.
+
+\end{document}

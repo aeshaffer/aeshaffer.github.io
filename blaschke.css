@@ -1,3 +1,9 @@
+.zhlabel {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+}
+
 ul.criticalpoints, ul.zeroes, ul.criticalvalues, ul.criticalangles {
     list-style: none;
     margin: 0px;
@@ -38,8 +44,12 @@ div.innerzero {
 div.zero {
     background-color: white;
     border: 1px solid black;
+}
+
+.rainbowholder .zero {
     cursor: crosshair;
 }
+
 div.zerozero {
     cursor: default;
 }
@@ -52,12 +62,13 @@ div.cp {
     border: 1px solid #444444;
     background-color: #888888;
 }
-div.cp.picked {
+div.cp.picked, div.cv.picked {
     background-color: #000088;
     border: 1px solid yellow;
 }
 
 div.cv {
+    border: 1px solid #444444;
     background-color: #444444;
 }
 canvas.graph{

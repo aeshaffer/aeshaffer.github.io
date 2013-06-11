@@ -127,7 +127,8 @@ function BPWidget(obj) {
     function g(sel) {
 	return obj.find(sel);
     }
-    
+
+    this.showadvanced=g(".showadvanced");
     this.criticalpoints= g(".criticalpoints");
     this.criticalvalues= g(".criticalvalues");
     this.criticalangles= g(".criticalangles");
@@ -206,7 +207,7 @@ BPWidget.prototype.displayTables = function(zs, cpi) {
     for(var i = 0; i < cpi.cvs.length; i++) { groups[dccv(i)] = []; }
     for(var i = 0; i < cpi.cvs.length; i++) { groups[dccv(i)].push(i); }
 
-    function clearPicked() { $(".cp").removeClass("picked");}
+    function clearPicked() { $(".cp").removeClass("picked"); $(".cv").removeClass("picked"); }
 
     for(var i = 0; i < cpi.cps.length; i++) {
 	var cpli = $("<li>");
@@ -237,8 +238,9 @@ BPWidget.prototype.displayTables = function(zs, cpi) {
 	    cvli
 		.on("mouseover", function() {
 			clearPicked();
+			$(".cv"+j).addClass("picked");
 			for(var k = 0; k < group.length; k++) {
-			    $(".cp"+group[k]).addClass("picked");			 
+			    $(".cp"+group[k]).addClass("picked");
 			}
 		    })
 		.on("mouseleave", clearPicked);
@@ -319,10 +321,16 @@ BPWidget.prototype.rescatter = function() {
     var cvangles = this.cpi.cvangles;
     
     this.displayTables(this.zs, this.cpi);
-    
+
     var cw = this.rainbow.parent(".zeroesholder");
     var cwidth = this.plotDims().graphN;
 
+    var rng = this.range.parent(".zeroesholder");
+    cssscatter(rng, cwidth, cvs, "cv");
+    var rgns = this.regions.parent(".zeroesholder");
+    cssscatter(rgns, cwidth, cps, "cp");
+    cssscatter(rgns, cwidth, this.zs, "zero");
+    
     var innertest = [];
     if(this.plotinterp.is(":checked")) {
 	if(this.skippoints.val() != "") {
@@ -626,6 +634,16 @@ BPWidget.prototype.setup = function() {
     // zs = zeroonehalf;
     var that = this;
     this.resizeCanvasesRescatter();
+
+    this.showadvanced.change(function() {
+	    if($(this).is(":checked")) {
+		$(".advanced").show();
+	    } else {
+		$(".advanced").hide();
+	    }
+	});
+
+    this.showadvanced.change();
 
     this.skippoints.change(function() { that.rescatter(); });
     this.windowscale.change(function() { that.resizeCanvasesRescatter(); });
