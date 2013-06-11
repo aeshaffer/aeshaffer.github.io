@@ -1053,26 +1053,6 @@ numeric.Tunop = function Tunop(r,c,s) {
     );
 }
 
-numeric.T.prototype.angle = function() {
-    if(this.y == undefined) {
-	return numeric.atan2(0, this.x);
-    } else {
-	return numeric.atan2(this.y, this.x);
-    }
-}
-
-numeric.T.prototype.pow = function(n) {
-    if(this.x == 0 && this.y == 0) {
-	return nzero;
-    } else {
-	var retval = none;
-	for(i = 0; i < n; i++) {
-	    retval = retval.mul(this);
-	}
-	return retval;
-    }
-}
-
 numeric.T.prototype.exp = numeric.Tunop(
         'return new numeric.T(ex)',
         'return new numeric.T(mul(cos(x.y),ex),mul(sin(x.y),ex))',
