@@ -210,11 +210,13 @@ BPWidget.prototype.displayTables = function(zs, cpi) {
     function clearPicked() { $(".cp").removeClass("picked"); $(".cv").removeClass("picked"); }
 
     for(var i = 0; i < cpi.cps.length; i++) {
-	var cpli = $("<li>");
+	var cpli = $("<li class='cp'>");
+	cpli.addClass("cp"+i);
 	cpli.text(dccp(i));
 	this.criticalpoints.append(cpli);
 
-	var cvli = $("<li>");
+	var cvli = $("<li class='cv'>");
+	cvli.addClass("cv"+i);
 	var dc = dcomplex(cpi.cvs[i]);
 	cvli.text(dc);
 	this.criticalvalues.append(cvli);
@@ -233,6 +235,7 @@ BPWidget.prototype.displayTables = function(zs, cpi) {
 		.on("mouseover", function() {
 			clearPicked();
 			$(".cp"+j).addClass("picked");
+			$(".cv"+j).addClass("picked");
 		    })
 		.on("mouseleave", clearPicked);
 	    cvli
@@ -416,7 +419,7 @@ BPWidget.prototype.fastReplot = function(as, N, cpi, raythreshold) {
     var endBPGE = (new Date()).getTime();
     this.progress.append("NWRP " + N + " " + as.length + " " + (endBPGE - startBPGE));
 
-    var rgidata = new Uint8ClampedArray(4*N*N);
+    var rgidata = new Uint8Array(4*N*N);
     rpipToHue(rpip, rgidata, function(bpz) { return region(cpi.cvangles, bpz);});
     finishCanvas(rgidata, this.regions[0], cpi, as);
 
@@ -432,7 +435,7 @@ BPWidget.prototype.fastReplot = function(as, N, cpi, raythreshold) {
 	if (val > 1) { return 1; } else { return val; }
     }	
 
-    var rbidata = new Uint8ClampedArray(4*N*N);
+    var rbidata = new Uint8Array(4*N*N);
     rpipToHue(rpip, rbidata, anglehue, valfun);
     finishCanvas(rbidata, this.rainbow[0], cpi);
 

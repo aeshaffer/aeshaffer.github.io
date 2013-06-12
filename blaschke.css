@@ -62,9 +62,15 @@ div.cp {
     border: 1px solid #444444;
     background-color: #888888;
 }
+li.cp.picked, li.cv.picked {
+    background-color: grey;
+}
 div.cp.picked, div.cv.picked {
     background-color: #000088;
     border: 1px solid yellow;
+    /* Bump it up to the top so that if we have a stack of identical critical values,
+       this one shows up. */
+    z-index: 100; 
 }
 
 div.cv {

@@ -1,35 +1,36 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<link rel="stylesheet" type="text/css" href="blaschke.css"></link>
-<script type="text/javascript" src="./numeric-1.2.3.js" ></script>
-<script type="text/javascript" src="./jquery-ui-1.9.1.custom/js/jquery-1.8.2.js"></script>
-<script type="text/javascript" src="./jquery-ui-1.9.1.custom/js/jquery-ui-1.9.1.custom.js"></script>
-<script type="text/javascript" src="./polynomials.js" ></script>
-<script type="text/javascript" src="./hsvToRGB.js" ></script>
+  <link rel="stylesheet" type="text/css" href="blaschke.css" />
+  <script type="text/javascript" src="./numeric-1.2.3.js" ></script>
+  <script type="text/javascript" src="./jquery-ui-1.9.1.custom/js/jquery-1.8.2.js"></script>
+  <script type="text/javascript" src="./jquery-ui-1.9.1.custom/js/jquery-ui-1.9.1.custom.js"></script>
+  <script type="text/javascript" src="./polynomials.js" ></script>
+  <script type="text/javascript" src="./hsvToRGB.js" ></script>
+  
+  <script type="text/javascript" src="./blaschke.js" ></script>
+  <script type="text/javascript" src="./bpgraphics.js" ></script>
+  <script type="text/javascript" src="./bpui.js" ></script>
+  <script type="text/javascript" src="./interpolation2.js"></script>
+  
+  <script type="text/javascript">
+    var bpwidget;
+    $(function() {
+    bpwidget = new BPWidget($("html"));
+    bpwidget.wireup();
+    });
+  </script>
 
-<script type="text/javascript" src="./blaschke.js" ></script>
-<script type="text/javascript" src="./bpgraphics.js" ></script>
-<script type="text/javascript" src="./bpui.js" ></script>
-<script type="text/javascript" src="./interpolation2.js"></script>
-
-<script type="text/javascript">
-  var bpwidget;
-  $(function() {
-  bpwidget = new BPWidget($("html"));
-  bpwidget.wireup();
-  });
-</script>
-
+  <title>Blaschke Product Applet</title>
+  <meta charset="utf-8" />
 </head>
 <body>
   <div>
-    Show Advanced Options:<input type="checkbox" class="showadvanced" value="false"></input>
+    Show Advanced Options:<input type="checkbox" class="showadvanced" value="false" />
     <span class="advanced">
-      Rendered Size: <input class="pixels" value="400"></input>
-      Zoom Size: <input class="graphzoom" value="1"></input>
-      Window Scale: <input class="windowscale" value="1"></input> 
+      Rendered Size: <input class="pixels" value="400" />
+      Zoom Size: <input class="graphzoom" value="1" />
+      Window Scale: <input class="windowscale" value="1" />
     </span>
     <br/>
     <button type="button" class="plotbutton">Plot</button>    
@@ -42,19 +43,19 @@
       <option value="regions" selected="selected">Regions Plot</option>
       <option value="both">Both</option>
     </select>
-    <span class="advanced">B. Line Threshold: <input class="raythreshold" value="0"></input></span>
+    <span class="advanced">B. Line Threshold: <input class="raythreshold" value="0"/></span>
   </div>
   <div>
-    Skip Points: <input class="skippoints" value="1" style="width: 50px;"></input>
-    <!-- Angle: <input class="theta" value="0"></input>
+    Skip Points: <input class="skippoints" value="1" style="width: 50px;"/>
+    <!-- Angle: <input class="theta" value="0"/>
 	 <button type="button" class="timesPI">*= &pi;</button>
 	 <button type="button" class="plottheta">Plot Identified</button><br/>
 	 -->
-    Auto Identify Points: <input class="autolinespoints" value="16" style="width: 50px;"></input>
+    Auto Identify Points: <input class="autolinespoints" value="16" style="width: 50px;"/>
     <button type="button" class="clearlines">Clear Lines</button>
     <button type="button" class="autolinesgo">Redraw Lines</button>
-    Auto Re-Draw:<input class="reidonrplot" value="false" type="checkbox"></input>    
-    <span class="advanced">Plot Interp:<input class="plotinterp" value="false" type="checkbox"></input></span>
+    Auto Re-Draw:<input class="reidonrplot" value="false" type="checkbox"/>    
+    <span class="advanced">Plot Interp:<input class="plotinterp" value="false" type="checkbox"/></span>
   </div>
   <div id="clicklocation">
     <span style="display: inline-block; width: 300px;">
@@ -66,10 +67,9 @@
   </div>
   <div style="display: none">
   Eval: <div class="progress"></div>
-  RB: <ul class="rainbowstatus"></ul>
-  Reg: <ul class="regionsstatus"></ul>
+  RB: <ul class="rainbowstatus"><li></li></ul>
+  Reg: <ul class="regionsstatus"><li></li></ul>
   </div>
-  <br/>
   <div class="zeroesholder rainbowholder">
     <span class="zhlabel">arg(B)</span>
     <div class="circle"></div>
