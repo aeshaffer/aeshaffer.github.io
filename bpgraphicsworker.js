@@ -27,7 +27,7 @@ self.onmessage = function(event) {
 	var rainbowstatus = function(row) { 
 	    postMessage({rainbowrow: row, senddate: (new Date()).getTime() });
 	}
-	rpipToHue(bprpip, rainbowidata, angle);
+	rpipToHue(bprpip, rainbowidata, anglehue);
 	postMessage({rainbowidata: rainbowidata, senddate: (new Date()).getTime() });
     }
 

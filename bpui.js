@@ -561,25 +561,25 @@ BPWidget.prototype.attachcanvasclicks = function() {
 	    console.log("RangeMD: " + rangemd);
 	})
  	.on("click", function(e) {
-	    rangemd = !rangemd;
-	    console.log("RangeMD: " + rangemd);
+		rangemd = !rangemd;
+		console.log("RangeMD: " + rangemd);
 	})
 	.on("mousemove", function(e) {
-	    if(rangemd || e.which == 1) {
-		var z = zeroFromClick($(this), e);
-		var preimages = preimage(that.zs, z);
-		var v = that.showpreimages.val();
-		if(v == "both") {
-		    var pidivs = cssscatter(that.rainbow.parent(".zeroesholder"),
-					    that.plotDims().graphN, preimages, "pi", false);
+		if(rangemd /* || e.which == 1 */ ) {
+		    var z = zeroFromClick($(this), e);
+		    var preimages = preimage(that.zs, z);
+		    var v = that.showpreimages.val();
+		    if(v == "both") {
+			var pidivs = cssscatter(that.rainbow.parent(".zeroesholder"),
+						that.plotDims().graphN, preimages, "pi", false);
+		    }
+		    if(v == "regions" || v == "both") {
+			var pidivs = cssscatter(that.regions.parent(".zeroesholder"),
+						that.plotDims().graphN, preimages, "pi", false);
+		    }
+		    console.log("Scattering preimages.");
 		}
-		if(v == "regions" || v == "both") {
-		    var pidivs = cssscatter(that.regions.parent(".zeroesholder"),
-					    that.plotDims().graphN, preimages, "pi", false);
-		}
-		console.log("Scattering preimages.");
-	    }
-	});
+	    });
     this.clearpreimages.on("click", 
 			   function(e) {
 			       cssscatter(that.regions.parent(".zeroesholder"), 
