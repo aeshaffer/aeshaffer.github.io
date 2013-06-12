@@ -510,7 +510,7 @@ BPWidget.prototype.doclearlines = function () {
 function showClick(z, that) {
     var val = bpeval(that.zs, c(z.x,z.y));
     that.point.text(dcomplex(z));
-    that.dest.text(dcomplex(val) + " " + getangleindex(val.angle(), that.cpi.cvangles));
+    that.dest.text(dcomplex(val)); //  + " " + getangleindex(val.angle(), that.cpi.cvangles));
 };
 
 BPWidget.prototype.attachcanvasclicks = function() {

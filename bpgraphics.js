@@ -25,8 +25,8 @@ function finishCanvas(idata0, canvas, cpi, zs) {
 	idata1.data[i] = idata0[i];
     }
     rainbowctx.putImageData(idata1, 0, 0);
-    scatter(rainbowctx, cpi.cps, "#888888", N);
-    scatter(rainbowctx, zs, "#ffffff", N);
+    // scatter(rainbowctx, cpi.cps, "#888888", N);
+    // scatter(rainbowctx, zs, "#ffffff", N);
 }
 
 var rainbowStart;
@@ -63,7 +63,7 @@ function doRange(canvas, bpzs, cpi, N) {
     var rangeidata = getID(canvas, N);
     showRegions(rangeidata.data, bpzs.zs, bpzs.zs, cpi.cvangles);
     rangecxt.putImageData(rangeidata, 0, 0);
-    scatter(rangecxt, cpi.cvs, "#000000", N);
+    //scatter(rangecxt, cpi.cvs, "#000000", N);
 }
 
 
