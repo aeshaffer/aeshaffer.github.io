@@ -40,24 +40,40 @@ function getUniforms(t) {
 
 function c(event) {
     event.preventDefault();
-    
-    var vector = new THREE.Vector3(
-        ( event.clientX / window.innerWidth ) * 2 - 1,
-	    - ( event.clientY / window.innerHeight ) * 2 + 1,
-        0.5
-    );
-    var projector = new THREE.Projector();
-    projector.unprojectVector( vector, camera );
-    
-    var ray = new THREE.Raycaster( camera.position, 
-				   vector.sub( camera.position ).normalize() );
-    
-    var intersects = ray.intersectObjects( [squareMesh] );
-    
-    if ( intersects.length > 0 ) {
-	var pt = intersects[ 0 ].point;
+
+    var pt;
+
+    var clickX = event.clientX - $(event.target).offset().left;
+    var clickY = event.clientY - $(event.target).offset().top;
+
+    if(camera instanceof THREE.OrthographicCamera) {
+	pt = new THREE.Vector3( 
+	    clickX - $(renderer.domElement).width()/2.0,
+		-1*(clickY - $(renderer.domElement).height()/2.0),
+	    0
+	);
+    } else if(camera instanceof THREE.PerspectiveCamera) {
+	var vector = new THREE.Vector3(
+            2 * ( clickX / $(renderer.domElement).width() ) - 1,
+	    -2 * ( clickY / $(renderer.domElement).height() ) - 1,
+            0.5
+	);	
+	var projector = new THREE.Projector();
+	projector.unprojectVector( vector, camera );
+	
+	var ray = new THREE.Raycaster( camera.position, 
+				       vector.sub( camera.position ).normalize() );
+	
+	var intersects = ray.intersectObjects( [squareMesh] );
+	if ( intersects.length > 0 ) {
+	    pt = intersects[ 0 ].point;
+	}
+    }
+
+    if(pt != null) {
 	spheres.push(new THREE.Vector2(pt.x/300, pt.y/300));
-	var sphereMesh = new THREE.Mesh(new THREE.SphereGeometry(20,20,20), new THREE.MeshNormalMaterial());
+	var sphereMesh = new THREE.Mesh(new THREE.SphereGeometry(20,20,20), 
+					new THREE.MeshNormalMaterial());
 	sphereMeshes.push(sphereMesh);
         sphereMesh.position = pt;
         scene.add(sphereMesh);
@@ -68,7 +84,10 @@ var time = 0;
 
 function init() {
     
-    camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000 );
+    var width = 600;
+    camera = new THREE.OrthographicCamera( width / - 2, width / 2, 
+					   width / 2, width / - 2, 
+					   1, 1000 );
     camera.position.z = 1000;
     
     scene = new THREE.Scene();
@@ -98,9 +117,9 @@ function init() {
     //scene.add( mesh );
     
     renderer = new THREE.WebGLRenderer();
-    renderer.setSize( window.innerWidth - 20, window.innerHeight -20);
+    renderer.setSize( 600, 600);
     
-    document.body.appendChild( renderer.domElement );
+    $("#renderercontainer").append( renderer.domElement );
     $(renderer.domElement).click(c);
     
 }
