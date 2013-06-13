@@ -1,3 +1,22 @@
+var outerwidget;
+var innerwidget;
+var composewidget;
+
+function composeSetup() {
+    var html = '<div class="circle"></div>'
+	+'<canvas class="rainbow graph"></canvas>'
+	+'<canvas class="rblines graph lines"></canvas>';
+    $(".zeroesholder").append($(html));
+    
+    outerwidget = new ComposeWidget($("#outerzeroesdiv"));
+    innerwidget = new ComposeWidget($("#innerzeroesdiv"));
+    composewidget = new ComposeWidget($("#composeddiv"));
+    outerwidget.setup();
+    innerwidget.setup();
+    composewidget.setup();
+    doCompose();
+}
+
 function doCompose() {
     var zss1 = $("#outerzs").val();
     var zss2 = $("#innerzs").val();
@@ -16,13 +35,14 @@ function doCompose() {
 	td1.text(dc(o.outerzero));
 	tr.append(td1);
 	for(var j = 0; j < o.preimages.length; j++) {
-	    var pimg = o.preimages[i];
+	    var pimg = o.preimages[j];
 	    var td2 = $("<td>");
 	    td2.text(dc(pimg));
 	    tr.append(td2);
 	}
 	$("#preimages tbody").append(tr);
     }
+    composewidget.rescatter();
 }
 
 function resizeMe() {
@@ -32,6 +52,11 @@ function resizeMe() {
 }
 
 $(function() {
+    $("#plotallbutton").on("click", function() {
+	outerwidget.replotMe();
+	innerwidget.replotMe();
+	composewidget.replotMe();
+    });
     $("#composebutton").on("click", doCompose);
     $("#composedzs")
 	.on("change", resizeMe)
@@ -55,3 +80,21 @@ $(function() {
 	$("#innerzs").change();
     });    
 });
+
+var ComposeWidget = function(obj) {
+    BPWidgetSetup.call(this, obj);
+    this.plotDims = function() {
+	return {N: 400, zoom: 1, windowN: 400, graphN: 400};
+    }
+    this.resizeCanvases = function() {
+	resize(this.rainbow, this.plotDims());
+	resize(this.rblines, this.plotDims());
+    }
+    var that = this;
+    this.zsstring.change(function() {
+	that.zs = parseZsString(that.zsstring.val());
+	that.rescatter();
+    });
+}
+
+ComposeWidget.prototype = new BPWidget();

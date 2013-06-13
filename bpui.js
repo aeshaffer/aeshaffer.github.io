@@ -69,12 +69,8 @@ function zeroFromClick(canvas, e) {
     return c(x,y);
 }
 
-// N is the number of pixels in the canvas
-// wrapperN is the size of the canvas wrapper
-function resize(g, pd) {
-    var cw = $(g).parent(".zeroesholder");
-    
-    $(cw).find(".circle")
+function resizeCW(cw, pd) {
+   $(cw).find(".circle")
 	.css("width", (pd.graphN-2)+"px")
 	.css("height",(pd.graphN-2)+"px");
     
@@ -90,8 +86,16 @@ function resize(g, pd) {
 	    .removeClass("zeroesholderScroll")
 	    .addClass("zeroesholderHidden");
     }
+}
 
+// N is the number of pixels in the canvas
+// wrapperN is the size of the canvas wrapper
+function resize(g, pd) {
+    var cw = $(g).parent(".zeroesholder");
+    resizeCW(cw, pd);
+ 
     var graph = $(g)[0];
+    if(graph == undefined) { return; }
     /*
       var oldImgData = graph.toDataURL("image/png");
       var img = new Image(); img.src = oldImgData;
@@ -124,10 +128,16 @@ var rpipToBpzs = function(rpip) {
 }
 
 function BPWidget(obj) {
+    if(obj == undefined) { return; }
+    BPWidgetSetup.call(this, obj);
+}
+
+function BPWidgetSetup(obj) {
     function g(sel) {
 	return obj.find(sel);
     }
 
+    this.container= obj;
     this.showadvanced=g(".showadvanced");
     this.criticalpoints= g(".criticalpoints");
     this.criticalvalues= g(".criticalvalues");
@@ -292,12 +302,20 @@ BPWidget.prototype.updatezero = function(zdiv) {
     var nudge = getNudge($(zdiv));
     var zeroid = $(zdiv).attr("zeroid");
     var cw = $(zdiv).parent(".zeroesholder");
-    var canvas = cw.find("canvas");
-    var unit = canvas.width() /2.0;
     var p = $(zdiv).position();
-    var newpos = {
-	left: p.left - canvas.position().left + nudge,
-	top: p.top - canvas.position().top + nudge
+    var canvas = cw.find("canvas");
+    var contpos;
+    var unit;
+    if(canvas != null) {
+	unit = canvas.width() /2.0;
+	contpos = canvas.position();
+    } else {
+	unit = cw.width() / 2.0;
+	contpos = cw.position();	
+    }
+    var	newpos = {
+	left: p.left - contpos.left + nudge,
+	top: p.top - contpos.top + nudge
     };    
     var z = c(newpos.left/unit-1, -(newpos.top/unit - 1));
     if(z.abs().x <= 1) {
@@ -359,7 +377,7 @@ BPWidget.prototype.rescatter = function() {
 	.addClass("ui-draggable")
 	.addClass("ui-widget-content")
 	.draggable({
-	    containment: ".zeroesholder", scroll: false,
+	    containment: cw, scroll: false,
 	    stop: function() { that.updatezero($(this));}
 	});
     
@@ -419,9 +437,11 @@ BPWidget.prototype.fastReplot = function(as, N, cpi, raythreshold) {
     var endBPGE = (new Date()).getTime();
     this.progress.append("NWRP " + N + " " + as.length + " " + (endBPGE - startBPGE));
 
-    var rgidata = new Uint8Array(4*N*N);
-    rpipToHue(rpip, rgidata, function(bpz) { return region(cpi.cvangles, bpz);});
-    finishCanvas(rgidata, this.regions[0], cpi, as);
+    if(this.regions.length > 0) {
+	var rgidata = new Uint8Array(4*N*N);
+	rpipToHue(rpip, rgidata, function(bpz) { return region(cpi.cvangles, bpz);});
+	finishCanvas(rgidata, this.regions[0], cpi, as);
+    }
 
     var bad = biggestanglediff(cpi.cps.map(function(bpz) { return bpz.angle();}));
 
@@ -439,7 +459,9 @@ BPWidget.prototype.fastReplot = function(as, N, cpi, raythreshold) {
     rpipToHue(rpip, rbidata, anglehue, valfun);
     finishCanvas(rbidata, this.rainbow[0], cpi);
 
-    doRange(this.range[0], bpzs, cpi, this.plotDims().N);
+    if(this.range.length > 0) {
+	doRange(this.range[0], bpzs, cpi, this.plotDims().N);
+    }
 };
 
 
@@ -528,8 +550,10 @@ BPWidget.prototype.attachcanvasclicks = function() {
     };
     function joinpoints(e) {
 	var z = zeroFromClick($(this), e);
-	var t = z.angle();
-	that.drawPILines(t);
+	if(z.abs().x > .9) {
+	    var t = z.angle();
+	    that.drawPILines(t);
+	}
     }
 
     function doclearplots() {
@@ -694,8 +718,13 @@ BPWidget.prototype.setup = function() {
     });
     this.replotMe = function() {
 	that.resizeCanvasesRescatter();
-	that.fastReplot(that.zs, that.plotDims().N, that.cpi, 
-			parseFloat(that.rayThreshold.val()));
+	var th = that.rayThreshold.val();
+	if(th == undefined || th == "") {
+	    th = 0;
+	} else {
+	    th = parseFloat(that.rayThreshold.val());
+	}
+	that.fastReplot(that.zs, that.plotDims().N, that.cpi, th);
     }
     this.plotbutton.click(function() {
 	that.replotMe();

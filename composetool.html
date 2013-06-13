@@ -10,30 +10,55 @@
     <script type="text/javascript" src="./hsvToRGB.js" ></script>
     
     <script type="text/javascript" src="./blaschke.js" ></script>
+    <script type="text/javascript" src="./bpgraphics.js" ></script>
+    <script type="text/javascript" src="./bpui.js"></script>
     <script type="text/javascript" src="./composetool.js" ></script>
+    <script type="text/javascript">
+      $(composeSetup);
+    </script>
+    <style type="text/css">
+      #outerzeroesdiv, #innerzeroesdiv, #composeddiv {
+      width: 30%;
+      float: left;
+      }
+      textarea { 
+      width: 90%;
+      }
+    </style>
   </head>
   <body>
-    <h3>Outer Zeroes <a href="" id="outerpermalink">Open in Blaschke Tool</a></h3>
+    
+    <div>
+      <button type="button" id="testbutton">Load Sample Data</button>
+      <button type="button" id="composebutton">Compose</button>
+      <button type="button" id="plotallbutton">Plot All</button>
+    </div>
+        
+    <div id="outerzeroesdiv">
+      <h3>Outer Zeroes <a href="" id="outerpermalink">Open in Blaschke Tool</a></h3>
+      <div class="zeroesholder outerholder rainbowholder"></div>
+      <textarea id="outerzs" class="zsstring"></textarea><br/>
 
-    <textarea id="outerzs" style="width: 50%" ></textarea>
-    <h3>Inner Zeroes <a href="" id="innerpermalink">Open in Blaschke Tool</a></h3>
-
-    <textarea id="innerzs" style="width: 50%" ></textarea>
-    <br/>
-
-    <button type="button" id="testbutton">Load Sample Data</button>
-    <button type="button" id="composebutton">Compose</button><br/>
-
-    <h3>Composed Zeroes <a href="" id="permalink">Open in Blaschke Tool</a></h3>
-    <textarea id="composedzs" style="width: 50%" ></textarea><br />
-    <table id="preimages">
+    </div>
+    
+    <div id="innerzeroesdiv">
+      <h3>Inner Zeroes <a href="" id="innerpermalink">Open in Blaschke Tool</a></h3>
+      <div class="zeroesholder outerholder rainbowholder"></div>
+      <textarea id="innerzs" class="zsstring" ></textarea>
+    </div>
+    
+    <div id="composeddiv">
+      <h3>Composed Zeroes <a href="" id="permalink">Open in Blaschke Tool</a></h3>
+      <div class="zeroesholder composedholder"></div>
+      <textarea id="composedzs" class="zsstring"></textarea>
+    </div>
+    <table id="preimages" style="clear: both;">
       <thead>
 	<th>Outer Zero</th>
 	<th id="ipimgs">Inner Preimages</th>
       </thead>
       <tbody>
       </tbody>
-    </table>
-    
+    </table>      
   </body>
 </html>
