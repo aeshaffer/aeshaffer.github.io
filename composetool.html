@@ -18,11 +18,16 @@
     </script>
     <style type="text/css">
       #outerzeroesdiv, #innerzeroesdiv, #composeddiv {
-      width: 30%;
+      width: 300px;
+      margin: 0px 20px;
       float: left;
       }
+      #outerzeroesdiv a, #innerzeroesdiv a, #composeddiv a {
+      float: right;
+      margin-right: 10px;
+      }
       textarea { 
-      width: 90%;
+      width: 100%;
       }
     </style>
   </head>
@@ -32,25 +37,27 @@
       <button type="button" id="testbutton">Load Sample Data</button>
       <button type="button" id="composebutton">Compose</button>
       <button type="button" id="plotallbutton">Plot All</button>
-      <input type="checkbox" id="autoplot"></input>AutoPlot?
+      <input type="checkbox" id="autoplot"></input>Auto Plot
     </div>
         
     <div id="outerzeroesdiv">
-      <h3>Outer Zeroes <a href="" id="outerpermalink">Open in Blaschke Tool</a></h3>
-      <div class="zeroesholder outerholder rainbowholder"></div>
+      <h3>C <a href="" id="outerpermalink" target="_blank">Open in Applet</a></h3>
+      <div class="zeroesholder outerholder rainbowholder">
+      </div>
       <textarea id="outerzs" class="zsstring"></textarea><br/>
-
     </div>
     
     <div id="innerzeroesdiv">
-      <h3>Inner Zeroes <a href="" id="innerpermalink">Open in Blaschke Tool</a></h3>
-      <div class="zeroesholder outerholder rainbowholder"></div>
+      <h3>D <a href="" id="innerpermalink" target="_blank">Open in Applet</a></h3>
+      <div class="zeroesholder outerholder rainbowholder">
+      </div>
       <textarea id="innerzs" class="zsstring" ></textarea>
     </div>
     
     <div id="composeddiv">
-      <h3>Composed Zeroes <a href="" id="permalink">Open in Blaschke Tool</a></h3>
-      <div class="zeroesholder composedholder"></div>
+      <h3>B=C&#x25cb;D <a href="" id="permalink" target="_blank">Open in Applet</a></h3>
+      <div class="zeroesholder composedholder">
+      </div>
       <textarea id="composedzs" class="zsstring"></textarea>
     </div>
     <table id="preimages" style="clear: both;">

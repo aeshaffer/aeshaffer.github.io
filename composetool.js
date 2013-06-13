@@ -94,7 +94,7 @@ function redisplay() {
 var ComposeWidget = function(obj) {
     BPWidgetSetup.call(this, obj);
     this.plotDims = function() {
-	return {N: 100, zoom: 4, windowN: 400, graphN: 400};
+	return {N: 100, zoom: 3, windowN: 300, graphN: 300};
     }
     this.resizeCanvases = function() {
 	resize(this.rainbow, this.plotDims());
