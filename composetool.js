@@ -51,12 +51,15 @@ function resizeMe() {
     $(this).val(ns);
 }
 
+function replot() {
+    outerwidget.replotMe();
+    innerwidget.replotMe();
+    composewidget.replotMe();
+}
+
 $(function() {
-    $("#plotallbutton").on("click", function() {
-	outerwidget.replotMe();
-	innerwidget.replotMe();
-	composewidget.replotMe();
-    });
+    
+    $("#plotallbutton").on("click", replot);
     $("#composebutton").on("click", doCompose);
     $("#composedzs")
 	.on("change", resizeMe)
@@ -81,14 +84,29 @@ $(function() {
     });    
 });
 
+function redisplay() {
+    doCompose();
+    if($("#autoplot").is(":checked")) {
+	replot();
+    }
+}
+
 var ComposeWidget = function(obj) {
     BPWidgetSetup.call(this, obj);
     this.plotDims = function() {
-	return {N: 400, zoom: 1, windowN: 400, graphN: 400};
+	return {N: 100, zoom: 4, windowN: 400, graphN: 400};
     }
     this.resizeCanvases = function() {
 	resize(this.rainbow, this.plotDims());
 	resize(this.rblines, this.plotDims());
+    }
+    this.updatezero = function(zdiv) {
+	BPWidget.prototype.updatezero.call(this, zdiv);
+	redisplay();
+    }
+    this.addZero = function(z) {
+	BPWidget.prototype.addZero.call(this, z);
+	redisplay();
     }
     var that = this;
     this.zsstring.change(function() {

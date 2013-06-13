@@ -535,14 +535,18 @@ function showClick(z, that) {
     that.dest.text(dcomplex(val)); //  + " " + getangleindex(val.angle(), that.cpi.cvangles));
 };
 
+BPWidget.prototype.addZero = function(z) {
+    if(z.abs().x <=1) {
+	this.zs.push(z);
+	this.rescatter();
+    }
+}
+
 BPWidget.prototype.attachcanvasclicks = function() {
     var that = this;
     function addpoint(e) {
 	var z = zeroFromClick($(this), e);
-	if(z.abs().x <=1) {
-	    that.zs.push(z);
-	    that.rescatter();
-	}
+	that.addZero(z);
     }
     function cf(e) {
 	var z = zeroFromClick($(this), e);
