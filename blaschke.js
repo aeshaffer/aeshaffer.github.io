@@ -11,6 +11,23 @@ function bpgridevalArrayOrig(N, as, rowcallback) {
 
 var bpgridevalArray = bpgridevalArrayOrig;
 
+function bpBoundaryEval(bpe, N) {
+    var ts = numeric.linspace(-Math.PI, Math.PI, N);
+    var outthetas = new Array(N);
+    var outzs = new Array(N);
+    var z;
+    var bpz;
+    var t;
+    for(var ti = 0; ti < N; ti++) {
+	t = ts[ti];
+	z = c(numeric.cos(t), numeric.sin(t));
+	bpz = bpe(z);
+	outthetas[ti] = [t, bpz.angle()+Math.PI];
+	outzs[ti] = [t, bpz];
+    }
+    return {thetas: outthetas, zs: outzs};
+}
+
 function bpgridevalArrayInner(bpe, N, as, rowcallback) {
     // We want (-1,1) in the upper-left corner.
     var xs = numeric.linspace(-1,1,N);
