@@ -1,3 +1,11 @@
+// Add necessary HTML to setup a widget.
+function setupCanvases(sel) {
+     var html = '<div class="circle"></div>'
+	+'<canvas class="rainbow graph"></canvas>'
+	+'<canvas class="rblines graph lines"></canvas>';
+    sel.append($(html));
+}
+
 function getNudge(div) {
     var nudge = div.width()/2;
     nudge += parseFloat(div.css("border-left-width").replace("px", ""), 10);

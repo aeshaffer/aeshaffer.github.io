@@ -3,11 +3,7 @@ var innerwidget;
 var composewidget;
 
 function composeSetup() {
-    var html = '<div class="circle"></div>'
-	+'<canvas class="rainbow graph"></canvas>'
-	+'<canvas class="rblines graph lines"></canvas>';
-    $(".zeroesholder").append($(html));
-    
+    setupCanvases($(".zeroesholder"));
     outerwidget = new ComposeWidget($("#outerzeroesdiv"));
     innerwidget = new ComposeWidget($("#innerzeroesdiv"));
     composewidget = new ComposeWidget($("#composeddiv"));

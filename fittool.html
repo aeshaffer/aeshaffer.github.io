@@ -1,0 +1,59 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="blaschke.css"></link>
+    <script type="text/javascript" src="./numeric-1.2.3.js" ></script>
+    <script type="text/javascript" src="./jquery-ui-1.9.1.custom/js/jquery-1.8.2.js"></script>
+    <script type="text/javascript" src="./jquery-ui-1.9.1.custom/js/jquery-ui-1.9.1.custom.js"></script>
+    <script type="text/javascript" src="./polynomials.js" ></script>
+    <script type="text/javascript" src="./hsvToRGB.js" ></script>
+    
+    <script type="text/javascript" src="./blaschke.js" ></script>
+    <script type="text/javascript" src="./bpgraphics.js" ></script>
+    <script type="text/javascript" src="./bpui.js"></script>
+    <script type="text/javascript" src="./fittool.js" ></script>
+    <script type="text/javascript">
+      $(fitSetup);
+    </script>
+    <style type="text/css">
+      #targetdiv {
+      width: 300px;
+      margin: 0px 20px;
+      float: left;
+      }
+      #targetdiv a {
+      float: right;
+      margin-right: 10px;
+      }
+      textarea { 
+      width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    
+    <div>
+      <button type="button" id="testbutton">Load Sample Data</button>
+      <button type="button" id="composebutton">Compose</button>
+      <button type="button" id="plotallbutton">Plot All</button>
+      <input type="checkbox" id="autoplot"></input>Auto Plot
+    </div>
+        
+    <div id="targetdiv">
+      <h3>C <a href="" id="outerpermalink" target="_blank">Open in Applet</a></h3>
+      <div class="zeroesholder outerholder rainbowholder">
+      </div>
+      <textarea id="outerzs" class="zsstring"></textarea><br/>
+    </div>
+    
+    <table id="preimages" style="clear: both;">
+      <thead>
+	<th>Outer Zero</th>
+	<th id="ipimgs">Inner Preimages</th>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>      
+  </body>
+</html>
