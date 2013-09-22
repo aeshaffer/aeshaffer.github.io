@@ -22,7 +22,7 @@ function bpBoundaryEval(bpe, N) {
 	t = ts[ti];
 	z = c(numeric.cos(t), numeric.sin(t));
 	bpz = bpe(z);
-	outthetas[ti] = [t, bpz.angle()+Math.PI];
+	outthetas[ti] = [t, (bpz.angle()+2*Math.PI) % (2*Math.PI)];
 	outzs[ti] = [t, bpz];
     }
     return {thetas: outthetas, zs: outzs};
@@ -60,15 +60,6 @@ function zsString(zs) {
     return zs.map(function(z) { return "z="+z.x+","+(z.y == undefined ? 0: z.y); }).join("\n&");
 }
 
-function parseZsString(s) {
-    var zs = s.replace(/\n/g, "").replace(/z=/g, "").split("&");
-    var retval = new Array();
-    for(var i= 0; i < zs.length; i++) {
-	var parts = zs[i].split(",");
-	retval.push(c(parseFloat(parts[0]), parseFloat(parts[1])));
-    }
-    return retval;
-}
 
 // Normalize to between 0 and 2Pi.
 function normalizeangle(theta) {
@@ -123,7 +114,7 @@ function lt(a) {
     }
 }
 
-function getBPFExpr(as) {
+function getBPFExpr(as, ignorefactor) {
     var asNums = new Array();
     var asDens = new Array();
     var asVars = new Array();
@@ -142,12 +133,19 @@ function getBPFExpr(as) {
 	}
     }
     
-    var expr = asVars.join(';') + "; var l = "+toc(l)+"; var f = function(z) { return l" +  asNums.join('') + asDens.join('') + "; }; {f};"
+    var lstring;
+    if(ignorefactor) {
+	lstring = toc(none);
+    } else {
+	lstring = toc(l);
+    }
+    var expr = asVars.join(';') + "; var l = "+lstring+"; var f = function(z) { return l" +  asNums.join('') + asDens.join('') + "; }; {f};"
+    
     return expr;
 }
 
-function getBPF(as) {
-    return eval(getBPFExpr(as));
+function getBPF(as, ignorefactor) {
+    return eval(getBPFExpr(as, ignorefactor));
 }
 
 function bpeval0(as, z) {

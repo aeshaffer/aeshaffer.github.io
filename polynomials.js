@@ -51,6 +51,10 @@ function c(x,y) {
     return numeric.t(x,y);
 }
 
+function ttcp(t) {
+    return c(numeric.cos(t), numeric.sin(t));
+}
+
 function cifyrow(as) {
     return as.map(function(a) { return c(a.x, a.y);});
 }

@@ -154,10 +154,6 @@ function maxinterval(thetas) {
 	    ts : ts.map(function(t) { return t + rot; })};
 }
 
-function ttcp(t) {
-    return c(numeric.cos(t), numeric.sin(t));
-}
-
 function DtoR(z) {
     var num = z.add(ni);
     var den = ni.mul(z).add(none);

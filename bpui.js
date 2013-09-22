@@ -1,3 +1,35 @@
+// From http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values
+
+function getQSMap(s) {    
+    if (s == "") return {};
+    var a = s.split("&");
+    var b = {};
+    for (var i = 0; i < a.length; ++i)
+    {
+        var p=a[i].split('=');
+        if (p.length != 2) continue;
+	var val = decodeURIComponent(p[1].replace(/\+/g, " "));
+	if(b[p[0]] == undefined) {
+	    b[p[0]] = [val];
+	} else {
+	    b[p[0]].push(val);
+	}
+    }
+    return b;
+}
+
+function parseZsString(s, key) {
+    var k = (key == undefined ? "z" : key);
+    var zs = getQSMap(s)[k];
+    var retval = new Array();
+    if(zs == undefined) { return retval; }
+    for(var i= 0; i < zs.length; i++) {
+	var parts = zs[i].split(",");
+	retval.push(c(parseFloat(parts[0]), parseFloat(parts[1])));
+    }
+    return retval;
+}
+
 // Add necessary HTML to setup a widget.
 function setupCanvases(sel) {
      var html = '<div class="circle"></div>'
@@ -298,10 +330,14 @@ BPWidget.prototype.displayTables = function(zs, cpi) {
 	this.criticalangles.append(li);
     }   
     
+    var oldval = this.zsstring.val();
     this.zsstring.val("");
     var zscode = zsString(this.zs);
     this.zsstring.val(zscode);
     this.zsstring.attr("rows", zs.length);
+    if(oldval != this.zsstring.val()) {
+	this.zsstring.change();
+    }
     var wl = window.location.href.replace(window.location.search, "");
     this.permalink.attr("href", wl+"?"+zscode);
 };
@@ -641,10 +677,9 @@ BPWidget.prototype.attachcanvasclicks = function() {
 
 BPWidget.prototype.setup = function() {	     
 
-    if(window.location.search != "") {
-	var urlZS = window.location.search.replace(/^\?/, '');
-	this.zs = parseZsString(urlZS);
-    } else {
+    var urlZS = window.location.search.replace(/^\?/, '');
+    this.zs = parseZsString(urlZS);
+    if(this.zs.length == 0) {
 	this.zs = [
 	    c(0,0),
 	    c(.5, -.5),

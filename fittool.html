@@ -17,8 +17,8 @@
     <script type="text/javascript" src="./composetool.js"></script>
     <script type="text/javascript" src="./fittool.js" ></script>
     <script type="text/javascript">
-      $(fitSetup);
       $(composeSetup);
+      $(fitSetup);
     </script>
     <style type="text/css">
       #targetdiv, #outerzeroesdiv, #innerzeroesdiv, #composeddiv {
@@ -42,44 +42,47 @@
       <button type="button" id="composebutton">Compose</button>
       <button type="button" id="plotallbutton">Plot All</button>
       <input type="checkbox" id="autoplot"></input>Auto Plot
+      <input type="checkbox" id="correct"></input>Add Unit Factor
       <button type="button" id="plottargetboundary">Plot Boundary</button>    
-    </div>
-        
-    <div id="targetdiv">
-      <div class="zeroesholder outerholder rainbowholder">
-      </div>
-      <textarea id="targetzs" class="zsstring"></textarea><br/>
-    </div>
-    
-    <div style="width: 600px; height: 400px; float: left;">
-      <div id="targetboundaryplot" style="width: 600px; height: 80%;">      
-      </div>
-      Max Norm Diff: <span id="maxnormdiff" ></span><br/>
-      Hover Theta: <span id="hovertheta" ></span>
+      <button type="button" id="copybutton">Copy to Target</button>
     </div>
 
-    <br style="clear: both;" />
+    <div style="width: 90%; height: 400px; float: left;">
+      <div id="targetboundaryplot" style="float: left; width: 90%; height: 200px;">      
+      </div>
+      <div style="float: left; width: 900px;">
+	Max Norm Diff: <span id="maxnormdiff" ></span><br/>
+	Hover Theta: <span id="hovertheta" ></span>
+      </div>
+    </div>
+    <div style="clear: both">
+      <div id="outerzeroesdiv">
+	<div class="zeroesholder outerholder rainbowholder">
+	</div>
+	<textarea id="outerzs" class="zsstring"></textarea><br/>
+	<h3>C <a href="" id="outerpermalink" target="_blank">Open in Applet</a></h3>
+      </div>
+      
+      <div id="innerzeroesdiv">
+	<div class="zeroesholder outerholder rainbowholder">
+	</div>
+	<textarea id="innerzs" class="zsstring" ></textarea>
+	<h3>D <a href="" id="innerpermalink" target="_blank">Open in Applet</a></h3>
+      </div>      
+      <div id="composeddiv">
+	<div class="zeroesholder composedholder">
+	</div>
+	<textarea id="composedzs" class="zsstring"></textarea>
+	<h3>B=C&#x25cb;D <a href="" id="permalink" target="_blank">Open in Applet</a></h3>
+      </div>
+      <div id="targetdiv">
+	<div class="zeroesholder outerholder rainbowholder">
+	</div>
+	<textarea id="targetzs" class="zsstring"></textarea><br/>
+	<h3>Target</h3>
+      </div>    
+    </div>
 
-    <div id="outerzeroesdiv">
-      <h3>C <a href="" id="outerpermalink" target="_blank">Open in Applet</a></h3>
-      <div class="zeroesholder outerholder rainbowholder">
-      </div>
-      <textarea id="outerzs" class="zsstring"></textarea><br/>
-    </div>
-    
-    <div id="innerzeroesdiv">
-      <h3>D <a href="" id="innerpermalink" target="_blank">Open in Applet</a></h3>
-      <div class="zeroesholder outerholder rainbowholder">
-      </div>
-      <textarea id="innerzs" class="zsstring" ></textarea>
-    </div>
-    
-    <div id="composeddiv">
-      <h3>B=C&#x25cb;D <a href="" id="permalink" target="_blank">Open in Applet</a></h3>
-      <div class="zeroesholder composedholder">
-      </div>
-      <textarea id="composedzs" class="zsstring"></textarea>
-    </div>
 
     <table id="preimages" style="clear: both;">
       <thead>

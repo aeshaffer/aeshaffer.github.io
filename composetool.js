@@ -3,7 +3,9 @@ var innerwidget;
 var composewidget;
 
 function composeSetup() {
-    setupCanvases($(".zeroesholder"));
+    setupCanvases($("#outerzeroesdiv .zeroesholder"));
+    setupCanvases($("#innerzeroesdiv .zeroesholder"));
+    setupCanvases($("#composeddiv .zeroesholder"));
     outerwidget = new ComposeWidget($("#outerzeroesdiv"));
     innerwidget = new ComposeWidget($("#innerzeroesdiv"));
     composewidget = new ComposeWidget($("#composeddiv"));
