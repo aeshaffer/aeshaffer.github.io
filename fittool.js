@@ -103,8 +103,8 @@ var guessBPF;
 
 function replotBoundaries() {
     var N = 1024;
-    targetBPF = getBPF(targetwidget.zs, $("#correct").is(":checked"));
-    guessBPF = getBPF(composewidget.zs, $("#correct").is(":checked"));
+    targetBPF = getBPF(targetwidget.zs, $("#ignoreUF").is(":checked"));
+    guessBPF = getBPF(composewidget.zs, $("#ignoreUF").is(":checked"));
     targetdata = bpBoundaryEval(targetBPF, N);
     guessdata = bpBoundaryEval(guessBPF, N);
 
