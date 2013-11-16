@@ -391,7 +391,12 @@ BPWidget.prototype.rescatter = function() {
     var cwidth = this.plotDims().graphN;
 
     var rng = this.range.parent(".zeroesholder");
+    rng.find(".preimagepanel").remove();
     cssscatter(rng, cwidth, cvs, "cv");
+    var preimagepanel = $("<div class='preimagepanel' style='position: absolute; top: 0; left: 0;' />").css('width', cwidth).css('height', cwidth);
+    rng.append(preimagepanel);
+    this.attachrangeMD(preimagepanel);
+    
     var rgns = this.regions.parent(".zeroesholder");
     cssscatter(rgns, cwidth, cps, "cp");
     cssscatter(rgns, cwidth, this.zs, "zero");
@@ -586,6 +591,40 @@ BPWidget.prototype.addZero = function(z) {
     }
 }
 
+BPWidget.prototype.attachrangeMD = function (preimagepanel) {
+    var rangemd = false;
+    var that = this;
+    preimagepanel
+	.on("mouseleave", function(e) {
+	    rangemd = false;
+	    console.log("RangeMD: " + rangemd);
+	})
+ 	.on("click", function(e) {
+	    rangemd = !rangemd;
+	    console.log("RangeMD: " + rangemd);
+	})
+	.on("mousemove", function(e) {
+	    if(rangemd /* || e.which == 1 */ ) {
+		var z = zeroFromClick($(this), e);
+		var preimages = preimage(that.zs, z);
+		var v = that.showpreimages.val();
+		if(v == "both") {
+		    var pidivs = cssscatter(that.rainbow.parent(".zeroesholder"),
+					    that.plotDims().graphN, preimages, "pi", false);
+		}
+		if(v == "regions" || v == "both") {
+		    var pidivs = cssscatter(that.regions.parent(".zeroesholder"),
+					    that.plotDims().graphN, preimages, "pi", false);
+		}
+		console.log("Scattering preimages.");
+	    }
+	});
+/*
+  preimagepanel.css("background-color", "grey")
+  .css('opacity', '0.1');
+*/
+}
+
 BPWidget.prototype.attachcanvasclicks = function() {
     var that = this;
     function addpoint(e) {
@@ -626,32 +665,7 @@ BPWidget.prototype.attachcanvasclicks = function() {
     this.clearlines.on("click", function() {that.doclearlines();});
     // $("#regions").on("click", cf);
    
-    var rangemd = false;
-    this.range
-	.on("mouseleave", function(e) {
-	    rangemd = false;
-	    console.log("RangeMD: " + rangemd);
-	})
- 	.on("click", function(e) {
-		rangemd = !rangemd;
-		console.log("RangeMD: " + rangemd);
-	})
-	.on("mousemove", function(e) {
-		if(rangemd /* || e.which == 1 */ ) {
-		    var z = zeroFromClick($(this), e);
-		    var preimages = preimage(that.zs, z);
-		    var v = that.showpreimages.val();
-		    if(v == "both") {
-			var pidivs = cssscatter(that.rainbow.parent(".zeroesholder"),
-						that.plotDims().graphN, preimages, "pi", false);
-		    }
-		    if(v == "regions" || v == "both") {
-			var pidivs = cssscatter(that.regions.parent(".zeroesholder"),
-						that.plotDims().graphN, preimages, "pi", false);
-		    }
-		    console.log("Scattering preimages.");
-		}
-	    });
+    
     this.clearpreimages.on("click", 
 			   function(e) {
 			       cssscatter(that.regions.parent(".zeroesholder"), 
