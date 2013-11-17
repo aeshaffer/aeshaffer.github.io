@@ -56,6 +56,11 @@ function replot() {
     outerwidget.replotMe();
     innerwidget.replotMe();
     composewidget.replotMe();
+    var innerdata = innerwidget.regions[0].getContext('2d').getImageData(0,0,300,300);
+    var image = composewidget.regions[0].getContext('2d').getImageData(0,0,300,300);
+
+    $("#overlay")[0].getContext('2d').putImageData(image, 0, 0);
+    $("#inneroverlay")[0].getContext('2d').putImageData(innerdata, 0, 0);
 }
 
 $(function() {
@@ -98,8 +103,12 @@ var ComposeWidget = function(obj) {
     this.rainbow[0].height = 300;
     this.regions[0].width = 300;
     this.regions[0].height = 300;
+    $("#overlay")[0].width = 150;
+    $("#overlay")[0].height = 150;
+    $("#inneroverlay")[0].width = 150;
+    $("#inneroverlay")[0].height = 150;
     this.plotDims = function() {
-	return {N: 300, zoom: 1, windowN: 300, graphN: 300};
+	return {N: 150, zoom: 1, windowN: 300, graphN: 300};
     }
     this.resizeCanvases = function() {
 	resize(this.rainbow, this.plotDims());
