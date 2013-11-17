@@ -30,6 +30,13 @@ function parseZsString(s, key) {
     return retval;
 }
 
+function setupRegions(sel) {
+     var html = '<div class="circle"></div>'
+	+'<canvas class="regions graph"></canvas>'
+	+'<canvas class="rblines graph lines"></canvas>';
+    sel.append($(html));
+}
+
 // Add necessary HTML to setup a widget.
 function setupCanvases(sel) {
      var html = '<div class="circle"></div>'
@@ -486,7 +493,7 @@ BPWidget.prototype.fastReplot = function(as, N, cpi, raythreshold) {
     var endBPGE = (new Date()).getTime();
     this.progress.append("NWRP " + N + " " + as.length + " " + (endBPGE - startBPGE));
 
-    if(this.regions.length > 0) {
+    if(this.regions.length > 0 && $(this.regions[0]).is(":visible")) {
 	var rgidata = new Uint8Array(4*N*N);
 	rpipToHue(rpip, rgidata, function(bpz) { return region(cpi.cvangles, bpz);});
 	finishCanvas(rgidata, this.regions[0], cpi, as);
@@ -616,6 +623,8 @@ BPWidget.prototype.attachrangeMD = function (preimagepanel) {
 		    var pidivs = cssscatter(that.regions.parent(".zeroesholder"),
 					    that.plotDims().graphN, preimages, "pi", false);
 		}
+		var idivs = cssscatter(that.range.siblings("#rangepath"),
+				       that.plotDims().graphN, [z], "path", false);
 		console.log("Scattering preimages.");
 	    }
 	});
@@ -674,6 +683,9 @@ BPWidget.prototype.attachcanvasclicks = function() {
 			       cssscatter(that.rainbow.parent(".zeroesholder"), 
 					  that.plotDims().graphN,
 					  [], "pi", true);
+			       cssscatter(that.range.siblings("#rangepath"),
+					  that.plotDims().graphN,
+					  [], "path", true);
 			   }
 			  );
     this.showpreimages.on("change", function(e) {

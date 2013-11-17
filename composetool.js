@@ -3,9 +3,12 @@ var innerwidget;
 var composewidget;
 
 function composeSetup() {
-    setupCanvases($("#outerzeroesdiv .zeroesholder"));
-    setupCanvases($("#innerzeroesdiv .zeroesholder"));
-    setupCanvases($("#composeddiv .zeroesholder"));
+    setupCanvases($("#outerzeroesdiv .rainbowholder"));
+    setupCanvases($("#innerzeroesdiv .rainbowholder"));
+    setupCanvases($("#composeddiv    .rainbowholder"));    
+    setupRegions($("#outerzeroesdiv .regionsholder"));
+    setupRegions($("#innerzeroesdiv .regionsholder"));
+    setupRegions($("#composeddiv    .regionsholder"));    
     outerwidget = new ComposeWidget($("#outerzeroesdiv"));
     innerwidget = new ComposeWidget($("#innerzeroesdiv"));
     composewidget = new ComposeWidget($("#composeddiv"));
@@ -91,12 +94,17 @@ function redisplay() {
 
 var ComposeWidget = function(obj) {
     BPWidgetSetup.call(this, obj);
+    this.rainbow[0].width = 300;
+    this.rainbow[0].height = 300;
+    this.regions[0].width = 300;
+    this.regions[0].height = 300;
     this.plotDims = function() {
-	return {N: 100, zoom: 3, windowN: 300, graphN: 300};
+	return {N: 300, zoom: 1, windowN: 300, graphN: 300};
     }
     this.resizeCanvases = function() {
 	resize(this.rainbow, this.plotDims());
 	resize(this.rblines, this.plotDims());
+	resize(this.regions, this.plotDims());	
     }
     this.updatezero = function(zdiv) {
 	BPWidget.prototype.updatezero.call(this, zdiv);
