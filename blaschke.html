@@ -37,7 +37,6 @@
     <button type="button" class="workergo advanced">Fast Plot</button>
     <button type="button" class="clearplots">Clear Plots</button>
     &nbsp;
-    <button type="button" class="clearpreimages">Clear Preimages</button>
     <select class="showpreimages advanced">
       <option value="none">Hide Range</option>
       <option value="regions" selected="selected">Regions Plot</option>
@@ -95,6 +94,7 @@
     </canvas>
   </div>
   <div class="zeroesholder" id="rangewrapper">
+    <button type="button" class="clearpreimages" style="position: absolute; right: 0px; top: 0px;z-index: 4;">Clear PIs</button>
     <span class="zhlabel">Region Images</span>
     <div class="circle"></div>
     <canvas class="range graph">
