@@ -398,11 +398,17 @@ BPWidget.prototype.rescatter = function() {
     var cwidth = this.plotDims().graphN;
 
     var rng = this.range.parent(".zeroesholder");
-    rng.find(".preimagepanel").remove();
-    cssscatter(rng, cwidth, cvs, "cv");
-    var preimagepanel = $("<div class='preimagepanel' style='position: absolute; top: 0; left: 0;' />").css('width', cwidth).css('height', cwidth);
-    rng.append(preimagepanel);
-    this.attachrangeMD(preimagepanel);
+    var cvs2 = mapCVs(this.cpi);
+    cssscatter(rng, cwidth, cvs2, "cv");
+
+    // Put the panel after all the plotted points
+    // so it gets our click events.
+    var preimages = rng.find(".preimagepanel");
+    preimages.css('width', cwidth).css('height', cwidth);
+    preimages.remove();
+    rng.append(preimages);
+
+    this.attachrangeMD(preimages);
     
     var rgns = this.regions.parent(".zeroesholder");
     cssscatter(rgns, cwidth, cps, "cp");
@@ -604,6 +610,47 @@ BPWidget.prototype.addZero = function(z) {
     }
 }
 
+function linterp(xmin, xmax, ymin, ymax) {
+    return function(x) { return ymin + (ymax-ymin)*(x-xmin)/(xmax-xmin); };
+}
+
+function zinterp(xmin, xmax, ymin, ymax) {
+    var li = linterp(xmin, xmax, ymin, ymax);
+    return function(z) {
+	var unitvec = z.div(z.abs());
+	var znorm = z.abs().x; 
+	return unitvec.mul(li(znorm));
+    }
+}
+
+// Zoom in on the critical values.
+function mapCVs(cpi) {
+    var cvs = cpi.cvs;
+    var cvnorms = $.map(cvs, function(e,i) { return e.abs().x; });
+    var maxcvabs = Math.max.apply(null, cvnorms);
+    var mincvabs = Math.min.apply(null, cvnorms);
+    var f = zinterp(mincvabs, maxcvabs, .25, .75);
+    return $.map(cvs, 
+		 function(z,i) { 
+		     return f(z);
+		 });
+}
+
+function mapZinCVs(z, cpi) {
+    var cvs = cpi.cvs;
+    var cvnorms = $.map(cvs, function(e,i) { return e.abs().x; });
+    var maxcvabs = Math.max.apply(null, cvnorms);
+    var mincvabs = Math.min.apply(null, cvnorms);
+    var znorm = z.abs().x;
+    if(znorm > .75) {
+	return (zinterp(.75, 1, maxcvabs, 1))(z);
+    } else if(znorm < .25) {
+	return (zinterp(0, .25, 0, mincvabs))(z);
+    } else {
+	return (zinterp(.25, .75, mincvabs, maxcvabs))(z);
+    }
+}
+
 BPWidget.prototype.attachrangeMD = function (preimagepanel) {
     var rangemd = false;
     var that = this;
@@ -618,7 +665,8 @@ BPWidget.prototype.attachrangeMD = function (preimagepanel) {
 	})
 	.on("mousemove", function(e) {
 	    if(rangemd /* || e.which == 1 */ ) {
-		var z = zeroFromClick($(this), e);
+		var z0 = zeroFromClick($(this), e);
+		var z = mapZinCVs(z0, that.cpi);
 		var preimages = preimage(that.zs, z);
 		var v = that.showpreimages.val();
 		if(v == "both") {
@@ -629,8 +677,8 @@ BPWidget.prototype.attachrangeMD = function (preimagepanel) {
 		    var pidivs = cssscatter(that.regions.parent(".zeroesholder"),
 					    that.plotDims().graphN, preimages, "pi", false);
 		}
-		var idivs = cssscatter(that.range.siblings("#rangepath"),
-				       that.plotDims().graphN, [z], "path", false);
+		var idivs = cssscatter(that.range.siblings(".rangepath"),
+				       that.plotDims().graphN, [z0], "path", false);
 		console.log("Scattering preimages.");
 	    }
 	});
@@ -689,7 +737,7 @@ BPWidget.prototype.attachcanvasclicks = function() {
 			       cssscatter(that.rainbow.parent(".zeroesholder"), 
 					  that.plotDims().graphN,
 					  [], "pi", true);
-			       cssscatter(that.range.siblings("#rangepath"),
+			       cssscatter(that.range.siblings(".rangepath"),
 					  that.plotDims().graphN,
 					  [], "path", true);
 			   }
