@@ -382,9 +382,9 @@ BPWidget.prototype.rescatter = function() {
     
     if(this.reidonrplot.is(":checked")) {
 	this.autojoinpoints();
-	this.rainbow[0].getContext("2d").clear();
-	this.regions[0].getContext("2d").clear();
-	this.range[0].getContext("2d").clear();
+	clearCanvas(this.rainbow);
+	clearCanvas(this.regions);
+	clearCanvas(this.range);
     }
 
     this.cpi = cpinfo(this.zs);
@@ -580,9 +580,15 @@ BPWidget.prototype.autojoinpoints = function() {
     }
 };
 
+function clearCanvas(selector) {
+    if(selector != null) {
+	selector.each(function(i,e) {e.getContext("2d").clear()});
+    }
+}
+
 BPWidget.prototype.doclearlines = function () {
-    this.rglines[0].getContext("2d").clear();
-    this.rblines[0].getContext("2d").clear();
+    clearCanvas(this.rglines);
+    clearCanvas(this.rblines);
 };
 
 function showClick(z, that) {
@@ -654,7 +660,7 @@ BPWidget.prototype.attachcanvasclicks = function() {
 
     function doclearplots() {
 	that.resizeCanvasesRescatter();
-	$(".graph").each(function(i) {$(this)[0].getContext("2d").clear();});
+	clearCanvas($(".graph"));
     }
 
     this.rblines.on("dblclick", addpoint);

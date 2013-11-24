@@ -99,14 +99,13 @@ function redisplay() {
 
 var ComposeWidget = function(obj) {
     BPWidgetSetup.call(this, obj);
-    this.rainbow[0].width = 300;
-    this.rainbow[0].height = 300;
-    this.regions[0].width = 300;
-    this.regions[0].height = 300;
-    $("#overlay")[0].width = 150;
-    $("#overlay")[0].height = 150;
-    $("#inneroverlay")[0].width = 150;
-    $("#inneroverlay")[0].height = 150;
+    var setdims = function(i,e) { e.width = 300; e.height=300;};
+    this.rainbow.each(setdims);
+    this.regions.each(setdims);
+    this.regions.each(setdims);
+    this.rblines.each(setdims);
+    $("#overlay").each(setdims);
+    $("#inneroverlay").each(setdims);
     this.plotDims = function() {
 	return {N: 150, zoom: 1, windowN: 300, graphN: 300};
     }
