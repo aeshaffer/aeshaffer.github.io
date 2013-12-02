@@ -225,10 +225,12 @@ function bpden(as) {
     return den;
 }
 
+// Gets the numerator of B'.
 function getBPprime(as) {
     var num = bpnum(as);
     var nump = dcoeffs(num);
-    var den = bpden(as);
+    var nonzeroas = as.filter(function(z) { return z.abs().x > .0001; });
+    var den = bpden(nonzeroas);
     var denp = dcoeffs(den);
     return polysub(polymult(nump, den), polymult(denp, num));
 }
