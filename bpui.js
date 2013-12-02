@@ -509,6 +509,7 @@ BPWidget.prototype.fastReplot = function(as, N, cpi, raythreshold) {
 
     var valfun = function(bpz) {
 	if(th == 0) { return 1; }
+	if(isNaN(bad.midpt)) { return 1; }
 	if(isNaN(bpz.x) || isNaN(bpz.y)) { return 1; }
 	var th = raythreshold;
 	var ad = anglediff(bad.midpt - bpz.angle());
