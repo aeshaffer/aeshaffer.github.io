@@ -71,7 +71,8 @@ function getTangentSegments(zs, ajpct) {
 		{/* x1: x1, x2: x2, y1: y1, y2: y2, */
 		 inter: inter, 
 		    dc: pdc(x1.z) + "->" + pdc(x2.z) + "\tx\t " 
-			+ pdc(y1.z) + "->" + pdc(y2.z) + "\tat\t " + dc(inter)};
+			+ pdc(y1.z) + "->" + pdc(y2.z) + "\tat\t " + dc(inter) 
+			+ " " + inter.angle()};
 	    console.log(intersections[j][i].dc);
 	}	
 	prevpis = pis;

@@ -593,17 +593,89 @@ BPWidget.prototype.autojoinpoints = function() {
     }
 
     var ctx = setupCTX(this.rblines[0], this.plotDims().windowN);
-
+    ctx.beginPath();
     var intersections = getTangentSegments(this.zs, ajpct);
     var deg = this.zs.length;
+    var ints = [];
     for(var i = 0; i < deg; i++) {
 	for(var j = 0; j < ajpct; j++) {
-	var intersection = intersections[i][j];
-	ctx.beginPath();
-	ctx.arc(intersection.inter.x, intersection.inter.y, .01, 0, 2.0*Math.PI);
-	ctx.stroke();
-	}	
+	    ints.push(intersections[i][j].inter);
+	}
     }
+
+    var avg = nzero;
+    for(var i = 0; i < ints.length; i++) {
+	avg = avg.add(ints[i]);
+    }
+    avg = avg.div(ints.length);
+    ints = ints.map(function(z) { return z.sub(avg); });
+    ints = ints.sort(function(a,b) { return b.angle() - a.angle(); });
+    ints = ints.map(function(z) { return z.add(avg); });
+    
+/*
+    ctx.lineWidth = 8.0/400;
+    ctx.strokeStyle="#f00";
+    ctx.moveTo(ints[0].x, ints[0].y);
+    for(var i = 0; i < ints.length; i++) {
+	ctx.lineTo(ints[i].x, ints[i].y);
+    }
+    ctx.closePath();
+    ctx.stroke();
+*/
+
+    var maxDist = 0;
+    var maxI = -1;
+    var maxJ = -1;
+    for(var i = 0; i < ints.length; i++) {
+	for(var j = i+1; j < ints.length; j++) {
+	    var dist0 = ints[i].sub(ints[j]).abs().x;
+	    if(dist0 > maxDist) {
+		maxI = i;
+		maxJ = j;
+		maxDist = dist0;
+	    }
+	}
+    }
+
+    var cent = ints[maxI].add(ints[maxJ]).div(2);
+
+    var n = ints[maxI].sub(ints[maxJ]);
+    n = n.div(n.abs().x).mul(c(0,1));
+
+    var dists = ints.map(function(p) { 
+	var amp = cent.sub(p);
+	var rhs = n.mul(amp.x * n.x + amp.y * n.y);
+	return amp.sub(rhs).abs().x;
+    });
+
+    var minI = -1;
+    var minDist = 2;
+
+    for(var i = 0; i < ints.length; i++) {
+	if(dists[i] < minDist) {
+	    minDist = dists[i];
+	    minI = i;
+	}
+    }
+    
+    var mla = ints[minI].sub(cent).abs().x;
+
+    ctx.beginPath();
+    ctx.moveTo(cent.add(n.mul(mla)).x, 
+	       cent.add(n.mul(mla)).y);
+    ctx.lineTo(cent.sub(n.mul(mla)).x,
+	       cent.sub(n.mul(mla)).y);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(cent.x, cent.y, .01, 0, 2.0*Math.PI);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(ints[maxI].x, ints[maxI].y);
+    ctx.lineTo(ints[maxJ].x, ints[maxJ].y);
+    ctx.stroke();
+
     ctx.restore();    					   
 };
 
