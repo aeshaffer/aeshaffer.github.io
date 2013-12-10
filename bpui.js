@@ -594,6 +594,7 @@ BPWidget.prototype.autojoinpoints = function() {
 
     var ctx = setupCTX(this.rblines[0], this.plotDims().windowN);
     ctx.beginPath();
+    ctx.strokeStyle = "#f00";
     var intersections = getTangentSegments(this.zs, ajpct);
     var deg = this.zs.length;
     var ints = [];
@@ -612,7 +613,7 @@ BPWidget.prototype.autojoinpoints = function() {
     ints = ints.sort(function(a,b) { return b.angle() - a.angle(); });
     ints = ints.map(function(z) { return z.add(avg); });
     
-/*
+
     ctx.lineWidth = 8.0/400;
     ctx.strokeStyle="#f00";
     ctx.moveTo(ints[0].x, ints[0].y);
@@ -621,7 +622,6 @@ BPWidget.prototype.autojoinpoints = function() {
     }
     ctx.closePath();
     ctx.stroke();
-*/
 
     var maxDist = 0;
     var maxI = -1;
