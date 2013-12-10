@@ -541,7 +541,8 @@ BPWidget.prototype.drawPILines = function(t) {
     }
 
     var z2 = c(numeric.cos(t), numeric.sin(t));
-    var bz2 = bpeval0(this.zs, z2);
+    // var bz2 = bpeval0(this.zs, z2);
+    var bz2 = z2;
     var preimages = preimage(this.zs, bz2);
     var piangles = preimages.map(function(cv) { return cv.angle();})
     piangles = piangles.sort(function(a,b){return a-b});
@@ -550,15 +551,20 @@ BPWidget.prototype.drawPILines = function(t) {
     //drawPILinesInner(rglines, piangles, skip);
 };
 
-BPWidget.prototype.drawPILinesInner = function(lines, piangles, skip){
-
+function setupCTX(lines, N) {
     var ctx = lines.getContext("2d");
-    var N = this.plotDims().windowN;
     var Nover2 = N/2;
     ctx.save();
     ctx.translate(Nover2,Nover2);
     ctx.scale(Nover2, -Nover2);
     ctx.lineWidth = 1.00001/Nover2;
+    return ctx;
+}
+
+BPWidget.prototype.drawPILinesInner = function(lines, piangles, skip){
+
+    var N = this.plotDims().windowN;
+    var ctx = setupCTX(lines, N);
 
     for(var j = 0; j < skip; j++) {
 	var i = j;
@@ -582,9 +588,23 @@ BPWidget.prototype.autojoinpoints = function() {
     var ajpct = parseInt(this.autolinespoints.val(), 10);
     var adelta = Math.PI*2.0/ajpct;
     for(var i = 0; i < ajpct; i++) {
-	console.log("Joining points that map to"+i*adelta);
+	console.log("Joining points that map to "+i*adelta);
 	this.drawPILines(i*adelta);
     }
+
+    var ctx = setupCTX(this.rblines[0], this.plotDims().windowN);
+
+    var intersections = getTangentSegments(this.zs, ajpct);
+    var deg = this.zs.length;
+    for(var i = 0; i < deg; i++) {
+	for(var j = 0; j < ajpct; j++) {
+	var intersection = intersections[i][j];
+	ctx.beginPath();
+	ctx.arc(intersection.inter.x, intersection.inter.y, .01, 0, 2.0*Math.PI);
+	ctx.stroke();
+	}	
+    }
+    ctx.restore();    					   
 };
 
 function clearCanvas(selector) {
