@@ -583,45 +583,29 @@ BPWidget.prototype.drawPILinesInner = function(lines, piangles, skip){
     ctx.restore();
 };
 
-BPWidget.prototype.autojoinpoints = function() {	
-    this.doclearlines();
-    var ajpct = parseInt(this.autolinespoints.val(), 10);
-    var adelta = Math.PI*2.0/ajpct;
-    for(var i = 0; i < ajpct; i++) {
-	console.log("Joining points that map to "+i*adelta);
-	this.drawPILines(i*adelta);
-    }
-
-    var ctx = setupCTX(this.rblines[0], this.plotDims().windowN);
-    ctx.beginPath();
-    ctx.strokeStyle = "#f00";
-    var intersections = getTangentSegments(this.zs, ajpct);
-    var deg = this.zs.length;
+function getSortedByCenter(intersections) {
     var ints = [];
-    for(var i = 0; i < deg; i++) {
-	for(var j = 0; j < ajpct; j++) {
+    for(var i = 0; i < intersections.length; i++) {
+	for(var j = 0; j < intersections[i].length; j++) {
 	    ints.push(intersections[i][j].inter);
 	}
     }
-
+    
+    // Find the center of mass
     var avg = nzero;
     for(var i = 0; i < ints.length; i++) {
 	avg = avg.add(ints[i]);
     }
     avg = avg.div(ints.length);
+    // Sort them by angle around this center.
     ints = ints.map(function(z) { return z.sub(avg); });
     ints = ints.sort(function(a,b) { return b.angle() - a.angle(); });
     ints = ints.map(function(z) { return z.add(avg); });
     
+    return ints;
+}
 
-    ctx.lineWidth = 8.0/400;
-    ctx.strokeStyle="#f00";
-    ctx.moveTo(ints[0].x, ints[0].y);
-    for(var i = 0; i < ints.length; i++) {
-	ctx.lineTo(ints[i].x, ints[i].y);
-    }
-    ctx.closePath();
-    ctx.stroke();
+function maxDistPair(ints) {
 
     var maxDist = 0;
     var maxI = -1;
@@ -636,45 +620,138 @@ BPWidget.prototype.autojoinpoints = function() {
 	    }
 	}
     }
+    return {p0 : ints[maxI], p1: ints[maxJ]};
+}
 
-    var cent = ints[maxI].add(ints[maxJ]).div(2);
+// Scrap code to find points which are closest to the 
+// minor axis.
+    // function getNormalDist(p) { 
+    // 	var amp = cent.sub(p);
+    // 	var rhs = n.mul(amp.x * n.x + amp.y * n.y);
+    // 	return amp.sub(rhs).abs().x;
+    // }
 
-    var n = ints[maxI].sub(ints[maxJ]);
-    n = n.div(n.abs().x).mul(c(0,1));
+    // var closesttoma = ints.sort(function(a,b) { return getNormalDist(b) - getNormalDist(a); });
 
-    var dists = ints.map(function(p) { 
-	var amp = cent.sub(p);
-	var rhs = n.mul(amp.x * n.x + amp.y * n.y);
-	return amp.sub(rhs).abs().x;
-    });
+    //for(var i = 0; i < closesttoma.length; i++) {
+    // 	if(dists[i] < minDist) {
+    // 	    minDist = dists[i];
+    // 	    minI = i;
+    // 	}
+    // }
+    
+function closestToPoint(ints, cent) {
+    // Find the point that's closest to the center of the major axis.
+    var closesttocent = ints.slice();
+    closesttocent.sort(function(a,b) { return a.sub(cent).abs().x - b.sub(cent).abs().x; })
+    return closesttocent[0];
+}
 
-    var minI = -1;
-    var minDist = 2;
-
-    for(var i = 0; i < ints.length; i++) {
-	if(dists[i] < minDist) {
-	    minDist = dists[i];
-	    minI = i;
+function drawEllipse(ctx, cent, majorAxisVector, minorAxisVector, strokeStyle, odd) {
+    if(odd == undefined) { odd = 0; }
+    ctx.beginPath();
+    ctx.strokeStyle = strokeStyle;
+    ctx.moveTo(cent.add(minorAxisVector).x, cent.add(minorAxisVector).y);
+    for(var t0 = 0; t0 <= 128; t0 ++) {
+	var t = Math.PI*2.0/128*t0;
+	var v1 = majorAxisVector.mul(Math.sin(t));
+	var v2 = minorAxisVector.mul(Math.cos(t));
+	var pt = cent
+	    .add(v1)
+	    .add(v2);
+	pt = fixy(pt);
+	if(t0 % 2 == odd) {
+	    ctx.moveTo(pt.x, pt.y);
+	} else {
+	    ctx.lineTo(pt.x, pt.y);
 	}
     }
+    ctx.closePath();
+    ctx.stroke();
+}
+
+BPWidget.prototype.autojoinpoints = function() {	
+    this.doclearlines();
+    var ajpct = parseInt(this.autolinespoints.val(), 10);
+    var adelta = Math.PI*2.0/ajpct;
+    for(var i = 0; i < ajpct; i++) {
+	// console.log("Joining points that map to "+i*adelta);
+	this.drawPILines(i*adelta);
+    }
+
+    // Get tangent segments.
+    var intersections = getTangentSegments(this.zs, ajpct);
+    var ints = getSortedByCenter(intersections);    
+    var ctx = setupCTX(this.rblines[0], this.plotDims().windowN);
     
-    var mla = ints[minI].sub(cent).abs().x;
-
+    // Draw lines connecting the intersections
+    // Not quite correct, since we want the curve to be tangent to the segments,
+    // but I think for a large enough sampling it comes close enough.
     ctx.beginPath();
-    ctx.moveTo(cent.add(n.mul(mla)).x, 
-	       cent.add(n.mul(mla)).y);
-    ctx.lineTo(cent.sub(n.mul(mla)).x,
-	       cent.sub(n.mul(mla)).y);
+    ctx.strokeStyle = "#f00";
+    ctx.lineWidth = 4.0/this.plotDims().graphN;
+    ctx.moveTo(ints[0].x, ints[0].y);
+    for(var i = 0; i < ints.length; i++) {
+	ctx.lineTo(ints[i].x, ints[i].y);
+    }
+    ctx.closePath();
     ctx.stroke();
 
-    ctx.beginPath();
-    ctx.arc(cent.x, cent.y, .01, 0, 2.0*Math.PI);
-    ctx.stroke();
+    var mdp = maxDistPair(ints);
+    var maj0 = mdp.p0;
+    var maj1 = mdp.p1;
 
-    ctx.beginPath();
-    ctx.moveTo(ints[maxI].x, ints[maxI].y);
-    ctx.lineTo(ints[maxJ].x, ints[maxJ].y);
-    ctx.stroke();
+    // Find the center of the major axis.
+    var cent = maj0.add(maj1).div(2);
+    var majorAxisVector = maj0.sub(maj1).div(2);
+    
+    var closesttocent = closestToPoint(ints, cent);
+    
+    var minDist = cent.sub(closesttocent).abs().x;
+
+    // Get a normal vector.
+    var n = majorAxisVector;
+    n = n.div(n.abs().x).mul(c(0,1));
+    n = fixy(n);
+
+    var minorAxisVector = n.mul(minDist);
+    var min0 = fixy(cent.add(minorAxisVector));
+    var min1 = fixy(cent.sub(minorAxisVector));
+
+    drawEllipse(ctx, cent, majorAxisVector, minorAxisVector, "#ff0");
+    drawEllipse(ctx, cent, majorAxisVector, minorAxisVector, "#00f", 1);
+
+    var d = Math.sqrt(majorAxisVector.abs().x * majorAxisVector.abs().x - minorAxisVector.abs().x * minorAxisVector.abs().x);
+    var focusvector = majorAxisVector.div(majorAxisVector.abs().x).mul(d);
+
+    var f1 = cent.sub(focusvector);
+    var f2 = cent.add(focusvector);
+
+    function drawCircle(p) {
+	// Draw Center
+	ctx.beginPath();
+	ctx.strokeStyle = "#f00";
+	ctx.arc(p.x, fixy(p).y, .05, 0, 2.0*Math.PI);
+	ctx.stroke();
+    }
+
+    function drawAxis(p0, p1) {
+	ctx.beginPath();
+	ctx.moveTo(p0.x, fixy(p0).y);
+	ctx.lineTo(p1.x, fixy(p1).y);
+	ctx.stroke();
+    }
+
+    // Draw Center, Foci
+    drawCircle(cent);
+    drawCircle(f1);
+    drawCircle(f2);
+
+    ctx.strokeStyle = "#00f";
+    // Draw Minor Axis
+    drawAxis(min0, min1);
+    // Draw Major Axis
+    drawAxis(maj0, maj1);
 
     ctx.restore();    					   
 };

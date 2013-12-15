@@ -21,6 +21,8 @@ function pdc(z) {
     return padLeft(dc(z), 21, " ");
 }
 
+function fixy(z) { return c(z.x, z.y == undefined ? 0 : z.y); }
+
 function getTangentSegments(zs, ajpct) {
     var adelta = 2.0*Math.PI/ajpct;
     var getangle = function(cv) { return normalizeangle(cv.angle()); }
@@ -52,8 +54,8 @@ function getTangentSegments(zs, ajpct) {
 	    .sort(function(tza, tzb) { 
 		return nsort(tza.z, tzb.z); 
 	    });
-	console.log(allpis.map(function (tz) { return dc(tz.z) + " " + tz.tag;}));
-	console.log(allpis.map(function (tz) { return getangle(tz.z);}));
+	// console.log(allpis.map(function (tz) { return dc(tz.z) + " " + tz.tag;}));
+	// console.log(allpis.map(function (tz) { return getangle(tz.z);}));
 	if(allpis[0].tag == "pi") {
 	    allpis = roll(allpis);
 	}
@@ -62,7 +64,6 @@ function getTangentSegments(zs, ajpct) {
 	    var y1 = allpis[(2*j+1) % (2*deg) ];
 	    var x2 = allpis[(2*j+2) % (2*deg) ];
 	    var y2 = allpis[(2*j+3) % (2*deg) ];
-	    var fixy = function(z) { return c(z.x, z.y == undefined ? 0 : z.y); }
 	    var inter = intersection(fixy(x1.z), fixy(x2.z), fixy(y1.z), fixy(y2.z));
 	    if(inter.abs().x > 1) {
 		throw "Intersection is outside the circle."
@@ -73,7 +74,7 @@ function getTangentSegments(zs, ajpct) {
 		    dc: pdc(x1.z) + "->" + pdc(x2.z) + "\tx\t " 
 			+ pdc(y1.z) + "->" + pdc(y2.z) + "\tat\t " + dc(inter) 
 			+ " " + inter.angle()};
-	    console.log(intersections[j][i].dc);
+	    // console.log(intersections[j][i].dc);
 	}	
 	prevpis = pis;
     }
