@@ -82,11 +82,15 @@ function test(ab, pq) {
     print(ab.betas.map(evbp));
 }
 
+// N is the guessed size of the inner factor.
 function spacedpreimages(b, z, N) {
+    // Get angles that b maps to arg(z)
     var pithetas = piangles(b, z.angle());
     pithetas.sort(o);
     var spacedthetas = [];
     var spacedthetas2 = [];
+    // Get pithetas[0,N,2N,...]
+    // and pithetas[1,N+1,2N+1, ...]
     for(var i = 0; i < b.length; i += N) {
 	spacedthetas.push(pithetas[i]);
 	spacedthetas2.push(pithetas[i+1]);
@@ -145,21 +149,38 @@ function algorithmtest0(b1, b2) {
     return retval;
 
 }
+
+function hextest() {
+    var delta = 2*Math.PI/6;
+    var alphas = [0*delta, 1*delta, 2*delta, 3*delta, 4*delta, 5*delta];
+    var betas = alphas.map(function(t) { return t + delta/2; });
+    var pq = interpolate([alphas, betas]);
+}
  
 function algorithmtest(b3, N) {
     var Binvs = spacedpreimages(b3, nnone, N);
+ 
+/*
     piangles(b3, nnone.angle());
     Binvs[0].map(function(t) { return bpeval(b3, t2c(t));}).map(dcp);
     Binvs[1].map(function(t) { return bpeval(b3, t2c(t));}).map(dcp);
+*/
     
     // Identifies the two sets of points, but not to the 
     // correct angle.
-    var pq = abpolynomial(Binvs[0], Binvs[1]);
+    return interpolate(Binvs);
+}
+
+// Return a Blaschke product which identifies idpoints[0] to 1 
+// and idpoints[1] to -1.
+
+function interpolate(idpoints) {
+    var pq = abpolynomial(idpoints[0], idpoints[1]);
     var pqzeroes = pqpreimages(pq, nzero);
     var w0 = pqeval(pq, nzero);
     var innerzeroes = pqpreimages(pq, w0);
 
-    return {zeroes: innerzeroes, Binvs : Binvs, pq: pq, w0: w0, pqzeroes: pqzeroes};
+    return {zeroes: innerzeroes, Binvs : idpoints, pq: pq, w0: w0, pqzeroes: pqzeroes};
 }
 
 
