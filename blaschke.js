@@ -127,7 +127,7 @@ function getBPFExpr(as, ignorefactor) {
 	    asNums.push(".mul(z)");
 	    asDens.push(".div(none)");
 	} else {
-	    asNums.push(".mul(a"+i+".sub(z))");
+	    asNums.push(".mul(z.sub(a"+i+"))");
 	    asDens.push(".div(none.sub(a"+i+".conj().mul(z)))");
 	    l = l.mul(lt(a));
 	}
@@ -168,7 +168,7 @@ function bpeval(as, z) {
 	var l = lt(a); // (a*)/|a|
 	var num;
 	if(!iszero(a)) {
-	    num = a.sub(z); // (a - z)
+	    num = z.sub(a); // (z-a)
 	} else {
 	    num = z;
 	}
@@ -210,7 +210,8 @@ function bpnum(as) {
     var num = [none.mul(-1)];
     for(var i = 0; i < as.length; i++) {
 	var polyterm;
-	polyterm = [as[i], none.mul(-1)];
+	// (z-a)
+	polyterm = [as[i].mul(-1), none];
 	num = polymult(polyterm, num);
     }
     return num;
