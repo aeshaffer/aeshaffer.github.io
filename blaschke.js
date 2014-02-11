@@ -207,7 +207,7 @@ function l(as) {
 
 function bpnum(as) {
     // cancel the sign on the z (as[i] == 0) term.
-    var num = [none.mul(-1)];
+    var num = [none];
     for(var i = 0; i < as.length; i++) {
 	var polyterm;
 	// (z-a)

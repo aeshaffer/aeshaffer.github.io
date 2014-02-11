@@ -224,6 +224,10 @@ function BPWidgetSetup(obj) {
     this.textz = g(".textz");
     this.gotextz = g(".gotextz");
 
+    this.rangepoint = g(".rangepoint");
+    this.findpreimages = g(".findpreimages");
+    this.foundpreimages = g(".foundpreimages");
+
     this.zs = {};
     this.cpi = {};
     this.bpzs = {};
@@ -1032,6 +1036,16 @@ BPWidget.prototype.setup = function() {
 	var z = c(parseFloat(zt[0]), parseFloat(zt[1]));
 	showClick(z, that);
     });
+    
+    this.findpreimages.click(function() {
+	var zt = that.rangepoint.val().split(",");
+	var z = c(parseFloat(zt[0]), parseFloat(zt[1]));
+	var preimages = preimage(that.zs, z);
+	that.foundpreimages.empty();
+	var pilis = preimages.map(function(cv) { return $("<li>").text(dcomplex(cv)); });
+	$.each(pilis, function(i,e) { that.foundpreimages.append(e); });
+    });
+
     this.plotbutton.click(function() {
 	that.replotMe();
     });
