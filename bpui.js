@@ -221,6 +221,8 @@ function BPWidgetSetup(obj) {
     this.plottheta= g(".plottheta");
     this.clearpreimages= g(".clearpreimages");
     this.showpreimages = g(".showpreimages");
+    this.textz = g(".textz");
+    this.gotextz = g(".gotextz");
 
     this.zs = {};
     this.cpi = {};
@@ -1025,6 +1027,11 @@ BPWidget.prototype.setup = function() {
 	}
 	that.fastReplot(that.zs, that.plotDims().N, that.cpi, th);
     }
+    this.gotextz.click(function() {
+	var zt = that.textz.val().split(",");
+	var z = c(parseFloat(zt[0]), parseFloat(zt[1]));
+	showClick(z, that);
+    });
     this.plotbutton.click(function() {
 	that.replotMe();
     });
