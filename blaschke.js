@@ -105,20 +105,21 @@ function biggestanglediff(ts) {
     return retval;
 }
 
-
+/*
 function lt(a) {
+    
     if(a.abs().x == 0) {
 	return c(1);
     } else {
 	return a.conj().div(a.abs());
     }
 }
+*/
 
 function getBPFExpr(as, ignorefactor) {
     var asNums = new Array();
     var asDens = new Array();
     var asVars = new Array();
-    var l = none;
     function toc(a) { return "c("+a.x+","+a.y+")"; }
     for(var i  = 0; i < as.length; i++) {
 	var a = as[i];
@@ -129,17 +130,11 @@ function getBPFExpr(as, ignorefactor) {
 	} else {
 	    asNums.push(".mul(z.sub(a"+i+"))");
 	    asDens.push(".div(none.sub(a"+i+".conj().mul(z)))");
-	    l = l.mul(lt(a));
 	}
     }
     
-    var lstring;
-    if(ignorefactor) {
-	lstring = toc(none);
-    } else {
-	lstring = toc(l);
-    }
-    var expr = asVars.join(';') + "; var l = "+lstring+"; var f = function(z) { return l" +  asNums.join('') + asDens.join('') + "; }; {f};"
+    var expr = asVars.join(';') + "; var f = function(z) { return c(1,0)" +  
+	asNums.join('') + asDens.join('') + "; }; {f};"
     
     return expr;
 }
@@ -156,16 +151,14 @@ function bpeval0(as, z) {
 function bpepolys(as) {
     var num = bpnum(as);
     var den = bpden(as);
-    var lambda = l(as);
     return function(z) {
-	return lambda.mul(peval(num, z)).div(peval(den, z));
+	return peval(num, z).div(peval(den, z));
     }
 }
 
 function bpeval(as, z) {
 
     function bpterm(a) {
-	var l = lt(a); // (a*)/|a|
 	var num;
 	if(!iszero(a)) {
 	    num = z.sub(a); // (z-a)
@@ -173,7 +166,7 @@ function bpeval(as, z) {
 	    num = z;
 	}
 	var den = none.sub(a.conj().mul(z)); // (1-a*z)
-	return l.mul(num).div(den);
+	return num.div(den);
     }
 
     var retval = none;
@@ -183,30 +176,8 @@ function bpeval(as, z) {
     }
     return retval;
 }
-/*
-
-function bpeval2(as, z) {
-    var lambda = l(as);
-    var num = bpnum(as);
-    var numv = peval(num, z);
-    var den = bpden(as);
-    var denv = peval(den, z);
-    return lambda.mul(numv).div(denv);
-}
-
-*/
-
-function l(as) {
-    var l = none;
-    for(var i = 0; i < as.length; i++) {
-	var a = as[i];
-	l = l.mul(lt(a));
-    }
-    return l;
-}
 
 function bpnum(as) {
-    // cancel the sign on the z (as[i] == 0) term.
     var num = [none];
     for(var i = 0; i < as.length; i++) {
 	var polyterm;
@@ -239,10 +210,8 @@ function getBPprime(as) {
 function preimage(zs, beta) {
     var num = bpnum(zs);
     var den = bpden(zs);
-    var lambda = l(zs);
-    var lambdanum = polymult([lambda], num);
     var alphaden = polymult([beta], den);
-    var poly = polysub(lambdanum, alphaden);
+    var poly = polysub(num, alphaden);
     var preimages = polyroots(poly);    
     return preimages;
 }
