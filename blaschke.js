@@ -207,6 +207,52 @@ function getBPprime(as) {
     return polysub(polymult(nump, den), polymult(denp, num));
 }
 
+function getFullBPprime(as) {
+    var num = getBPprime(as);
+    var nonzeroas = as.filter(function(z) { return z.abs().x > .0001; });
+    var den = bpden(nonzeroas);
+    var den2 = polymult(den, den);
+    var dzmax = den2[den2.length -1];
+    den2 = den2.map(function(z) { return z.div(dzmax);});
+    num  = num.map(function(z) { return z.div(dzmax);});
+    return {"num": num, "den": den2};
+}
+
+function getBPTheta(as, ts) {
+    var retval = new Array(ts.length);
+    var bpnumden = getFullBPprime(as);
+    for(var i = 0; i < ts.length; i++) {
+	var t = ts[i];
+	var z = ttcp(t);
+	var bpt = peval(bpnumden.num, z).div(peval(bpnumden.den, z));
+	bpt = bpt.mul(ni).mul(z);
+	retval[i] = bpt;
+    }
+    return retval;
+}
+
+function getTanPoints(as, t) {
+    var preimages = preimage(as, rt2c(1,t));
+    preimages = preimages.sort(function(i,j) { 
+	return normalizeangle(i.angle()) - normalizeangle(j.angle());
+    });
+
+    var ts = preimages.map(function(z) { return z.angle(); });
+    var bps = getBPTheta(as, ts);
+    var retval = new Array(preimages.length);
+    for(var i = 0; i < preimages.length; i++) {
+	var j = (i+1) % preimages.length;
+	var z1 = preimages[i];
+	var z2 = preimages[j];
+	var bp1 = bps[i].abs();
+	var bp2 = bps[j].abs();
+	var l = bp2.div(bp2.add(bp1));
+	var ztan = z1.add(z2.sub(z1).mul(l));
+	retval[i] = {"z1": z1, "z2": z2, "ztan": ztan};
+    }
+    return retval;
+}
+
 function preimage(zs, beta) {
     var num = bpnum(zs);
     var den = bpden(zs);

@@ -689,7 +689,7 @@ BPWidget.prototype.autojoinpoints = function() {
     var intersections = getTangentSegments(this.zs, ajpct);
     var ints = getSortedByCenter(intersections);    
     var ctx = setupCTX(this.rblines[0], this.plotDims().windowN);
-    
+
     // Draw lines connecting the intersections
     // Not quite correct, since we want the curve to be tangent to the segments,
     // but I think for a large enough sampling it comes close enough.
@@ -760,6 +760,31 @@ BPWidget.prototype.autojoinpoints = function() {
 	// Draw Major Axis
 	drawAxis(maj0, maj1);
     }
+
+    var tpts = numeric.linspace(0, 2*Math.PI, 5); // [0, Math.PI];
+
+    for(var ti = 0; ti < tpts.length; ti++) {
+	
+	var pts = getTanPoints(this.zs, tpts[ti]);
+	
+	for(var i = 0; i < pts.length; i++) {
+	    ctx.lineWidth = 4.0/this.plotDims().graphN;
+	    
+	    ctx.beginPath();
+	    ctx.strokeStyle = "#00f";
+	    ctx.moveTo(pts[i].z1.x, fixy(pts[i].z1).y);
+	    ctx.lineTo(pts[i].ztan.x, fixy(pts[i].ztan).y);
+	    ctx.stroke();
+	    
+	    // ctx.beginPath();
+	    // ctx.strokeStyle = "#0f0";
+	    // ctx.moveTo(pts[i].ztan.x, fixy(pts[i].ztan).y);
+	    // ctx.lineTo(pts[i].z2.x, fixy(pts[i].z2).y);
+	    // ctx.stroke();
+	}
+
+    }
+
 
     ctx.restore();    					   
 };
