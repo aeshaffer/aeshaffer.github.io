@@ -676,23 +676,10 @@ function drawEllipse(ctx, cent, majorAxisVector, minorAxisVector, strokeStyle, o
     ctx.stroke();
 }
 
-BPWidget.prototype.autojoinpoints = function() {	
-    this.doclearlines();
-    var ajpct = parseInt(this.autolinespoints.val(), 10);
-    var adelta = Math.PI*2.0/ajpct;
-    for(var i = 0; i < ajpct; i++) {
-	// console.log("Joining points that map to "+i*adelta);
-	this.drawPILines(i*adelta);
-    }
-
-    // Get tangent segments.
-    var intersections = getTangentSegments(this.zs, ajpct);
-    var ints = getSortedByCenter(intersections);    
-    var ctx = setupCTX(this.rblines[0], this.plotDims().windowN);
-
+BPWidget.prototype.drawponcelet = function(ctx, ints) {
     // Draw lines connecting the intersections
     // Not quite correct, since we want the curve to be tangent to the segments,
-    // but I think for a large enough sampling it comes close enough.
+    // but I think for a large enough sampling it comes close enough.  
     ctx.beginPath();
     ctx.strokeStyle = "#f00";
     ctx.lineWidth = 4.0/this.plotDims().graphN;
@@ -702,8 +689,11 @@ BPWidget.prototype.autojoinpoints = function() {
     }
     ctx.closePath();
     ctx.stroke();
+}
 
+BPWidget.prototype.guessellipse = function(ctx, ints) {
     if(ints.length > 4) {
+	ctx.lineWidth = 4.0/this.plotDims().graphN;
 	var mdp = maxDistPair(ints);
 	var maj0 = mdp.p0;
 	var maj1 = mdp.p1;
@@ -760,31 +750,65 @@ BPWidget.prototype.autojoinpoints = function() {
 	// Draw Major Axis
 	drawAxis(maj0, maj1);
     }
+}
 
-    var tpts = numeric.linspace(0, 2*Math.PI, 5); // [0, Math.PI];
-
+BPWidget.prototype.drawtangents = function(ctx, ajpct) {
+    var tpts = numeric.linspace(0, 2*Math.PI - 2*Math.PI/ajpct, ajpct); // [0, Math.PI];
     for(var ti = 0; ti < tpts.length; ti++) {
 	
 	var pts = getTanPoints(this.zs, tpts[ti]);
 	
 	for(var i = 0; i < pts.length; i++) {
-	    ctx.lineWidth = 4.0/this.plotDims().graphN;
+	    ctx.lineWidth = 1.0/this.plotDims().graphN;
 	    
 	    ctx.beginPath();
 	    ctx.strokeStyle = "#00f";
 	    ctx.moveTo(pts[i].z1.x, fixy(pts[i].z1).y);
 	    ctx.lineTo(pts[i].ztan.x, fixy(pts[i].ztan).y);
 	    ctx.stroke();
-	    
-	    // ctx.beginPath();
-	    // ctx.strokeStyle = "#0f0";
-	    // ctx.moveTo(pts[i].ztan.x, fixy(pts[i].ztan).y);
-	    // ctx.lineTo(pts[i].z2.x, fixy(pts[i].z2).y);
-	    // ctx.stroke();
+
+    	    ctx.beginPath();
+	    ctx.strokeStyle = "#0f0";
+	    ctx.moveTo(pts[i].ztan.x, fixy(pts[i].ztan).y);
+	    ctx.lineTo(pts[i].z2.x, fixy(pts[i].z2).y);
+	    ctx.stroke();
 	}
 
     }
+}
 
+BPWidget.prototype.joinpis = function(ajpct) {
+    var adelta = Math.PI*2.0/ajpct;
+    for(var i = 0; i < ajpct; i++) {
+	// console.log("Joining points that map to "+i*adelta);
+	this.drawPILines(i*adelta);
+    }
+}
+
+BPWidget.prototype.autojoinpoints = function() {	
+    this.doclearlines();
+    var ajpct = parseInt(this.autolinespoints.val(), 10);
+
+    // this.joinpis(ajpct);
+
+    var ctx = setupCTX(this.rblines[0], this.plotDims().windowN);
+
+    // Get tangent segments.
+    //var intersections = getTangentSegments(this.zs, ajpct);
+    //var ints = getSortedByCenter(intersections);    
+
+    var ints2 = new Array(); // ajpct*this.zs.length);
+    var tpts = numeric.linspace(0, 2*Math.PI - 2*Math.PI/ajpct, ajpct);
+    for(var ti = 0; ti < tpts.length; ti++) {
+	var pts = getTanPoints(this.zs, tpts[ti]);
+	for(var j = 0; j < pts.length; j++) {
+	    ints2.push(pts[j].ztan);
+	}
+    }
+	
+    this.drawtangents(ctx, ajpct);   
+    // this.drawponcelet(ctx, ints);
+    this.guessellipse(ctx, ints2);
 
     ctx.restore();    					   
 };
