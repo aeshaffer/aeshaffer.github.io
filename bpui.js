@@ -773,7 +773,6 @@ BPWidget.prototype.drawtangents = function(ctx, ajpct) {
 	    ctx.lineTo(pts[i].z2.x, fixy(pts[i].z2).y);
 	    ctx.stroke();
 	}
-
     }
 }
 
@@ -805,6 +804,11 @@ BPWidget.prototype.autojoinpoints = function() {
 	    ints2.push(pts[j].ztan);
 	}
     }
+
+    var a = fitellipseZS(ints2);
+
+    console.log(numeric.prettyPrint(ellipse_foci(a)));
+    console.log(ellipse_axis_length(a));
 	
     this.drawtangents(ctx, ajpct);   
     // this.drawponcelet(ctx, ints);
