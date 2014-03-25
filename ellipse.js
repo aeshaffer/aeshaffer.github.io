@@ -145,7 +145,7 @@ function ellipse_center(ina) {
     var num = b*b-a*c;
     var x0 = (c*d-b*f)/num;
     var y0 = (a*f-b*d)/num;
-    return [x0,y0];
+    return numeric.t(x0,y0);
 }
 
 function ellipse_axis_length(ina) {
@@ -155,22 +155,25 @@ function ellipse_axis_length(ina) {
     var down2=(b*b-a*c)*( (a-c)*numeric.sqrt(1+4*b*b/((a-c)*(a-c)))-(c+a));
     var res1=numeric.sqrt(up/down1);
     var res2=numeric.sqrt(up/down2);
-    return [res1, res2];
+    var ret =[res1, res2];
+    return ret;
+/*     return [Math.max.apply(null, ret), 
+	    Math.min.apply(null, ret)]; */
 }
 
 function ellipse_foci(ina) {
     var center = ellipse_center(ina);
+    center = c.apply(null, center);
     var axislengths = ellipse_axis_length(ina);
     var angle = ellipse_angle_of_rotation(ina);
 
-    var major = Math.max.apply(null, axislengths);
-    var minor = Math.min.apply(null, axislengths);
+    var major = axislengths[0];
+    var minor = axislengths[1];
 
     var rootC = Math.sqrt(major*major-minor*minor);
-
     var ctof = fixy(rt2c(rootC, angle));
 
-    var f1 = numeric.add(center, [ctof.x,ctof.y]);
-    var f2 = numeric.sub(center, [ctof.x,ctof.y]);
+    var f1 = center.add(ctof);
+    var f2 = center.sub(ctof);
     return [f1, f2];
 }
