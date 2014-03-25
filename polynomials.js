@@ -1,3 +1,5 @@
+function fixy(z) { return c(z.x, z.y == undefined ? 0 : z.y); }
+
 numeric.T.prototype.angle = function() {
     if(this.y == undefined) {
 	return numeric.atan2(0, this.x);

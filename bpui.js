@@ -807,7 +807,7 @@ BPWidget.prototype.autojoinpoints = function() {
     this.doclearlines();
     var ajpct = parseInt(this.autolinespoints.val(), 10);
 
-    // this.joinpis(ajpct);
+    this.joinpis(ajpct);
 
     var ctx = setupCTX(this.rblines[0], this.plotDims().windowN);
 
@@ -820,41 +820,43 @@ BPWidget.prototype.autojoinpoints = function() {
 	}
     }
 
-    var drawsolid = this.solidtangents.is(":checked");
-    if(drawsolid) {
-	// Get tangent segments.
-	var intersections = getTangentSegments(this.zs, ajpct);
-	var ints = getSortedByCenter(intersections);    
-	this.drawtangents(ctx, ajpct, drawsolid);   
-	this.drawponcelet(ctx, ints);
-    } else {
-	this.drawtangents(ctx, ajpct, drawsolid);
+    if(parseInt(this.skippoints.val(), 10) == 1) {
 
-    }
-
-    if(this.doguessellipse.is(":checked")) {
-	try {
-	    var a;
-
-	    a = fitellipseZS(ints2);
-
-	    console.log(numeric.prettyPrint(ellipse_foci(a)));
-	    console.log(ellipse_axis_length(a));
+	var drawsolid = this.solidtangents.is(":checked");
+	if(drawsolid) {
+	    // Get tangent segments.
+	    var intersections = getTangentSegments(this.zs, ajpct);
+	    var ints = getSortedByCenter(intersections);    
+	    this.drawtangents(ctx, ajpct, drawsolid);   
+	    this.drawponcelet(ctx, ints);
+	} else {
+	    this.drawtangents(ctx, ajpct, drawsolid);
 	    
-	    var cent = ellipse_center(a);
-	    var axes = ellipse_axis_length(a);
-	    var angle = ellipse_angle_of_rotation(a);
-	    var majorAxisVector = rt2c(axes[0], angle);
-	    var minorAxisVector = rt2c(axes[1], angle + Math.PI/2);
-	    
-	    this.drawDecoratedEllipse(ctx, cent, majorAxisVector, minorAxisVector);
-	} catch (err) {
-	    alert(err);
 	}
-
-//	this.guessellipse(ctx, ints2);
+	
+	if(this.doguessellipse.is(":checked")) {
+	    try {
+		var a;
+		
+		a = fitellipseZS(ints2);
+		
+		console.log(numeric.prettyPrint(ellipse_foci(a)));
+		console.log(ellipse_axis_length(a));
+		
+		var cent = ellipse_center(a);
+		var axes = ellipse_axis_length(a);
+		var angle = ellipse_angle_of_rotation(a);
+		var majorAxisVector = rt2c(axes[0], angle);
+		var minorAxisVector = rt2c(axes[1], angle + Math.PI/2);
+		
+		this.drawDecoratedEllipse(ctx, cent, majorAxisVector, minorAxisVector);
+	    } catch (err) {
+		alert(err);
+	    }
+	    
+	    //	this.guessellipse(ctx, ints2);
+	}
     }
-
 
     ctx.restore();    					   
 };
