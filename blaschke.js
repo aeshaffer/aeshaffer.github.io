@@ -87,9 +87,10 @@ function anglediff(theta) {
     }
 }
 
-function biggestanglediff(ts) {
+function biggestanglediff(ints) {
     var maxdiff = 0;
     var maxind = 0;
+    var ts = ints.sort(function(i,j) { return normalizeangle(i)-normalizeangle(j); });
     for(var i = 0; i < ts.length; i++) {
 	var t0 = ts[i];
 	var t1 = ts[(i+1) % ts.length];
