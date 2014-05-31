@@ -41,17 +41,9 @@
       <button type="button" id="plotallbutton">Plot All</button>
       <input type="checkbox" id="autoplot"></input>Auto Plot
       <input type="checkbox" id="plotregions"></input>Plot Regions
+      <button type="button" class="clearplots">Clear Plots</button>
     </div>
-        
-    <div id="outerzeroesdiv">
-      <h3>C <a href="" id="outerpermalink" target="_blank">Open in Applet</a></h3>
-      <div class="zeroesholder outerholder rainbowholder">
-      </div>
-      <div class="zeroesholder outerholder regionsholder">
-      </div>
-      <textarea id="outerzs" class="zsstring"></textarea><br/>
-    </div>
-    
+
     <div id="innerzeroesdiv">
       <h3>D <a href="" id="innerpermalink" target="_blank">Open in Applet</a></h3>
       <div class="zeroesholder outerholder rainbowholder">
@@ -59,6 +51,15 @@
       <div class="zeroesholder outerholder regionsholder">
       </div>
       <textarea id="innerzs" class="zsstring" ></textarea>
+    </div>
+
+    <div id="outerzeroesdiv">
+      <h3>C <a href="" id="outerpermalink" target="_blank">Open in Applet</a></h3>
+      <div class="zeroesholder outerholder rainbowholder">
+      </div>
+      <div class="zeroesholder outerholder regionsholder">
+      </div>
+      <textarea id="outerzs" class="zsstring"></textarea><br/>
     </div>
     
     <div id="composeddiv">
@@ -78,7 +79,10 @@
 	<button type="button" class="autolinesgo">Redraw Lines</button>
       </div>
     </div>
-    <div style="border: 1px solid black; float: left; width: 300px;">
+        
+
+    
+    <div style="border: 1px solid black; float: left; width: 300px; display: none;">
       Overlay
       <div style="position: relative; width: 300px; height: 300px;">
 	<canvas id="inneroverlay" style="width: 300px; height: 300px; top: 0px; position: absolute; opacity:.5" width="300" height="300"></canvas>

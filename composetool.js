@@ -64,6 +64,13 @@ function replot() {
 }
 
 $(function() {
+
+    $(".clearplots").on("click", function() {
+	outerwidget.resizeCanvasesRescatter();
+	innerwidget.resizeCanvasesRescatter();
+	composewidget.resizeCanvasesRescatter();
+	clearCanvas($(".graph"));
+    });
     
     $("#plotallbutton").on("click", replot);
     $("#composebutton").on("click", doCompose);
