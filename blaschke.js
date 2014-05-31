@@ -343,3 +343,50 @@ function getangleindex(theta, ts) {
     }
     return ts.length - 1;
 }
+
+function quadPerspective(zs) {
+    var N = 16;
+    var ts = numeric.linspace(0, Math.PI*2, N).slice(0,N-1).map(function(t) { return rt2c(1,t); });
+    var preimages = ts.map(function(z) { return preimage(zs, z); });
+    function anglesort(z1,z2) {
+	return normalizeangle(z1.angle()) - normalizeangle(z2.angle());
+    };
+    var angleSorted = preimages.map(function(zs2) { return zs2.sort(anglesort);});    
+    var goodpoints = new Array();
+    for(var i = 0; i < 4; i++) {
+	for(var j = 0; j < angleSorted.length; j++) {
+	    var ppt = perspective(angleSorted[j], i);
+	    if(isNaN(ppt.x) || isNaN(ppt.y) || Math.abs(ppt.x) > 10000 || Math.abs(ppt.y) > 10000) {
+		//console.log("Burp.");
+	    } else {
+		//console.log(ppt);
+		goodpoints.push(ppt);
+	    }
+	}
+    }
+    goodpoints = goodpoints.sort(function(a,b) { return a.x - b.x; });
+    var gpxs = goodpoints.map(function(xy) { return xy.x;});
+    var gpys = goodpoints.map(function(xy) { return xy.y;});
+    var ls = findLineByLeastSquares(gpxs, gpys);
+    var diffs = new Array();
+    for(var i = 0; i < ls.points[1].length; i++) { 
+	diffs[i] = Math.abs(ls.points[1][i] - gpys[i]);
+    }
+    
+}
+
+function perspective(zs, i) {
+    var z1 = zs[(0+i) % zs.length];
+    var z2 = zs[(1+i) % zs.length];
+    var z3 = zs[(2+i) % zs.length];
+    var z4 = zs[(3+i) % zs.length];
+    var m12 = z2.sub(z1);
+    var m34 = z4.sub(z3);
+    var b = [z1.sub(z3).x, z1.sub(z3).y];
+    var M = [[-z2.sub(z1).x, -fixy(z2.sub(z1)).y], [z4.sub(z3).x, fixy(z4.sub(z3)).y]];
+    var ts = numeric.solve(numeric.transpose(M),b);
+    var intz12 = z1.add(z2.sub(z1).mul(ts[0]));
+    var intz34 = z3.add(z4.sub(z3).mul(ts[1]));
+    return intz12;
+}
+

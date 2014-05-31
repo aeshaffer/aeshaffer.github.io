@@ -538,24 +538,27 @@ BPWidget.prototype.fastReplot = function(as, N, cpi, raythreshold) {
 
 
 BPWidget.prototype.drawPILines = function(t) {
-    var skip = parseInt(this.skippoints.val(), 10);
-    if(this.zs.length % skip != 0) {
-	this.skippoints.css("background-color", "red");
-	this.skippoints.attr("title", "Cannot skip "+this.zs.length+" points by " + skip + ".");
-	return;
-    } else {
-	this.skippoints.css("background-color", "");
-	this.skippoints.attr("title", "");
+    var skips = this.skippoints.val().split(",");
+    for(var i = 0; i < skips.length; i++) {	
+	var skip = parseInt(skips[i], 10);
+	if(this.zs.length % skip != 0) {
+	    this.skippoints.css("background-color", "red");
+	    this.skippoints.attr("title", "Cannot skip "+this.zs.length+" points by " + skip + ".");
+	    return;
+	} else {
+	    this.skippoints.css("background-color", "");
+	    this.skippoints.attr("title", "");
+	}
+	
+	var z2 = c(numeric.cos(t), numeric.sin(t));
+	// var bz2 = bpeval0(this.zs, z2);
+	var bz2 = z2;
+	var preimages = preimage(this.zs, bz2);
+	var piangles = preimages.map(function(cv) { return cv.angle();})
+	piangles = piangles.sort(function(a,b){return a-b});
+	
+	this.drawPILinesInner(this.rblines[0], piangles, skip);
     }
-
-    var z2 = c(numeric.cos(t), numeric.sin(t));
-    // var bz2 = bpeval0(this.zs, z2);
-    var bz2 = z2;
-    var preimages = preimage(this.zs, bz2);
-    var piangles = preimages.map(function(cv) { return cv.angle();})
-    piangles = piangles.sort(function(a,b){return a-b});
-    
-    this.drawPILinesInner(this.rblines[0], piangles, skip);
     //drawPILinesInner(rglines, piangles, skip);
 };
 
@@ -963,6 +966,11 @@ BPWidget.prototype.attachrangeMD = function (preimagepanel) {
 */
 }
 
+BPWidget.prototype.doclearplots = function() {
+    this.resizeCanvasesRescatter();
+    clearCanvas($(".graph"));
+}
+
 BPWidget.prototype.attachcanvasclicks = function() {
     var that = this;
     function addpoint(e) {
@@ -981,11 +989,6 @@ BPWidget.prototype.attachcanvasclicks = function() {
 	}
     }
 
-    function doclearplots() {
-	that.resizeCanvasesRescatter();
-	clearCanvas($(".graph"));
-    }
-
     this.rblines.on("dblclick", addpoint);
     this.rblines.on("click", cf);
     this.rglines.on("click", joinpoints);
@@ -999,7 +1002,7 @@ BPWidget.prototype.attachcanvasclicks = function() {
 	var t = parseFloat(that.theta.val());
 	that.drawPILines(t);
     });
-    this.clearplots.on("click", doclearplots);
+    this.clearplots.on("click", function() {that.doclearplots();});
     this.clearlines.on("click", function() {that.doclearlines();});
     // $("#regions").on("click", cf);
    
