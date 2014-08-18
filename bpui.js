@@ -20,6 +20,9 @@ function getQSMap(s) {
 
 function parseZsString(s, key) {
     var k = (key == undefined ? "z" : key);
+    if(s.indexOf("&") == 0) {
+	s = s.slice(1);
+    }   
     var zs = getQSMap(s)[k];
     var retval = new Array();
     if(zs == undefined) { return retval; }
