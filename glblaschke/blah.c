@@ -106,6 +106,8 @@ float ntheta(float theta) {
     return theta;
 }
 
+uniform sampler2D uSampler;
+
 void main()
 {
     /* zeroes[0] = z0; */
@@ -118,7 +120,8 @@ void main()
     bpz = cmul(nd.lambda, bpz);
     if(cnorm(z) <= 1.0) {
         float theta = atan(bpz.y, bpz.x) + 3.14;
-        gl_FragColor = hsv_to_rgb(theta/6.28, 1.0, 1.0,1.0);
+        // gl_FragColor = hsv_to_rgb(theta/6.28, 1.0, 1.0,1.0);
+	gl_FragColor = texture2D(uSampler, vec2(bpz.x + 1.0, bpz.y+1.0));
     } else {
         gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
     }        

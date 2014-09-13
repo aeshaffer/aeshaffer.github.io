@@ -18,9 +18,6 @@ var cubeVerticesIndexBuffer;
 var cubeRotation = 0.0;
 var lastCubeUpdateTime = 0;
 
-var cubeImage;
-var cubeTexture;
-
 var mvMatrix;
 var shaderProgram;
 var vertexPositionAttribute;
@@ -143,6 +140,8 @@ function start() {
     // we'll be drawing.
     
     initBuffers();
+
+      initTextures();
     
     // Set up to draw the scene periodically.
     
@@ -285,7 +284,10 @@ function drawScene() {
   
   gl.bindBuffer(gl.ARRAY_BUFFER, cubeVerticesTextureCoordBuffer);
   gl.vertexAttribPointer(textureCoordAttribute, 2, gl.FLOAT, false, 0, 0);
- 
+
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, cubeTexture);
+    gl.uniform1i(gl.getUniformLocation(shaderProgram, "uSampler"), 0);
   
   // Draw the cube.
   
@@ -307,6 +309,25 @@ function drawScene() {
   }
   
   lastCubeUpdateTime = currentTime;
+}
+
+var cubeTexture;
+var cubeImage;
+
+function initTextures() {
+  cubeTexture = gl.createTexture();
+  cubeImage = new Image();
+  cubeImage.onload = function() { handleTextureLoaded(cubeImage, cubeTexture); }
+  cubeImage.src = "../antique.png";
+}
+
+function handleTextureLoaded(image, texture) {
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
+  gl.generateMipmap(gl.TEXTURE_2D);
+  gl.bindTexture(gl.TEXTURE_2D, null);
 }
 
 //
