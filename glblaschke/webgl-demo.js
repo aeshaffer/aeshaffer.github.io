@@ -29,6 +29,8 @@ var locations = [
     [0, 0], [.5,.5], [-.5,-.5], [-.5,0]
 ];
 
+locations = [[-.5,0]];
+
 function recalcBP() {
     if($("#plotcps").is(":checked")) {
 	bproots = cpinfo(locations.map(xytoc));
@@ -50,8 +52,10 @@ function tocoords(me) {
     var w2 = w/2;
     var h = $(c).height();
     var h2 = h/2;
-    var x = (me.offsetX - c.clientLeft - w2)/w2;
-    var y = -1*(me.offsetY - c.clientTop - h2)/h2;
+    var offX  = (me.offsetX || me.clientX - $(me.target).offset().left);
+    var offY  = (me.offsetY || me.clientY - $(me.target).offset().top);
+    var x = (offX - c.clientLeft - w2)/w2;
+    var y = -1*(offY - c.clientTop - h2)/h2;
     return {x:x, y:y};
 }
 
@@ -107,7 +111,14 @@ $(function() {
 	    console.log(z, locations[locationindex]);
 	    me.originalEvent.preventDefault();
 	})
-	.mouseup(function() {
+	.mouseup(function(me) {
+	    if(locationindex >=0) {
+		var z = tocoords(me);
+		if(c(z.x, z.y).abs().x > 1) {
+		    locations.splice(locationindex, 1);
+		    recalcBP();
+		}
+	    }
 	    locationindex = -1;
 	    $(this).removeClass("moving");
 	});
@@ -318,7 +329,7 @@ function initTextures() {
   cubeTexture = gl.createTexture();
   cubeImage = new Image();
   cubeImage.onload = function() { handleTextureLoaded(cubeImage, cubeTexture); }
-  cubeImage.src = "../antique.png";
+  cubeImage.src = "clock2.png";
 }
 
 function handleTextureLoaded(image, texture) {
@@ -338,7 +349,7 @@ function handleTextureLoaded(image, texture) {
 function initShaders() {
    shaders = loadShaders(gl, "vs", ["vshader"]);
     vertexShader = shaders[0];
-    shaders = loadShaders(gl, "fs", ["blah"]);
+    shaders = loadShaders(gl, "fs", ["texturebp"]);
     fragmentShader = shaders[0];
   
   // Create the shader program
