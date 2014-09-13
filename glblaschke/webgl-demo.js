@@ -31,9 +31,57 @@ var locations = [
 
 locations = [[-.5,0]];
 
-function recalcBP() {
+var cvcanvas;
+var cvcanvascontext;
+var idWhite;
+var idBlack;
+$(function() {
+    cvcanvas = $("#cvcanvas")[0];
+    cvcanvascontext = cvcanvas.getContext("2d");
+    idWhite = cvcanvascontext.createImageData(1,1);
+    idWhite.data[0] = 255;
+    idWhite.data[1] = 0; // 255;
+    idWhite.data[2] = 0; // 255;
+    idWhite.data[3] = 255;
+    idBlack = cvcanvascontext.createImageData(1,1);
+    idBlack.data[0] = 0;
+    idBlack.data[1] = 255; // 0;
+    idBlack.data[2] = 0;
+    idBlack.data[3] = 255;
+});
+
+function getXY2(z) {
+    var iccssw = $(canvas).width();
+    var iccssh = $(canvas).height();
+    var xi = Math.round(iccssw)*(1+z.x)/2;
+    var yi = Math.round(iccssh)*(1-z.y)/2;
+    return {x: xi, y: yi};
+}
+
+function plotCVAngles(cpi) {
+    cvcanvascontext.clearRect(0, 0, cvcanvas.width, cvcanvas.height);
+    var cvangles = cpi.cvangles;
+    var rs = numeric.linspace(0,1,256);
+    var zs = locations.map(function(arr) { return c(arr[0], arr[1]); });
+    for(var cvai = 0; cvai < cvangles.length; cvai++) {
+	var cv = cvangles[cvai];
+	var preimages = rs.map(function(r) { return preimage(zs, rt2c(r, cv))});
+	var np = [];
+	np = np.concat.apply(np, preimages)
+	var preimagesPixels = np.map(function(z) {return getXY2(fixy(z));});
+	for(var pii = 0; pii < preimagesPixels.length; pii++) {	    
+	    var pip = preimagesPixels[pii];
+	    cvcanvascontext.putImageData(Math.random() > .5 ? idBlack: idWhite, pip.x, pip.y);
+	}
+    }
+}
+
+function recalcBP(cvlines) {
+    bproots = cpinfo(locations.map(xytoc));
+    if(cvlines) {  
+	plotCVAngles(bproots);
+    }
     if($("#plotcps").is(":checked")) {
-	bproots = cpinfo(locations.map(xytoc));
 	cssscatter($(".canvaswrapper"), 640, bproots.cps, "cp", true);
     } else {
 	cssscatter($(".canvaswrapper"), 640, [], "cp", true);
@@ -63,27 +111,36 @@ function xytoc(xy) {
     return c(xy[0], xy[1]);
 }
 
+var locationindex = -1;
+
+function moving() {
+    $("#glcanvaswrapper").addClass("moving");
+}
+
+function stopped() {
+    locationindex = -1;
+    $("#glcanvaswrapper").removeClass("moving");
+}
+
 $(function() {
-    var locationindex = -1;
-    $("#glcanvas")
+   
+    $("#glcanvas, #cvcanvas")
 	.mouseenter(function(me) {
-	    locationindex = -1;
-	    $(this).removeClass("moving");
+	    stopped();
 	})
 	.mouseleave(function(me) {
-	    locationindex = -1;
-	    $(this).removeClass("moving");
+	    stopped();
 	})
 	.on("dblclick", function(me) {
 	    var xy = tocoords(me);
 	    locations.push([xy.x,xy.y]);
-	    recalcBP();
+	    recalcBP(true);
 	})
 	.mousemove(function(me) {
 	    if(locationindex != -1) {
 		var z = tocoords(me);
 		locations[locationindex] = [z.x, z.y];
-		recalcBP();
+		recalcBP(false);
 	    }
 	})
 	.mousedown(function(me) {	    
@@ -99,14 +156,13 @@ $(function() {
 		var mind = Math.min.apply(null, ds);
 		var cp2 = closepoints.filter(function(id) { return id.d == mind;});
 		locationindex = cp2[0].i;
-		$(this).addClass("moving");
+		moving();
 	    } 
 	    else if(closepoints.length == 1) {
 		locationindex = closepoints[0].i;
-		$(this).addClass("moving");
+		moving();
 	    } else {
-		locationindex = -1;
-		$(this).removeClass("moving");
+		stopped();
 	    }
 	    console.log(z, locations[locationindex]);
 	    me.originalEvent.preventDefault();
@@ -116,11 +172,10 @@ $(function() {
 		var z = tocoords(me);
 		if(c(z.x, z.y).abs().x > 1) {
 		    locations.splice(locationindex, 1);
-		    recalcBP();
 		}
 	    }
-	    locationindex = -1;
-	    $(this).removeClass("moving");
+	    recalcBP(true);
+	    stopped();
 	});
 });
 
