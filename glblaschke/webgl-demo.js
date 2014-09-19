@@ -18,9 +18,6 @@ var cubeVerticesIndexBuffer;
 var cubeRotation = 0.0;
 var lastCubeUpdateTime = 0;
 
-var cubeImage;
-var cubeTexture;
-
 var mvMatrix;
 var shaderProgram;
 var vertexPositionAttribute;
@@ -32,9 +29,59 @@ var locations = [
     [0, 0], [.5,.5], [-.5,-.5], [-.5,0]
 ];
 
-function recalcBP() {
+locations = [[-.5,0]];
+
+var cvcanvas;
+var cvcanvascontext;
+var idWhite;
+var idBlack;
+$(function() {
+    cvcanvas = $("#cvcanvas")[0];
+    cvcanvascontext = cvcanvas.getContext("2d");
+    idWhite = cvcanvascontext.createImageData(1,1);
+    idWhite.data[0] = 255;
+    idWhite.data[1] = 0; // 255;
+    idWhite.data[2] = 0; // 255;
+    idWhite.data[3] = 255;
+    idBlack = cvcanvascontext.createImageData(1,1);
+    idBlack.data[0] = 0;
+    idBlack.data[1] = 255; // 0;
+    idBlack.data[2] = 0;
+    idBlack.data[3] = 255;
+});
+
+function getXY2(z) {
+    var iccssw = $(canvas).width();
+    var iccssh = $(canvas).height();
+    var xi = Math.round(iccssw)*(1+z.x)/2;
+    var yi = Math.round(iccssh)*(1-z.y)/2;
+    return {x: xi, y: yi};
+}
+
+function plotCVAngles(cpi) {
+    cvcanvascontext.clearRect(0, 0, cvcanvas.width, cvcanvas.height);
+    var cvangles = cpi.cvangles;
+    var rs = numeric.linspace(0,1,256);
+    var zs = locations.map(function(arr) { return c(arr[0], arr[1]); });
+    for(var cvai = 0; cvai < cvangles.length; cvai++) {
+	var cv = cvangles[cvai];
+	var preimages = rs.map(function(r) { return preimage(zs, rt2c(r, cv))});
+	var np = [];
+	np = np.concat.apply(np, preimages)
+	var preimagesPixels = np.map(function(z) {return getXY2(fixy(z));});
+	for(var pii = 0; pii < preimagesPixels.length; pii++) {	    
+	    var pip = preimagesPixels[pii];
+	    cvcanvascontext.putImageData(Math.random() > .5 ? idBlack: idWhite, pip.x, pip.y);
+	}
+    }
+}
+
+function recalcBP(cvlines) {
+    bproots = cpinfo(locations.map(xytoc));
+    if(cvlines) {  
+	plotCVAngles(bproots);
+    }
     if($("#plotcps").is(":checked")) {
-	bproots = cpinfo(locations.map(xytoc));
 	cssscatter($(".canvaswrapper"), 640, bproots.cps, "cp", true);
     } else {
 	cssscatter($(".canvaswrapper"), 640, [], "cp", true);
@@ -53,8 +100,10 @@ function tocoords(me) {
     var w2 = w/2;
     var h = $(c).height();
     var h2 = h/2;
-    var x = (me.offsetX - c.clientLeft - w2)/w2;
-    var y = -1*(me.offsetY - c.clientTop - h2)/h2;
+    var offX  = (me.offsetX || me.clientX - $(me.target).offset().left);
+    var offY  = (me.offsetY || me.clientY - $(me.target).offset().top);
+    var x = (offX - c.clientLeft - w2)/w2;
+    var y = -1*(offY - c.clientTop - h2)/h2;
     return {x:x, y:y};
 }
 
@@ -62,27 +111,36 @@ function xytoc(xy) {
     return c(xy[0], xy[1]);
 }
 
+var locationindex = -1;
+
+function moving() {
+    $("#glcanvaswrapper").addClass("moving");
+}
+
+function stopped() {
+    locationindex = -1;
+    $("#glcanvaswrapper").removeClass("moving");
+}
+
 $(function() {
-    var locationindex = -1;
-    $("#glcanvas")
+   
+    $("#glcanvas, #cvcanvas")
 	.mouseenter(function(me) {
-	    locationindex = -1;
-	    $(this).removeClass("moving");
+	    stopped();
 	})
 	.mouseleave(function(me) {
-	    locationindex = -1;
-	    $(this).removeClass("moving");
+	    stopped();
 	})
 	.on("dblclick", function(me) {
 	    var xy = tocoords(me);
 	    locations.push([xy.x,xy.y]);
-	    recalcBP();
+	    recalcBP(true);
 	})
 	.mousemove(function(me) {
 	    if(locationindex != -1) {
 		var z = tocoords(me);
 		locations[locationindex] = [z.x, z.y];
-		recalcBP();
+		recalcBP(false);
 	    }
 	})
 	.mousedown(function(me) {	    
@@ -98,21 +156,26 @@ $(function() {
 		var mind = Math.min.apply(null, ds);
 		var cp2 = closepoints.filter(function(id) { return id.d == mind;});
 		locationindex = cp2[0].i;
-		$(this).addClass("moving");
+		moving();
 	    } 
 	    else if(closepoints.length == 1) {
 		locationindex = closepoints[0].i;
-		$(this).addClass("moving");
+		moving();
 	    } else {
-		locationindex = -1;
-		$(this).removeClass("moving");
+		stopped();
 	    }
 	    console.log(z, locations[locationindex]);
 	    me.originalEvent.preventDefault();
 	})
-	.mouseup(function() {
-	    locationindex = -1;
-	    $(this).removeClass("moving");
+	.mouseup(function(me) {
+	    if(locationindex >=0) {
+		var z = tocoords(me);
+		if(c(z.x, z.y).abs().x > 1) {
+		    locations.splice(locationindex, 1);
+		}
+	    }
+	    recalcBP(true);
+	    stopped();
 	});
 });
 
@@ -143,6 +206,8 @@ function start() {
     // we'll be drawing.
     
     initBuffers();
+
+      initTextures();
     
     // Set up to draw the scene periodically.
     
@@ -285,7 +350,10 @@ function drawScene() {
   
   gl.bindBuffer(gl.ARRAY_BUFFER, cubeVerticesTextureCoordBuffer);
   gl.vertexAttribPointer(textureCoordAttribute, 2, gl.FLOAT, false, 0, 0);
- 
+
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, cubeTexture);
+    gl.uniform1i(gl.getUniformLocation(shaderProgram, "uSampler"), 0);
   
   // Draw the cube.
   
@@ -309,6 +377,25 @@ function drawScene() {
   lastCubeUpdateTime = currentTime;
 }
 
+var cubeTexture;
+var cubeImage;
+
+function initTextures() {
+  cubeTexture = gl.createTexture();
+  cubeImage = new Image();
+  cubeImage.onload = function() { handleTextureLoaded(cubeImage, cubeTexture); }
+  cubeImage.src = "clock2.png";
+}
+
+function handleTextureLoaded(image, texture) {
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
+  gl.generateMipmap(gl.TEXTURE_2D);
+  gl.bindTexture(gl.TEXTURE_2D, null);
+}
+
 //
 // initShaders
 //
@@ -317,7 +404,7 @@ function drawScene() {
 function initShaders() {
    shaders = loadShaders(gl, "vs", ["vshader"]);
     vertexShader = shaders[0];
-    shaders = loadShaders(gl, "fs", ["blah"]);
+    shaders = loadShaders(gl, "fs", ["texturebp"]);
     fragmentShader = shaders[0];
   
   // Create the shader program
