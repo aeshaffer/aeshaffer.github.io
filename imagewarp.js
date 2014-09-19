@@ -110,7 +110,7 @@ $(function() {
 	    retval[1] = imgData.data[i+1];
 	    retval[2] = imgData.data[i+2];
 	    retval[3] = imgData.data[i+3];
-	    retval[3] = 255;
+	    retval[4] = 255;
 	    return retval;
 	}
 	var images = rpipToRGBA(rpip, rbidata, rgbfn);
