@@ -107,10 +107,10 @@ $(function() {
 	var rgbfn = function(bpz) {
 	    var retval = new Array(4);
 	    var i = getI(bpz, imagecanvas.width, imagecanvas.height);
+	    retval[0] = imgData.data[i+0];
 	    retval[1] = imgData.data[i+1];
 	    retval[2] = imgData.data[i+2];
 	    retval[3] = imgData.data[i+3];
-	    retval[4] = 255;
 	    return retval;
 	}
 	var images = rpipToRGBA(rpip, rbidata, rgbfn);
