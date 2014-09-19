@@ -29,7 +29,48 @@
   <meta charset="utf-8" />
 </head>
 <body>
-  <div>
+  <div style="float: left; width: 400px; height: 400px;">
+    <h2>Pick a File:</h2>
+    <h3>Examples</h3>
+    <button type="button" id="goantique">Antique</button>
+    <button type="button" id="goclock2">Modern</button>
+    <button type="button" id="gorainbow">Rainbow</button>
+    <button type="button" id="goandrew">Andrew</button>
+    <button type="button" id="gogoose">Goose</button>
+    <h3>Or, pick a file from your computer:</h3>
+    Pick a file to upload, then click "Load."  For best results, pick an image larger than 400x400 pixels.
+    <input type="file" id="uploadfile"></input>
+    <button type="button" id="goupload">Load</button>
+    <h3>Pick a URL (might not work)</h3>
+    <input style="width: 75%;" id="loadimage" value="./antique.png"></input>
+    <button type="button" id="goloadimage">Load</button>
+    <br/>
+  </div>
+  <div style="float: left; width: 400px; height: 400px; position: relative;">
+    <div style="position: absolute; right: 0px; top: 0px;">Original Image</div>
+    <canvas id="imagecanvas" width="400" height="400"></canvas>
+  </div>
+  <h2 style="clear: both;">Pick Zeroes, and Click "Warp Image"</h2>
+  <div style="display: none">
+    Eval: <div class="progress"></div>
+    RB: <ul class="rainbowstatus"><li></li></ul>
+    Reg: <ul class="regionsstatus"><li></li></ul>
+  </div>
+  <div class="zeroesholder rainbowholder">
+    <span class="zhlabel">arg(B)</span>
+    <div class="circle"></div>
+    <canvas class="rainbow graph">
+    </canvas>
+    <canvas class="rblines graph lines">
+    </canvas>
+  </div>
+  <div class="zeroesholder rainbowholder" style="width: 400px; height: 400px;">
+    Mapped Image
+    <canvas id="mapcanvas" width="400" height="400"></canvas>
+    <button type="button" id="mapimage" style="position: absolute; right: 0px; top: 0px;">Warp Image</button>
+  </div>
+  <br/>
+    <div>
     Show Advanced Options:<input type="checkbox" class="showadvanced" value="false" />
     <span class="advanced">
       Rendered Size: <input class="pixels" value="400" />
@@ -58,9 +99,9 @@
     Auto Identify Points: <input class="autolinespoints" value="2" style="width: 50px;"/>
     <button type="button" class="clearlines">Clear Lines</button>
     <button type="button" class="autolinesgo">Redraw Lines</button>
-    Auto Re-Draw:<input class="reidonrplot" checked type="checkbox"/>    
-    Solid Lines:<input class="solidtangents" checked type="checkbox" />
-    Guess Ellipse:<input class="doguessellipse" checked type="checkbox" />
+    Auto Re-Draw:<input class="reidonrplot"  type="checkbox"/>    
+    Solid Lines:<input class="solidtangents"  type="checkbox" />
+    Guess Ellipse:<input class="doguessellipse"  type="checkbox" />
     <span class="advanced">Plot Interp:<input class="plotinterp" value="false" type="checkbox"/></span>
   </div>
   <div id="clicklocation" style="margin: 10px 0px;" >
@@ -73,32 +114,7 @@
       <tr><td class="point">&nbsp;</td><td class="dest">&nbsp;</td></tr>
     </table>
   </div>
-  <div style="display: none">
-  Eval: <div class="progress"></div>
-  RB: <ul class="rainbowstatus"><li></li></ul>
-  Reg: <ul class="regionsstatus"><li></li></ul>
-  </div>
-  <div class="zeroesholder rainbowholder">
-    <span class="zhlabel">arg(B)</span>
-    <div class="circle"></div>
-    <canvas class="rainbow graph">
-    </canvas>
-    <canvas class="rblines graph lines">
-    </canvas>
-  </div>
-  <div class="zeroesholder rainbowholder" style="width: 400px; height: 400px;">
-    Mapped Image
-    <canvas id="mapcanvas" width="400" height="400"></canvas>
-    <button type="button" id="mapimage" style="position: absolute; right: 0px; top: 0px;">Load</button>
-  </div><br/>
-  <div class="zeroesholder rainbowholder" style="width: 400px; height: 400px;">
-    Image
-    <canvas id="imagecanvas" width="400" height="400"></canvas>
-    <input style="width: 100%;" id="loadimage" value="http://localhost/~ashaffer/jsblaschke/antique.png"></input>
-    <button type="button" id="goloadimage">Load</button>
-  </div>
-
-  <div>
+  <div style="clear: both;">
     <div class="statsblock">
       <h3>Load/Edit</h3>
       <button type="button" class="loadbutton">Load</button>

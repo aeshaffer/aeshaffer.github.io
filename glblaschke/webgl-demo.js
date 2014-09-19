@@ -61,17 +61,23 @@ function getXY2(z) {
 function plotCVAngles(cpi) {
     cvcanvascontext.clearRect(0, 0, cvcanvas.width, cvcanvas.height);
     var cvangles = cpi.cvangles;
-    var rs = numeric.linspace(0,1,256);
-    var zs = locations.map(function(arr) { return c(arr[0], arr[1]); });
-    for(var cvai = 0; cvai < cvangles.length; cvai++) {
-	var cv = cvangles[cvai];
-	var preimages = rs.map(function(r) { return preimage(zs, rt2c(r, cv))});
-	var np = [];
-	np = np.concat.apply(np, preimages)
-	var preimagesPixels = np.map(function(z) {return getXY2(fixy(z));});
-	for(var pii = 0; pii < preimagesPixels.length; pii++) {	    
-	    var pip = preimagesPixels[pii];
-	    cvcanvascontext.putImageData(Math.random() > .5 ? idBlack: idWhite, pip.x, pip.y);
+    if(cvangles.length > 0) {
+	var rs = numeric.linspace(0,1,Math.round(256/cvangles.length));
+	var zs = locations.map(function(arr) { return c(arr[0], arr[1]); });
+	for(var cvai = 0; cvai < cvangles.length; cvai++) {
+	    var cv = cvangles[cvai];
+	    var preimages = rs.map(function(r) { return preimage(zs, rt2c(r, cv))});
+	    var np = [];
+	    np = np.concat.apply(np, preimages)
+	    var preimagesPixels = np.map(function(z) {return getXY2(fixy(z));});
+	    for(var pii = 0; pii < preimagesPixels.length; pii++) {	    
+		var pip = preimagesPixels[pii];
+		//cvcanvascontext.putImageData(Math.random() > .5 ? idBlack: idWhite, pip.x, pip.y);
+		cvcanvascontext.beginPath();
+		cvcanvascontext.arc(pip.x, pip.y, 2, 0, 2*Math.PI, false);
+		cvcanvascontext.fillStyle = Math.random() > .5 ? 'blue' : 'orange';
+		cvcanvascontext.fill();
+	    }
 	}
     }
 }
@@ -80,6 +86,15 @@ function recalcBP(cvlines) {
     bproots = cpinfo(locations.map(xytoc));
     if(cvlines) {  
 	plotCVAngles(bproots);
+	var xys = locations.map(function (a) { return getXY2(c(a[0], a[1]))});
+	for(var i = 0; i < xys.length; i++) {
+	    var xy = xys[i];
+	    cvcanvascontext.beginPath();
+	    cvcanvascontext.arc(xy.x, xy.y, 5, 0, 2*Math.PI, false);
+	    cvcanvascontext.strokeStyle='black';
+	    cvcanvascontext.lineWidth=2;
+	    cvcanvascontext.stroke();
+	}
     }
     if($("#plotcps").is(":checked")) {
 	cssscatter($(".canvaswrapper"), 640, bproots.cps, "cp", true);
@@ -185,34 +200,34 @@ $(function() {
 // Called when the canvas is created to get the ball rolling.
 //
 function start() {
-  canvas = document.getElementById("glcanvas");
-
-  initWebGL(canvas);      // Initialize the GL context
-  
-  // Only continue if WebGL is available and working
-  
-  if (gl) {
-    gl.clearColor(0.0, 0.0, 0.0, 1.0);  // Clear to black, fully opaque
-    gl.clearDepth(1.0);                 // Clear everything
-    gl.enable(gl.DEPTH_TEST);           // Enable depth testing
-    gl.depthFunc(gl.LEQUAL);            // Near things obscure far things
+    canvas = document.getElementById("glcanvas");
     
-    // Initialize the shaders; this is where all the lighting for the
-    // vertices and so forth is established.
+    initWebGL(canvas);      // Initialize the GL context
     
-    initShaders();
+    // Only continue if WebGL is available and working
     
-    // Here's where we call the routine that builds all the objects
-    // we'll be drawing.
-    
-    initBuffers();
-
-      initTextures();
-    
-    // Set up to draw the scene periodically.
-    
-    setInterval(drawScene, 15);
-  }
+    if (gl) {
+	gl.clearColor(0.0, 0.0, 0.0, 1.0);  // Clear to black, fully opaque
+	gl.clearDepth(1.0);                 // Clear everything
+	gl.enable(gl.DEPTH_TEST);           // Enable depth testing
+	gl.depthFunc(gl.LEQUAL);            // Near things obscure far things
+	
+	// Initialize the shaders; this is where all the lighting for the
+	// vertices and so forth is established.
+	
+	initShaders();
+	
+	// Here's where we call the routine that builds all the objects
+	// we'll be drawing.
+	
+	initBuffers();
+	
+	initTextures();
+	
+	// Set up to draw the scene periodically.
+	
+	setInterval(drawScene, 15);
+    }
 }
 
 //
@@ -379,6 +394,46 @@ function drawScene() {
 
 var cubeTexture;
 var cubeImage;
+
+$(function() {
+    $("#goupload").click(function() {
+	var file = $("#uploadfile")[0].files[0];
+	var fr = new FileReader();
+	fr.onload = function() {
+	    initTexturesFile(fr.result);
+	}
+	fr.readAsDataURL(file);
+    });
+});
+
+function initTexturesFile(durl) {
+  cubeTexture = gl.createTexture();
+  cubeImage = new Image();
+  cubeImage.onload = function() { 
+      // Draw the image into the canvas
+      var origctx = origcanvas.getContext("2d");
+      var dim = Math.min(cubeImage.width, cubeImage.height);
+      origcanvas.width = cubeImage.width;
+      origcanvas.height = cubeImage.height;
+      origctx.drawImage(cubeImage, 0, 0, cubeImage.width, cubeImage.height);
+      // Get the centered square region of the original image.
+      var squareID = origctx.getImageData((cubeImage.width - dim)/2, 
+					  (cubeImage.height - dim)/2, dim, dim);      
+      squarecanvas.width = dim;
+      squarecanvas.height = dim;
+      squarecanvas.getContext("2d").putImageData(squareID, 0, 0);
+      var squareImageURL = squarecanvas.toDataURL();
+      var squareImage = new Image();
+      squareImage.onload = function() {
+	  sourcecanvas.getContext("2d").drawImage(squareImage, 0,0,512, 512);
+	  var sourceImage = new Image();
+	  sourceImage.onload = function() {handleTextureLoaded(sourceImage, cubeTexture);};
+	  sourceImage.src = sourcecanvas.toDataURL();
+      }
+      squareImage.src = squareImageURL;
+  };
+  cubeImage.src = durl;
+}
 
 function initTextures() {
   cubeTexture = gl.createTexture();

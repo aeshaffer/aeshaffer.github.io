@@ -16,7 +16,7 @@ function loadCanvas(dataURL) {
     var imageObj = new Image();
     imageObj.onload = function() {
 	
-	var dim = Math.max(this.height, this.width);
+	var dim = Math.min(this.height, this.width);
 
 /*
 	$(imagecanvas).css("height", dim+"px");
@@ -86,8 +86,8 @@ $(function() {
 	var iccssh = $(imagecanvas).height();
 
 	function getXY2(z) {
-	    var xi = Math.round(iccssw)*(1+z.x)/2;
-	    var yi = Math.round(iccssh)*(1-z.y)/2;
+	    var xi = Math.round(iccssw*(1+z.x)/2);
+	    var yi = Math.round(iccssh*(1-z.y)/2);
 	    return {x: xi, y: yi};
 	}
 
@@ -103,14 +103,14 @@ $(function() {
 	var N = bpwidget.plotDims().N;
 	var rpip = bpgridevalArray(N, bpwidget.zs, null);
 	var imgData= imagecontext.getImageData(0,0,imagecanvas.width,imagecanvas.height);
-	var rbidata = new Uint8Array(4*imagecanvas.width*imagecanvas.height);
+	var rbidata = new Uint8Array(4*mapcanvas.width*mapcanvas.height);
 	var rgbfn = function(bpz) {
 	    var retval = new Array(4);
 	    var i = getI(bpz, imagecanvas.width, imagecanvas.height);
-	    retval[0] = imgData.data[i+0];
 	    retval[1] = imgData.data[i+1];
 	    retval[2] = imgData.data[i+2];
 	    retval[3] = imgData.data[i+3];
+	    retval[3] = 255;
 	    return retval;
 	}
 	var images = rpipToRGBA(rpip, rbidata, rgbfn);
@@ -135,7 +135,7 @@ $(function() {
 	idBlack.data[2] = 0;
 	idBlack.data[3] = 255;
 
-	var rs = numeric.linspace(0,1,512);
+	var rs = numeric.linspace(0,1,256);
 	for(var cvai = 0; cvai < cvangles.length; cvai++) {
 	    var cv = cvangles[cvai];
 	    var preimages = rs.map(function(r) { return preimage(bpwidget.zs, rt2c(r, cv))});
@@ -153,9 +153,16 @@ $(function() {
 	    }
 	}
     });
-    $("#goloadimage").click(function() {
+    $("#goupload").click(function() {
+	var file = $("#uploadfile")[0].files[0];
+	var fr = new FileReader();
+	fr.onload = function() {
+	    loadCanvas(fr.result);
+	}
+	fr.readAsDataURL(file);
+    });
+    function goUrl(url) {
 	var request = new XMLHttpRequest();
-	var url = $("#loadimage").val();
 	request.open('GET', url, true);
 	request.onreadystatechange = function() {
             // Makes sure the document is ready to parse.
@@ -167,5 +174,14 @@ $(function() {
             }
 	};
 	request.send(null);
+    }
+    $("#gogoose").click(function() { goUrl("./goose.png"); });
+    $("#goantique").click(function() { goUrl("./antique.png"); });
+    $("#goclock2").click(function() { goUrl("./clock2.jpg"); });
+    $("#gorainbow").click(function() { goUrl("./Rainbow.png"); });
+    $("#goandrew").click(function() { goUrl("./andrew2.png"); });
+    $("#goloadimage").click(function() {
+	var url = $("#loadimage").val();
+	goUrl(url);
     });
 });

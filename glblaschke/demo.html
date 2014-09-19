@@ -27,13 +27,21 @@
   </head>
   
   <body onload="start()">
-    <input type="checkbox" id="plotcps" checked="checked"></input>Plot CPS<br />
+    <input type="checkbox" id="plotcps" checked="checked"></input>Plot CPS
+    <input type="file" id="uploadfile"></input>
+    <button type="button" id="goupload">Load</button>
+    <br />
     <div class="canvaswrapper" id="glcanvaswrapper" >
       <canvas id="cvcanvas"  width="640" height="640" style="position: absolute; left: 0px; top: 0px;">
       </canvas>
       <canvas id="glcanvas" width="640" height="640">
 	Your browser doesn't appear to support the HTML5 <code>&lt;canvas&gt;</code> element.
       </canvas>
+    </div>
+    <div style="display: none;">
+      <canvas id="origcanvas"></canvas>
+      <canvas id="squarecanvas"></canvas>
+      <canvas id="sourcecanvas" width="512" height="512"></canvas>
     </div>
   </body>
 </html>
