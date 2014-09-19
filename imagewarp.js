@@ -60,6 +60,13 @@ function rpipToRGBA(rpip, idata, rgbfn) {
 		var bpz = c(rp[i], ip[i]);		
 		var rgb = rgbfn(bpz);
 		setRGBInner(idata, rgb, 4*i);	    
+	    } else {
+		var retval = new Array(4);
+		retval[0] = 128;
+		retval[0] = 0;
+		retval[0] = 0;
+		retval[0] = 255;
+		setRGBInner(idata, retval, 4*i);
 	    }
 	}
     }
@@ -116,13 +123,19 @@ $(function() {
 	var cps = this.cpi.cps;
 	var cvs = this.cpi.cvs;
 	var cvangles = this.cpi.cvangles;
-	var id = mapcontext.createImageData(1,1);
-	id.data[0] = 255;
-	id.data[1] = 255;
-	id.data[2] = 255;
-	id.data[3] = 255;
+	var idWhite = mapcontext.createImageData(1,1);
+	idWhite.data[0] = 255;
+	idWhite.data[1] = 255;
+	idWhite.data[2] = 255;
+	idWhite.data[3] = 255;
 
-	var rs = numeric.linspace(0,1,256);
+	var idBlack = mapcontext.createImageData(1,1);
+	idBlack.data[0] = 0;
+	idBlack.data[1] = 0;
+	idBlack.data[2] = 0;
+	idBlack.data[3] = 255;
+
+	var rs = numeric.linspace(0,1,512);
 	for(var cvai = 0; cvai < cvangles.length; cvai++) {
 	    var cv = cvangles[cvai];
 	    var preimages = rs.map(function(r) { return preimage(bpwidget.zs, rt2c(r, cv))});
@@ -131,7 +144,12 @@ $(function() {
 	    var preimagesPixels = np.map(function(z) {return getXY2(fixy(z));});
 	    for(var pii = 0; pii < preimagesPixels.length; pii++) {
 		var pip = preimagesPixels[pii];
-		mapcontext.putImageData(id, pip.x, pip.y);
+		var pxl = mapcontext.getImageData(pip.x, pip.y,1,1);
+		if(pxl.data[0] + pxl.data[1] + pxl.data[2] > 255*3/2) {
+		    mapcontext.putImageData(idBlack, pip.x, pip.y);		    
+		} else {
+		    mapcontext.putImageData(idWhite, pip.x, pip.y);		    
+		}
 	    }
 	}
     });
