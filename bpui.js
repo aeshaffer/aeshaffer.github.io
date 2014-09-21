@@ -55,8 +55,11 @@ function getNudge(div) {
 }
 
 function cssscatter(cw, canvaswidth, pts, cssclass, doclear) {
-    if(doclear == undefined || doclear) {
-	cw.find("."+cssclass).remove();
+    var moveexisting = pts.length == cw.find("."+cssclass).length;
+    if(!moveexisting) {
+	if(doclear == undefined || doclear) {
+	    cw.find("."+cssclass).remove();
+	}
     }
     var offset = canvaswidth/2;
     //console.log("Rescattering ", cw, cssclass, " at ", canvaswidth, offset);
@@ -65,13 +68,18 @@ function cssscatter(cw, canvaswidth, pts, cssclass, doclear) {
 	var z = pts[i];
 	var x = z.x;
 	var y = z.y == undefined ? 0: z.y;
-	var div = $("<div />");
-	cw.append(div);
-	
-	div.addClass(cssclass);
-	div.addClass("scatterpoint");
-	div.addClass(cssclass+i);
-	div.attr("zeroid", i);
+	var div;
+	if(!moveexisting) {
+	    div = $("<div />");
+	    cw.append(div);
+	    
+	    div.addClass(cssclass);
+	    div.addClass("scatterpoint");
+	    div.addClass(cssclass+i);
+	    div.attr("zeroid", i);
+	} else {
+	    div = cw.find("."+cssclass+"[zeroid='"+i+"']");
+	}
 	var nudge = getNudge(div);
 	div.css("top",  Math.round(offset - offset*y - nudge));
 	div.css("left", Math.round(offset + offset*x - nudge));
@@ -361,32 +369,38 @@ BPWidget.prototype.displayTables = function(zs, cpi) {
 };
 
 BPWidget.prototype.updatezero = function(zdiv) {
+    try {
     var nudge = getNudge($(zdiv));
     var zeroid = $(zdiv).attr("zeroid");
     var cw = $(zdiv).parent(".zeroesholder");
-    var p = $(zdiv).position();
-    var canvas = cw.find("canvas");
-    var contpos;
-    var unit;
-    if(canvas != null) {
-	unit = canvas.width() /2.0;
-	contpos = canvas.position();
-    } else {
-	unit = cw.width() / 2.0;
-	contpos = cw.position();	
+    if(cw.length != 0) { // Happens when a zero is dragged outside the circle and is removed from the list
+	var p = $(zdiv).position();
+	var canvas = cw.find("canvas");
+	var contpos;
+	var unit;
+	if(canvas != null) {
+	    unit = canvas.width() /2.0;
+	    contpos = canvas.position();
+	} else {
+	    unit = cw.width() / 2.0;
+	    contpos = cw.position();	
+	}
+	var	newpos = {
+	    left: p.left - contpos.left + nudge,
+	    top: p.top - contpos.top + nudge
+	};    
+	var z = c(newpos.left/unit-1, -(newpos.top/unit - 1));
+	if(z.abs().x <= 1) {
+	    this.zs[zeroid] = z;
+	} else {
+	    this.zs.splice(zeroid, 1);
+	}
+	
+	this.rescatter();
     }
-    var	newpos = {
-	left: p.left - contpos.left + nudge,
-	top: p.top - contpos.top + nudge
-    };    
-    var z = c(newpos.left/unit-1, -(newpos.top/unit - 1));
-    if(z.abs().x <= 1) {
-	this.zs[zeroid] = z;
-    } else {
-	this.zs.splice(zeroid, 1);
+    } catch (err) {
+	alert(err);
     }
-    
-    this.rescatter();
 };
 
 BPWidget.prototype.rescatter = function() {
@@ -451,6 +465,7 @@ BPWidget.prototype.rescatter = function() {
 	.addClass("ui-widget-content")
 	.draggable({
 	    containment: cw, scroll: false,
+	    drag: function() { that.updatezero($(this));},
 	    stop: function() { that.updatezero($(this));}
 	});
     
