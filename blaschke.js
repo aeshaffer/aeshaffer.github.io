@@ -94,7 +94,7 @@ function biggestanglediff(ints) {
     for(var i = 0; i < ts.length; i++) {
 	var t0 = ts[i];
 	var t1 = ts[(i+1) % ts.length];
-	var diff = Math.abs(normalizeangle(t1-t0));
+	var diff = normalizeangle(t1-t0);
 	//print("" + t0 + " " + t1 + " " + " "+diff);
 	if(diff > maxdiff) {
 	    maxdiff = diff;
@@ -102,7 +102,12 @@ function biggestanglediff(ints) {
 	}
     }
     var retval = {t0:ts[maxind], t1: ts[(maxind+1) % ts.length]};
-    retval.midpt = Math.abs(anglediff((t1+t0)/2));
+    if(t1 > t0) {
+	// t1-t0 is greater than zero.
+	retval.midpt = t0 + (t1-t0)/2;
+    } else {
+	retval.midpt = t0 + (t1-t0)/2;
+    }
     return retval;
 }
 
