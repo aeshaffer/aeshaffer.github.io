@@ -1150,6 +1150,12 @@ BPWidget.prototype.setup = function() {
     });
 
     this.plotbutton.click(function() {
+
+	    if(parseFloat(that.pixels.val()) > 900) {
+		$("body").addClass("bigdots");
+	    } else {
+		$("body").removeClass("bigdots");
+	    }
 	that.replotMe();
     });
 };

@@ -28,12 +28,12 @@
 </head>
 <body>
   <h1>Blaschke Product Applet</h1>
-  <div style="margin: 20px;">
+  <div style="margin: 20px;" id="links">
     <a href="./guide.html" style="margin: 0px 20px;">User's Guide</a>
     <a href="./composetool.html">Open Compose Tool</a>
+    <hr />
   </div>
-  <hr />
-  <div>
+  <div id="settings1">
     Show Advanced Options:<input type="checkbox" class="showadvanced" value="false" />
     <span class="advanced">
       Rendered Size: <input class="pixels" value="400" />
@@ -52,7 +52,7 @@
     </select>
     <span class="advanced">B. Line Threshold: <input class="raythreshold" value="0"/></span>
   </div>
-  <div>
+  <div id="settings2">
     Skip Points: <input class="skippoints" value="1" style="width: 50px;"/>
     <!-- Angle: <input class="theta" value="0"/>
 	 <button type="button" class="timesPI">*= &pi;</button>

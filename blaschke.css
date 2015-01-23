@@ -33,6 +33,20 @@ div.scatterpoint {
     border-radius: 50%;
 }  
 
+.bigdots div.scatterpoint {
+    width: 27px;
+    height: 27px;
+}
+
+@media print {
+    h1, #links, #settings1, #settings2, #clicklocation, .zhlabel {
+	display: none;
+    }
+    body { 
+	margin: 10px;
+    }
+}
+
 div.innerzero {
     width: 13px;
     height: 13px;
