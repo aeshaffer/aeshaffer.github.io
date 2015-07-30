@@ -1,7 +1,15 @@
 .zhlabel {
     position: absolute;
     top: 0px;
-    left: 0px;
+    left: %;
+}
+
+.bigdots .zhlabel {
+    display:  none;
+}
+
+.bigdots .zeroesholder {
+    margin: 20px;
 }
 
 ul.criticalpoints, ul.zeroes, ul.criticalvalues, ul.criticalangles {

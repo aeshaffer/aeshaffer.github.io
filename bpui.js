@@ -215,6 +215,7 @@ function BPWidgetSetup(obj) {
     this.solidtangents = g(".solidtangents");
     this.doguessellipse = g(".doguessellipse");
     this.plotinterp = g(".plotinterp");
+    this.plotpolygon = g(".plotpolygon");
     this.windowscale= g(".windowscale");
     this.rayThreshold = g(".raythreshold");
     this.graphzoom= g(".graphzoom");
@@ -790,29 +791,32 @@ BPWidget.prototype.drawDecoratedEllipse = function(ctx, cent, majorAxisVector, m
 BPWidget.prototype.drawtangents = function(ctx, ajpct, drawsolid) {
     var tpts = numeric.linspace(0, 2*Math.PI - 2*Math.PI/ajpct, ajpct); // [0, Math.PI];
     for(var ti = 0; ti < tpts.length; ti++) {
-	
-	var pts = getTanPoints(this.zs, tpts[ti]);
-	
-	for(var i = 0; i < pts.length; i++) {
-	    ctx.lineWidth = 1.0/this.plotDims().graphN;
-	    
-	    ctx.beginPath();
-	    ctx.moveTo(pts[i].z1.x, fixy(pts[i].z1).y);
-	    
-	    if(drawsolid) {
-		ctx.strokeStyle = "#000";
-	    } else {
-	 	ctx.strokeStyle = "#00f";
-		ctx.lineTo(pts[i].ztan.x, fixy(pts[i].ztan).y);
-		ctx.stroke();
-		
-    		ctx.beginPath();
-		ctx.strokeStyle = "#0f0";
-		ctx.moveTo(pts[i].ztan.x, fixy(pts[i].ztan).y);
-	    }
-	    ctx.lineTo(pts[i].z2.x, fixy(pts[i].z2).y);
-	    ctx.stroke();
-	}
+		var pts = getTanPoints(this.zs, tpts[ti]);
+		if($("body").hasClass("bigdots")) {
+			ctx.lineWidth = 10.0/this.plotDims().graphN;			
+		} else {
+			ctx.lineWidth = 1.0/this.plotDims().graphN;			
+		}
+
+		for(var i = 0; i < pts.length; i++) {
+
+			ctx.beginPath();
+			ctx.moveTo(pts[i].z1.x, fixy(pts[i].z1).y);
+
+			if(drawsolid) {
+				ctx.strokeStyle = "#000";
+			} else {
+				ctx.strokeStyle = "#00f";
+				ctx.lineTo(pts[i].ztan.x, fixy(pts[i].ztan).y);
+				ctx.stroke();
+
+				ctx.beginPath();
+				ctx.strokeStyle = "#0f0";
+				ctx.moveTo(pts[i].ztan.x, fixy(pts[i].ztan).y);
+			}
+			ctx.lineTo(pts[i].z2.x, fixy(pts[i].z2).y);
+			ctx.stroke();
+		}
     }
 }
 
@@ -848,8 +852,10 @@ BPWidget.prototype.autojoinpoints = function() {
 	    // Get tangent segments.
 	    var intersections = getTangentSegments(this.zs, ajpct);
 	    var ints = getSortedByCenter(intersections);    
-	    this.drawtangents(ctx, ajpct, drawsolid);   
-	    this.drawponcelet(ctx, ints);
+	    this.drawtangents(ctx, ajpct, drawsolid); 
+	    if(this.plotpolygon.is(":checked")) {  
+	    	this.drawponcelet(ctx, ints);
+	    }
 	} else {
 	    this.drawtangents(ctx, ajpct, drawsolid);
 	    
