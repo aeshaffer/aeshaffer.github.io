@@ -216,6 +216,8 @@ function BPWidgetSetup(obj) {
     this.doguessellipse = g(".doguessellipse");
     this.plotinterp = g(".plotinterp");
     this.plotpolygon = g(".plotpolygon");
+	this.hidecps = g(".hidecps");
+
     this.windowscale= g(".windowscale");
     this.rayThreshold = g(".raythreshold");
     this.graphzoom= g(".graphzoom");
@@ -225,6 +227,7 @@ function BPWidgetSetup(obj) {
     this.loadbutton= g(".loadbutton");
     this.zsstring= g(".zsstring");
     this.plotbutton= g(".plotbutton");
+    this.screenshot = g(".screenshot");
     this.skippoints= g(".skippoints");
     this.autolinespoints= g(".autolinespoints");
     this.theta= g(".theta");
@@ -1099,6 +1102,23 @@ BPWidget.prototype.setup = function() {
 	    }
 	});
 
+	this.pixels.change(function() {
+		if(parseFloat(that.pixels.val()) > 900) {
+		$("body").addClass("bigdots");
+	    } else {
+		$("body").removeClass("bigdots");
+	    }
+	    that.clearplots.click();
+	})
+
+	this.hidecps.change(function () {
+		if($(this).is(":checked")) {
+			$("body").addClass("hidecps");
+		} else {
+			$("body").removeClass("hidecps");
+		}
+	});
+
     this.showadvanced.change();
 
     this.skippoints.change(function() { that.rescatter(); });
@@ -1170,13 +1190,13 @@ BPWidget.prototype.setup = function() {
 	$.each(pilis, function(i,e) { that.foundpreimages.append(e); });
     });
 
+	this.screenshot.click(function() {
+		window.open("./screenshot.html", "width="+that.rainbow[0].width+"height="+that.rainbow[0].height);
+	})
+
     this.plotbutton.click(function() {
 
-	    if(parseFloat(that.pixels.val()) > 900) {
-		$("body").addClass("bigdots");
-	    } else {
-		$("body").removeClass("bigdots");
-	    }
+	    
 	that.replotMe();
     });
 };

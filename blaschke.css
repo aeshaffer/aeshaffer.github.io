@@ -4,6 +4,10 @@
     left: %;
 }
 
+body.hidecps .cp {
+    display: none;
+}
+
 .bigdots .zhlabel {
     display:  none;
 }
