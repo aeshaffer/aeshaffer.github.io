@@ -2,7 +2,6 @@
 // load("polynomials.js");
 
 function o(a,b) { return a-b; }
-function t2c(t) { return rt2c(1,t); }
 
 function abpolynomial(inalphas, inbetas) {
     var alphas = inalphas.map(normalizeangle);

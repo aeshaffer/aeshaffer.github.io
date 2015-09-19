@@ -1,3 +1,5 @@
+"use strict";
+
 // From http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values
 
 function getQSMap(s) {    
@@ -230,6 +232,7 @@ function BPWidgetSetup(obj) {
     this.clearplots= g(".clearplots");
     this.clearlines= g(".clearlines");
     this.autolinesgo= g(".autolinesgo");
+    this.animatelines = g(".animatelines");
     this.timesPI= g(".timesPI");
     this.plottheta= g(".plottheta");
     this.clearpreimages= g(".clearpreimages");
@@ -262,6 +265,8 @@ BPWidget.prototype.wireup = function() {
 
     this.setup();
 };
+
+function H(n) { n = Math.round(n); return (n < 16 ? "0" : "") + n.toString(16); }
 
 BPWidget.prototype.displayTables = function(zs, cpi) {
     this.criticalpoints.empty();
@@ -349,7 +354,6 @@ BPWidget.prototype.displayTables = function(zs, cpi) {
 	li.text(round5(cpi.cvangles[i]) +"-" + round5(rolledcvangles[i]));
 	var rgb = hsvToRgb(1.0*i/(cpi.cvangles.length), 1, 1);
 
-	function H(n) { n = Math.round(n); return (n < 16 ? "0" : "") + n.toString(16); }
 	var rgbstring = "#"+H(rgb[0]) + H(rgb[1]) + H(rgb[2]);
 	li.css("background-color", rgbstring);
 
@@ -521,7 +525,7 @@ BPWidget.prototype.resizeCanvases = function() {
 BPWidget.prototype.fastReplot = function(as, N, cpi, raythreshold) {
     var startBPGE = (new Date()).getTime();
     var rpip = bpgridevalArray(N, as, null);
-    bpzs = rpipToBpzs(rpip);
+    var bpzs = rpipToBpzs(rpip);
     var endBPGE = (new Date()).getTime();
     this.progress.append("NWRP " + N + " " + as.length + " " + (endBPGE - startBPGE));
 
@@ -553,29 +557,42 @@ BPWidget.prototype.fastReplot = function(as, N, cpi, raythreshold) {
     }
 };
 
+function getPIAngles(zs, t) {	
+	var z2 = c(numeric.cos(t), numeric.sin(t));
+	// var bz2 = bpeval0(this.zs, z2);
+	var bz2 = z2;
+	var preimages = preimage(zs, bz2);
+	var piangles = preimages.map(function(cv) { return cv.angle();})
+	piangles = piangles.sort(function(a,b){return a-b});	
+	return piangles;
+}
 
+function getPolylength(zs) {
+	var retval = 0;
+	for(var i = 0; i < zs.length; i++) {
+		var z0 = zs[i % zs.length];
+		var z1 = zs[(i+1) % zs.length];
+		retval += z0.sub(z1).abs().x;
+	}
+	return retval;
+}
 
 BPWidget.prototype.drawPILines = function(t) {
     var skips = this.skippoints.val().split(",");
     for(var i = 0; i < skips.length; i++) {	
-	var skip = parseInt(skips[i], 10);
-	if(this.zs.length % skip != 0) {
-	    this.skippoints.css("background-color", "red");
-	    this.skippoints.attr("title", "Cannot skip "+this.zs.length+" points by " + skip + ".");
-	    return;
-	} else {
-	    this.skippoints.css("background-color", "");
-	    this.skippoints.attr("title", "");
-	}
-	
-	var z2 = c(numeric.cos(t), numeric.sin(t));
-	// var bz2 = bpeval0(this.zs, z2);
-	var bz2 = z2;
-	var preimages = preimage(this.zs, bz2);
-	var piangles = preimages.map(function(cv) { return cv.angle();})
-	piangles = piangles.sort(function(a,b){return a-b});
-	
-	this.drawPILinesInner(this.rblines[0], piangles, skip);
+		var skip = parseInt(skips[i], 10);
+		if(this.zs.length % skip != 0) {
+			this.skippoints.css("background-color", "red");
+			this.skippoints.attr("title", "Cannot skip "+this.zs.length+" points by " + skip + ".");
+			return;
+		} else {
+			this.skippoints.css("background-color", "");
+			this.skippoints.attr("title", "");
+		}
+
+		var piangles = getPIAngles(this.zs, t);
+
+		this.drawPILinesInner(this.rblines[0], piangles, skip);
     }
     //drawPILinesInner(rglines, piangles, skip);
 };
@@ -590,27 +607,112 @@ function setupCTX(lines, N) {
     return ctx;
 }
 
-BPWidget.prototype.drawPILinesInner = function(lines, piangles, skip){
+function getCurrentSegment(zs, targetLength) {
+	var drawnLength = 0;
+	var z0;
+	var z1;
+	for(var i = 0; i < zs.length + 1; i++) {
+		z0 = zs[i % zs.length];
+		z1 = zs[(i+1) % zs.length];
+		var z1mz0 = z1.sub(z0);
+		var lineLength = z1mz0.abs().x;
+		if(drawnLength + lineLength >= targetLength) {
+			// Draw in the same direction with whatever length we have left over.
+			var z = z0.add(z1mz0.div(lineLength).mul(targetLength - drawnLength));
+			return {segment : [z0, z1], point: z};
+		} 			
+		drawnLength += lineLength;	
+	}
+	return {segment : [z0, z1], point: z1};
+}
+
+BPWidget.prototype.drawPILinesInner = function(lines, piangles, skip, totalLength){
 
     var N = this.plotDims().windowN;
     var ctx = setupCTX(lines, N);
 
+	var frontier = [];
+
     for(var j = 0; j < skip; j++) {
-	var i = j;
-	var t0 = piangles[i];
+		var drawnLength = 0;
+		var i = j;
+		var t0 = piangles[i];
+		var t1 = null;
 
-	ctx.beginPath();
-	(ctx.moveTo).apply(ctx, ttp(t0));
-	for(i = j+skip; i < piangles.length; i+= skip) {
-	    t0 = piangles[i];
-	    (ctx.lineTo).apply(ctx, ttp(t0));
-	}
-	ctx.closePath();
-	ctx.stroke();
+		var skippedangles = [];
+		for(var i = j; i < piangles.length; i+= skip) {
+			skippedangles.push(piangles[i]);
+		}
 
+		ctx.beginPath();
+		(ctx.moveTo).apply(ctx, ttp(t0));
+		var t0z;
+		var t1z;
+		for(i = 0; i < skippedangles.length + 1; i++) {
+			t1 = piangles[i % piangles.length];
+			t0z = t2c(t0);
+			t1z = t2c(t1);
+			var lineLength = t1z.sub(t0z).abs().x;
+			if(drawnLength + lineLength > totalLength) {
+				// Draw in the same direction with whatever length we have left over.
+				var z = t0z.add(t1z.sub(t0z).div(lineLength).mul(totalLength - drawnLength));
+				t1z = z;
+				(ctx.lineTo).apply(ctx, c2xy(z));	
+				drawnLength = totalLength;
+				break;
+			} else {
+				(ctx.lineTo).apply(ctx, ttp(t1));			
+				drawnLength += lineLength;
+				t0 = t1;
+			}
+		}
+		ctx.stroke();
+
+		frontier.push(t1z);
+
+		// crossHairs(lines, N, skippedangles, drawnLength);
+		//ctx.restore();
     }
+
+	for(var i = 0; i < frontier.length; i++) {
+		ctx.beginPath();
+		(ctx.arc).apply(ctx, [frontier[i].x, frontier[i].y, 6*ctx.lineWidth, 0, 2*Math.PI]);
+		var rgb = hsvToRgb(anglehue(bpeval(this.zs, t2c(piangles[0]))), 1, 1);
+		ctx.fillStyle = rgbToHex(rgb);
+		ctx.fill();		
+	}
+
+
     ctx.restore();
 };
+
+function rgbToHex(rgb) {
+	var s = ("0" + (Math.round(rgb[0]) * 65536 + Math.round(rgb[1]) * 256 + Math.round(rgb[0])).toString(16)); 
+	return "#" + s.substr(s.length-6);
+}
+
+function crossHairs(lines, N, skippedangles, drawnLength) {
+
+	var endpointzs = skippedangles.map(t2c);
+	var segment = getCurrentSegment(endpointzs, drawnLength);
+	var pt = c2xy(segment.point); 
+	var ctx = setupCTX(lines, N);
+	//ctx.save();
+	ctx.beginPath();
+	ctx.moveTo(pt.x, -1);
+	ctx.lineTo(pt.x, 1);
+	ctx.stroke();
+
+	ctx.beginPath();
+	ctx.moveTo(-1, pt.y);
+	ctx.lineTo(1, pt.y);
+	ctx.stroke();
+/* 		
+	ctx.arc(pt.x, pt.y, .1, 0, 2*Math.PI);
+	ctx.fillStyle = "#FF0000";
+	ctx.fill();
+		*/
+}
 
 function getSortedByCenter(intersections) {
     var ints = [];
@@ -816,20 +918,60 @@ BPWidget.prototype.drawtangents = function(ctx, ajpct, drawsolid) {
     }
 }
 
+function spacedAngles(n) {
+	var delta = Math.PI*2.0/n;
+	var ts = [];
+	for(var i = 0; i < n; i++) {
+		ts.push(delta*i);
+	}
+	return ts;
+}
+
 BPWidget.prototype.joinpis = function(ajpct) {
-    var adelta = Math.PI*2.0/ajpct;
-    for(var i = 0; i < ajpct; i++) {
-	// console.log("Joining points that map to "+i*adelta);
-	this.drawPILines(i*adelta);
+	var thetas = spacedAngles(ajpct);
+    for(var i = 0; i < thetas.length; i++) {
+		this.drawPILines(thetas[i]);
     }
 }
 
+BPWidget.prototype.setupanimatetangents = function() {
+	this.doclearlines();
+	var ajpct = parseInt(this.autolinespoints.val(), 10);
+
+	var thetas = spacedAngles(ajpct);
+	var preimageangles = [];
+	for(var i = 0; i < thetas.length; i++) {
+		var t = thetas[i];
+		var piangles = getPIAngles(this.zs, t);
+		preimageangles.push(piangles);	
+	}
+	var widget = this;
+	window.requestAnimationFrame(function() { tangentsframe(widget, new Date(), preimageangles); } )
+}
+
+var tangentsframe = function(widget, timeZero, preimages) {
+	var time = new Date();
+	var timepct = (time.getTime() - timeZero.getTime())/5000.0;
+	widget.doclearlines();
+	for(var i = 0; i < preimages.length; i++) {
+		var piangles = preimages[i];
+		var polylength = getPolylength(piangles.map(t2c));
+		widget.drawPILinesInner(widget.rblines[0], piangles, 1, polylength*timepct);
+	}
+	if(timepct <= 1) {
+		window.requestAnimationFrame(function() { tangentsframe(widget, timeZero, preimages); } )
+	}
+}
+
+var animateCallback;
+
 BPWidget.prototype.autojoinpoints = function() {	
     this.doclearlines();
-    var ajpct = parseInt(this.autolinespoints.val(), 10);
 
+    var ajpct = parseInt(this.autolinespoints.val(), 10);
     this.joinpis(ajpct);
 
+	// Setup another context
     var ctx = setupCTX(this.rblines[0], this.plotDims().windowN);
 
     var ints2 = new Array(); // ajpct*this.zs.length);
@@ -1011,6 +1153,8 @@ BPWidget.prototype.attachcanvasclicks = function() {
     this.rblines.on("click", cf);
     this.rglines.on("click", joinpoints);
 
+	this.animatelines.on("click", function() {that.setupanimatetangents(); })
+
     this.autolinesgo.on("click", function() {that.autojoinpoints();});
     this.timesPI.on("click", function() {
 	var t = parseFloat(that.theta.val());
@@ -1072,12 +1216,12 @@ BPWidget.prototype.setup = function() {
     ];
     */
 
-    zeroonehalf = [
+    var zeroonehalf = [
 	c(0 ,0),
 	c(.5,0)
     ];
     
-    z = [
+    var z = [
 	c(0,0)
     ];
     
