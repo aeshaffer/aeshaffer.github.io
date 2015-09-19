@@ -672,26 +672,20 @@ BPWidget.prototype.drawPILinesInner = function(lines, piangles, skip, totalLengt
 		}
 		ctx.stroke();
 
-		frontier.push(t1z);
+		frontier.push({t: piangles[0], dot: t1z});
 
 		// crossHairs(lines, N, skippedangles, drawnLength);
 		//ctx.restore();
     }
 
-	for(var i = 0; i < frontier.length; i++) {
-		ctx.beginPath();
-		(ctx.arc).apply(ctx, [frontier[i].x, frontier[i].y, 6*ctx.lineWidth, 0, 2*Math.PI]);
-		var rgb = hsvToRgb(anglehue(bpeval(this.zs, t2c(piangles[0]))), 1, 1);
-		ctx.fillStyle = rgbToHex(rgb);
-		ctx.fill();		
-	}
-
-
     ctx.restore();
+
+	return frontier;
+
 };
 
 function rgbToHex(rgb) {
-	var s = ("0" + (Math.round(rgb[0]) * 65536 + Math.round(rgb[1]) * 256 + Math.round(rgb[0])).toString(16)); 
+	var s = ("0000000" + (Math.round(rgb[0]) * 65536 + Math.round(rgb[1]) * 256 + Math.round(rgb[2])).toString(16)); 
 	return "#" + s.substr(s.length-6);
 }
 
@@ -960,11 +954,31 @@ var tangentsframe = function(widget, timeZero, preimages) {
 	var time = new Date();
 	var timepct = (time.getTime() - timeZero.getTime())/5000.0;
 	widget.doclearlines();
+	var frontier = [];
 	for(var i = 0; i < preimages.length; i++) {
 		var piangles = preimages[i];
 		var polylength = getPolylength(piangles.map(t2c));
-		widget.drawPILinesInner(widget.rblines[0], piangles, 1, polylength*timepct);
+		var myfrontier = widget.drawPILinesInner(widget.rblines[0], piangles, 1, polylength*timepct);
+		for(var j = 0; j < myfrontier.length; j++) {
+			frontier.push(myfrontier[j]);
+		}
 	}
+
+	var N = widget.plotDims().windowN;
+	var ctx = setupCTX(widget.rblines[0], N);
+
+	for(var i = 0; i < frontier.length; i++) {
+		var t = frontier[i].t;
+		var dot = frontier[i].dot;
+			ctx.beginPath();
+			(ctx.arc).apply(ctx, [dot.x, dot.y, 6*ctx.lineWidth, 0, 2*Math.PI]);
+			var rgb = hsvToRgb(anglehue(bpeval(widget.zs, t2c(t))), 1, 1);
+			ctx.fillStyle = rgbToHex(rgb);
+			ctx.fill();					
+	}
+
+	ctx.restore();
+
 	if(timepct <= 1) {
 		window.requestAnimationFrame(function() { tangentsframe(widget, timeZero, preimages); } )
 	}
