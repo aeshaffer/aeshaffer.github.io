@@ -967,8 +967,8 @@ var tangentsframe = function(widget, timeZero, preimages) {
 
 	var skips = widget.getSkips();
     if(skips != null) {
-    	for(var i = 0; i < skips.length; i++) {
-    		var skip = skips[i];
+    	for(var s = 0; s < skips.length; s++) {
+    		var skip = skips[s];
 			for(var i = 0; i < preimages.length; i++) {
 				var piangles = preimages[i];
 				var polylength = getPolylength(piangles.map(t2c));
@@ -988,11 +988,13 @@ var tangentsframe = function(widget, timeZero, preimages) {
 	for(var i = 0; i < frontier.length; i++) {
 		var t = frontier[i].t;
 		var dot = frontier[i].dot;
-			ctx.beginPath();
-			(ctx.arc).apply(ctx, [dot.x, dot.y, 6*ctx.lineWidth, 0, 2*Math.PI]);
-			var rgb = hsvToRgb(anglehue(bpeval(widget.zs, t2c(t))), 1, 1);
-			ctx.fillStyle = rgbToHex(rgb);
-			ctx.fill();					
+		ctx.beginPath();
+		(ctx.arc).apply(ctx, [dot.x, dot.y, 6*ctx.lineWidth, 0, 2*Math.PI]);
+		var rgb = hsvToRgb(anglehue(bpeval(widget.zs, t2c(t))), 1, 1);
+		ctx.fillStyle = rgbToHex(rgb);
+		ctx.strokeStyle = "#000000"; // rgbToHex([255-rgb[0], 255-rgb[1], 255-rgb[2]]);
+		ctx.fill();
+		ctx.stroke();					
 	}
 
 	ctx.restore();
@@ -1303,7 +1305,7 @@ BPWidget.prototype.setup = function() {
 
     var wom = function(event) {
 	if(event.data.rpip != null) {
-	    bpzs = rpipToBpzs(event.data.rpip);
+	    var bpzs = rpipToBpzs(event.data.rpip);
 	    that.workergo.css("background-color", "");
 	    that.progress.append(" COPY:" + ((new Date()).getTime() - event.data.senddate));
 	    that.resizeCanvases();
