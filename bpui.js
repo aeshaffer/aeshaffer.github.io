@@ -581,22 +581,30 @@ function getPolylength(zs) {
 	return retval;
 }
 
-BPWidget.prototype.drawPILines = function(t) {
-    var skips = this.skippoints.val().split(",");
+BPWidget.prototype.getSkips = function () {
+	var skips0 = this.skippoints.val().split(",");
+	var skips = skips0.map(function(skip) { return parseInt(skip); });
+	this.skippoints.css("background-color", "");
+	this.skippoints.attr("title", "");
     for(var i = 0; i < skips.length; i++) {	
-		var skip = parseInt(skips[i], 10);
+    	var skip = skips[i];
 		if(this.zs.length % skip != 0) {
 			this.skippoints.css("background-color", "red");
 			this.skippoints.attr("title", "Cannot skip "+this.zs.length+" points by " + skip + ".");
-			return;
-		} else {
-			this.skippoints.css("background-color", "");
-			this.skippoints.attr("title", "");
+			return null;
 		}
+    }
+    return skips;
+}
 
+BPWidget.prototype.drawPILines = function(t) {
+    var skips = this.getSkips();
+    if(skips != null) {
 		var piangles = getPIAngles(this.zs, t);
-
-		this.drawPILinesInner(this.rblines[0], piangles, skip);
+    	for(var i = 0; i < skips.length; i++) {
+    		var skip = skips[i];
+			this.drawPILinesInner(this.rblines[0], piangles, skip);    		
+    	}
     }
     //drawPILinesInner(rglines, piangles, skip);
 };
@@ -639,21 +647,21 @@ BPWidget.prototype.drawPILinesInner = function(lines, piangles, skip, totalLengt
 
     for(var j = 0; j < skip; j++) {
 		var drawnLength = 0;
-		var i = j;
-		var t0 = piangles[i];
-		var t1 = null;
-
 		var skippedangles = [];
+
 		for(var i = j; i < piangles.length; i+= skip) {
 			skippedangles.push(piangles[i]);
 		}
+
+		var t0 = skippedangles[0];
+		var t1 = null;
 
 		ctx.beginPath();
 		(ctx.moveTo).apply(ctx, ttp(t0));
 		var t0z;
 		var t1z;
-		for(i = 0; i < skippedangles.length + 1; i++) {
-			t1 = piangles[i % piangles.length];
+		for(var i = 1; i < skippedangles.length + 1; i++) {
+			t1 = skippedangles[i % skippedangles.length];
 			t0z = t2c(t0);
 			t1z = t2c(t1);
 			var lineLength = t1z.sub(t0z).abs().x;
@@ -954,15 +962,25 @@ var tangentsframe = function(widget, timeZero, preimages) {
 	var time = new Date();
 	var timepct = (time.getTime() - timeZero.getTime())/5000.0;
 	widget.doclearlines();
+
 	var frontier = [];
-	for(var i = 0; i < preimages.length; i++) {
-		var piangles = preimages[i];
-		var polylength = getPolylength(piangles.map(t2c));
-		var myfrontier = widget.drawPILinesInner(widget.rblines[0], piangles, 1, polylength*timepct);
-		for(var j = 0; j < myfrontier.length; j++) {
-			frontier.push(myfrontier[j]);
-		}
-	}
+
+	var skips = widget.getSkips();
+    if(skips != null) {
+    	for(var i = 0; i < skips.length; i++) {
+    		var skip = skips[i];
+			for(var i = 0; i < preimages.length; i++) {
+				var piangles = preimages[i];
+				var polylength = getPolylength(piangles.map(t2c));
+				var myfrontier = widget.drawPILinesInner(widget.rblines[0], piangles, skip, polylength*timepct);
+				for(var j = 0; j < myfrontier.length; j++) {
+					frontier.push(myfrontier[j]);
+				}
+			}
+
+    	}
+    }
+
 
 	var N = widget.plotDims().windowN;
 	var ctx = setupCTX(widget.rblines[0], N);
