@@ -4,23 +4,43 @@
     Ellipse Drawing
     </title>   
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-    <script src="jsblaschke/numeric-1.2.3.js" type="text/javascript"></script>
+    <script src="../jquery-ui-1.11.1/jquery-ui.js"></script>
+    <script src="../numeric-1.2.3.js" type="text/javascript"></script>
+    <script src="../polynomials.js" type="text/javascript"></script>
+    <script src="polyfill.js" type="text/javascript"></script>
+
     <script src="three.js" type="text/javascript"></script>
     <script src="TrackballControls.js" type="text/javascript"></script>
-    <script src="jsblaschke/polynomials.js" type="text/javascript"></script>
     <script src="ellipse.js" type="text/javascript"></script>
+
+    <style type="text/css">
+     .focusdiv {
+         width: 10px; 
+         background-color: blue; 
+         height: 10px; 
+         border: 1px solid black; 
+         border-radius: 10px; 
+         position: absolute;
+     }
+     .errorParams {background-color: red;}
+     </style>
 </head>
 <body>
-F1:<input type="text" id="f1x" value=".5"></input>
-<input type="text" id="f1y" value="0"></input><br/>
-F2:<input type="text" id="f2x" value="-.5"></input>
-<input type="text" id="f2y" value="0"></input><br/>
-C: <input type="text" id="sigma" value="1.25"></input><input type="button" id="go" value="Go"></input>
-<br/>
-<input type="button" id="go3d" value="Go 3D"></input>
-<div style="border: 1px solid black">
-<canvas style="border: 1px solid green; float: left;" id="canvas" height="512" width="512"></canvas>
-<div id="canvas3dcontainer" style="float: left;"></div>
+<div style="width: 512px;" id="params">
+    F1:<input type="text" id="f1x" value="0"></input>
+    <input type="text" id="f1y" value="0"></input><br/>
+    F2:<input type="text" id="f2x" value="-.5"></input>
+    <input type="text" id="f2y" value="0"></input><br/>
+    C: <input type="text" id="sigma" value="1"></input>
+    Folds: <input type="text" id="numfolds" value="16"></input><br />
+    <input type="button" id="go" value="Go"></input>
+    <br/>
+</div>
+<div style="border: 1px solid black; position: relative;">
+    <div id="f1div" class="focusdiv"></div>
+    <div id="f2div" class="focusdiv"></div>
+    <canvas style="border: 1px solid green; float: left;" id="canvas" height="512" width="512"></canvas>
+    <div id="canvas3dcontainer" style="float: left;"></div>
 </div>
 </body>
 </html>

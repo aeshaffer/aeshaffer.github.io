@@ -1,5 +1,5 @@
-/// <reference path="jsblaschke/numeric-1.2.3.js" />
-/// <reference path="jsblaschke/polynomials.js" />
+/// <reference path="../numeric-1.2.3.js" />
+/// <reference path="../polynomials.js" />
 
 "use strict";
 
@@ -16,24 +16,40 @@ numeric.T.prototype.unit = function() {
     return this.div(this.norm2());
 }
 
+function divideCircle(N) {
+    return numeric.linspace(0, 2*Math.PI*(1-1.0/N), N);
+}
+
 var cvs;
 var ctx;
+var minX, maxX, minY, maxY;
+function reset(inminX, inmaxX, inminY, inmaxY) {
+    minX = inminX; minY = inminY;
+    maxX = inmaxX; maxY = inmaxY;
+    var h = $(window).height() - $(cvs).offset().top - 50;
+    $(cvs).height(h).attr("height", h).width(h).attr("width", h);
 
-function reset() {
     ctx.resetTransform();
     ctx.transform(cvs.width / 2, 0, 0, -cvs.width / 2, cvs.width / 2, cvs.width / 2);
-    ctx.lineWidth = 1.0 / cvs.width;
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(-1, -1, 2, 2);
+    ctx.scale(2/(maxX - minX), 2/(maxY - minY));
+    ctx.translate(-(maxX + minX)/2, -(maxY + minY)/2);
+    ctx.lineWidth = 1.0 / cvs.width * (maxX - minX);
+    axes();
+}
+
+function axes() {
+    ctx.clearRect(minX, minY, maxX -minX, maxY - minY);
+    ctx.fillStyle = "#ff0000";
 
     ctx.beginPath();
-    ctx.moveTo(-1, 0);
-    ctx.lineTo(1, 0);
+    ctx.moveTo(minX, 0);
+    ctx.lineTo(maxX, 0);
     ctx.stroke();
     ctx.beginPath();
-    ctx.moveTo(0, -1);
-    ctx.lineTo(0, 1);
+    ctx.moveTo(0, minY);
+    ctx.lineTo(0, maxY);
     ctx.stroke();
+
 }
 
 function lineCircleIntersection(lp, ld, cc, r) {
@@ -56,19 +72,94 @@ function lineLineIntersectionZZ(z00, z01, z10, z11) {
     return lineLineIntersectionZD(z00, z00.sub(z01), z10, z10.sub(z11));
 }
 
+var f1 = {}, f2 = {}, numfolds, sigma;
+
 $(function () {
 
     cvs = document.getElementById("canvas");
     ctx = cvs.getContext("2d");
 
-    $("#go").bind("click", function () {
-        reset();
-        var f1 = {}, f2 = {};
+    $(".focusdiv").draggable();
+
+    window.requestAnimationFrame(drawAndRAF);
+
+    $("#go").click(drawAndRAF);
+
+    function drawAndRAF() {        
+        draw();
+        requestAnimationFrame(drawAndRAF);    
+    };
+
+    $("#f1x, #f1y, #f2x, #f2y, #numfolds, #sigma").change(function() {
+        updateGlobals();
+        repositionDivs();
+        });
+
+    updateGlobals();
+    reset(-1,1,-1,1);
+
+    function repositionDivs() {
+        // Flip y coordinate.
+        $("#f1div").css({left: cvs.width * (f1.x - minX)/(maxX - minX) - 5 + "px", 
+                          top: cvs.height * (maxY - f1.y)/(maxY - minY) - 5 + "px"})
+
+        $("#f2div").css({left: cvs.width * (f2.x - minX)/(maxX - minX) - 5 + "px",
+                          top: cvs.height * (maxY - f2.y)/(maxY - minY) - 5 + "px"});
+    }
+
+    repositionDivs();
+
+    function updatef(pos, fn) {    
+        fn.x = ((pos.left + 5) / cvs.width)*(maxX - minX) + minX;
+        fn.y = -(((pos.top + 5)/ cvs.height)*(maxY - minY) - maxY);
+        $("#f1x").val(f1.x.toFixed(2));
+        $("#f1y").val(f1.y.toFixed(2));
+        $("#f2x").val(f2.x.toFixed(2));
+        $("#f2y").val(f2.y.toFixed(2));
+        resetIfGood();
+    }
+
+    $("#f1div").draggable({stop: function(event, ui) {        updatef($(this).position(), f1);            },
+    drag: function(event, ui) {        updatef($(this).position(), f1);            }
+    });
+
+    $("#f2div").draggable({stop: function(event, ui) {        updatef($(this).position(), f2);    },
+    drag: function(event, ui) {        updatef($(this).position(), f2);    }
+    });
+
+    function updateGlobals() {
         f1.x = parseFloat($("#f1x").val());
         f1.y = parseFloat($("#f1y").val());
         f2.x = parseFloat($("#f2x").val());
         f2.y = parseFloat($("#f2y").val());
-        var sigma = parseFloat($("#sigma").val());
+        numfolds = parseInt($("#numfolds").val(), 10);
+        sigma = parseFloat($("#sigma").val());
+        resetIfGood();
+    }
+
+    function resetIfGood() {
+        if(goodGlobals()) {
+            //reset(f1.x - sigma, f1.x + sigma, f1.y - sigma, f1.y + sigma);
+reset(-1, 1, -1, 1);
+repositionDivs();
+        }
+    }
+
+    function goodGlobals() {
+        var allNumbers = [f1.x, f2.x, f1.y, f2.y, numfolds, sigma].every(function(x) { return !isNaN(x); });
+        if(!allNumbers) { return false; }
+        return (sigma > 0 && numfolds > 0);
+    }
+
+    function draw() {                       
+        if(!goodGlobals()) {
+            $("#params").addClass("errorParams");
+            return;
+        } else {
+            $("#params").removeClass("errorParams");
+        }
+
+        axes();
 
         var f1c = c(f1.x, f1.y);
         var f2c = c(f2.x, f2.y);
@@ -76,43 +167,56 @@ $(function () {
         ctx.beginPath();
         ctx.arc(f1.x, f1.y, sigma, 0, 2 * Math.PI, false);
         ctx.stroke();
-
-        var ts = numeric.linspace(0, 2 * Math.PI, 32+1);
-        ts.pop();
-        for (var i = 0; i < ts.length; i++) {
-            var t = ts[i];
+        
+        var foldts = divideCircle(numfolds);
+        // foldts.pop();
+        for (var i = 0; i < foldts.length; i+= 1) {
+            var t = foldts[i];
             var p = f1c.add(rt2c(sigma, t));
             ctx.strokeStyle = "#ff0000";
             ctx.beginPath();
             var radius = p.sub(f1c);
             radius = radius.div(radius.norm2()).mul(.05);           
-            ctx.moveTo(p.add(radius).x, p.add(radius).y);
-            ctx.lineTo(p.sub(radius).x, p.sub(radius).y);
+            //ctx.moveTo(p.add(radius).x, p.add(radius).y);
+            // Draw tickmark on circle
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(p.add(radius).x, p.add(radius).y);
             ctx.stroke();
+            // Find midpoint between circle point and the other focus.
             var mp = p.add(f2c).div(2);
+            // The fold passes through this line, 
+            // perpendicular to the line between the circle point and the 
+            // other focus.
             var d = p.sub(mp).mul(rt2c(1, Math.PI / 2));
             d = d.div(d.norm2()).mul(sigma);
             var intersections = lineCircleIntersection(mp, d, f1c, sigma);
 
+            // Draw fold
             ctx.beginPath();
-            ctx.strokeStyle = "yellow";
+            ctx.strokeStyle = "teal";
             ctx.moveTo(intersections[0].x, intersections[0].y);
             ctx.lineTo(intersections[1].x, intersections[1].y);
             ctx.stroke();
 
+            // Draw line from point on circle to other focus.
+            ctx.save();
+            ctx.lineWidth = ctx.lineWidth / 4 ;
             ctx.beginPath();
             ctx.strokeStyle = "green";
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(f2c.x, f2c.y);
             ctx.stroke();
+            ctx.restore();
 
+            // Draw right-angle marker at intersection between chord and focus-circle line.
             var chordlineint = lineLineIntersectionZZ(p, f2c, intersections[0], intersections[1]);
 
             ctx.strokeStyle = "green";
             ctx.beginPath();
-            var alongYellow = chordlineint.add(p.sub(f2c).unit().mul(.025));
-            var corner = alongYellow.add(intersections[0].sub(intersections[1]).unit().mul(.025));
-            var alongBlue = corner.sub(p.sub(f2c).unit().mul(.025));
+            var squarelength = sigma/50.0;
+            var alongYellow = chordlineint.add(p.sub(f2c).unit().mul(squarelength));
+            var corner = alongYellow.add(intersections[0].sub(intersections[1]).unit().mul(squarelength));
+            var alongBlue = corner.sub(p.sub(f2c).unit().mul(squarelength));
             ctx.moveTo(alongYellow.x, alongYellow.y);
             ctx.lineTo(corner.x, corner.y);
             ctx.lineTo(alongBlue.x, alongBlue.y);
@@ -159,6 +263,7 @@ $(function () {
         ctx.beginPath();
         r = fz(r);
         ctx.moveTo(r.x, r.y);
+        var ts = divideCircle(64);
         var ps = new Array(ts.length);
         for (var i = 0; i < ts.length; i++) {
             var theta = ts[i];
@@ -219,5 +324,5 @@ $(function () {
         ctx.lineTo(tl.x, tl.y);
         ctx.stroke();
 */
-    })
+    }
 })
