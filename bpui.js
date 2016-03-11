@@ -588,11 +588,13 @@ BPWidget.prototype.getSkips = function () {
 	this.skippoints.attr("title", "");
     for(var i = 0; i < skips.length; i++) {	
     	var skip = skips[i];
+	/*
 		if(this.zs.length % skip != 0) {
 			this.skippoints.css("background-color", "red");
 			this.skippoints.attr("title", "Cannot skip "+this.zs.length+" points by " + skip + ".");
 			return null;
 		}
+	*/
     }
     return skips;
 }
@@ -649,9 +651,12 @@ BPWidget.prototype.drawPILinesInner = function(lines, piangles, skip, totalLengt
 		var drawnLength = 0;
 		var skippedangles = [];
 
-		for(var i = j; i < piangles.length; i+= skip) {
-			skippedangles.push(piangles[i]);
-		}
+		skippedangles.push(piangles[j]);
+		var i = j;
+		do {
+		    skippedangles.push(piangles[i % (piangles.length)]);
+		    i = (i + skip) % piangles.length;
+		} while(i != j);
 
 		var t0 = skippedangles[0];
 		var t1 = null;
