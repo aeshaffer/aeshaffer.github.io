@@ -14,52 +14,52 @@ function bpgridevalArrayOrig(N: number, as: Array<numeric.T>, rowcallback: any) 
 
 var bpgridevalArray = bpgridevalArrayOrig;
 
-function bpBoundaryEval(bpe, N) {
+function bpBoundaryEval(bpe: BPF, N: number) {
     var ts = numeric.linspace(-Math.PI, Math.PI, N);
     var outthetas = new Array(N);
     var outzs = new Array(N);
-    var z;
-    var bpz;
-    var t;
+    var z : C;
+    var bpz : C;
+    var t : number;
     for(var ti = 0; ti < N; ti++) {
-	t = ts[ti];
-	z = c(numeric.cos(t), numeric.sin(t));
-	bpz = bpe(z);
-	outthetas[ti] = [t, (bpz.angle()+2*Math.PI) % (2*Math.PI)];
-	outzs[ti] = [t, bpz];
+        t = ts[ti];
+        z = c(numeric.cos(t), numeric.sin(t));
+        bpz = bpe(z);
+        outthetas[ti] = [t, (bpz.angle()+2*Math.PI) % (2*Math.PI)];
+        outzs[ti] = [t, bpz];
     }
     return {thetas: outthetas, zs: outzs};
 }
 
-function bpgridevalArrayInner(bpe, N, as, rowcallback) {
+function bpgridevalArrayInner(bpe: BPF, N: number, as: BPZeroes, rowcallback: (n: number) => void) {
     // We want (-1,1) in the upper-left corner.
     var xs = numeric.linspace(-1,1,N);
     var ys = numeric.linspace(1,-1,N);
     var realparts = new Float32Array(N*N);
     var imagparts = new Float32Array(N*N);
-    var z;
-    var bpz;
+    var z : C;
+    var bpz : C;
     for(var yi = 0; yi < N; yi++) {
-	for(var xi = 0; xi < N; xi++) {
-	    z = c(xs[xi], ys[yi]);
-	    if(z.abs().x <= 1) {
-		bpz = bpe(z);
-		var addr = N*yi + xi;
-		realparts[addr] = bpz.x;
-		imagparts[addr] = bpz.y;
-	    } else {
-		realparts[addr] = NaN;
-		imagparts[addr] = NaN;
-	    }
-	}
-	if(typeof(rowcallback) == "function") {
-	    rowcallback(yi);
-	}
+        for(var xi = 0; xi < N; xi++) {
+            z = c(xs[xi], ys[yi]);
+            if(z.abs().x <= 1) {
+                bpz = bpe(z);
+                var addr = N*yi + xi;
+                realparts[addr] = bpz.x;
+                imagparts[addr] = bpz.y;
+            } else {
+                realparts[addr] = NaN;
+                imagparts[addr] = NaN;
+            }
+        }
+        if(typeof(rowcallback) == "function") {
+            rowcallback(yi);
+        }
     }
     return {realparts: realparts, imagparts: imagparts, N: N};
 }
 
-function zsString(zs) {
+function zsString(zs: Array<C>) : string {
     return zs.map(function(z) { return "z="+z.x+","+(z.y == undefined ? 0: z.y); }).join("\n&");
 }
 
@@ -79,7 +79,7 @@ function getBPFExpr(as: BPZeroes, ignorefactor: boolean = null) {
     var asNums = new Array<string>();
     var asDens = new Array<string>()
     var asVars = new Array<string>();
-    function toc(a) { return "c("+a.x+","+a.y+")"; }
+    function toc(a: C) : string { return "c("+a.x+","+a.y+")"; }
     for(var i  = 0; i < as.length; i++) {
         var a = as[i];
         asVars.push("var a"+i+" = "+toc(a));
@@ -125,7 +125,7 @@ function bpepolys(as: BPZeroes): BPF {
 function bpeval(as: BPZeroes, z: C): C {
 
     function bpterm(a: C) : C {
-        var num;
+        var num : C;
         if(!iszero(a)) {
             num = z.sub(a); // (z-a)
         } else {
@@ -146,7 +146,7 @@ function bpeval(as: BPZeroes, z: C): C {
 function bpnum(as: BPZeroes): polynomial {
     var num = [none];
     for(var i = 0; i < as.length; i++) {
-        var polyterm;
+        var polyterm : polynomial;
         // (z-a)
         polyterm = [as[i].mul(-1), none];
         num = polymult(polyterm, num);
@@ -336,7 +336,7 @@ function quadPerspective(zs: Array<numeric.T>) {
     var N = 16;
     var ts = numeric.linspace(0, Math.PI*2, N).slice(0,N-1).map(function(t) { return rt2c(1,t); });
     var preimages = ts.map(function(z) { return preimage(zs, z); });
-    function anglesort(z1,z2) {
+    function anglesort(z1: C,z2: C): number {
 	    return normalizeangle(z1.angle()) - normalizeangle(z2.angle());
     };
     var angleSorted = preimages.map(function(zs2) { return zs2.sort(anglesort);});    
@@ -363,7 +363,7 @@ function quadPerspective(zs: Array<numeric.T>) {
     
 }
 
-function perspective(zs, i) {
+function perspective(zs: BPZeroes, i: number) {
     var z1 = zs[(0+i) % zs.length];
     var z2 = zs[(1+i) % zs.length];
     var z3 = zs[(2+i) % zs.length];

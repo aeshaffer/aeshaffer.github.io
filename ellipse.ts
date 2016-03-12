@@ -17,11 +17,11 @@ function intersection(a1: C, a2:C, b1:C, b2:C): C {
     return a1.add(a2.sub(a1).mul(ts[0]));
 }
 
-function padLeft(nr, n, str){
+function padLeft(nr: any, n: number, str: string): string{
     return Array(n-String(nr).length+1).join(str||'0')+nr;
 }
 
-function pdc(z) {
+function pdc(z: C): string {
     return padLeft(dc(z), 21, " ");
 }
 
@@ -29,9 +29,9 @@ class IntersectionData {inter:numeric.T; dc: string;}
 
 function getTangentSegments(zs: Array<C>, ajpct: number) : Array<Array<IntersectionData>> {
     var adelta = 2.0*Math.PI/ajpct;
-    var getangle = function(cv) { return normalizeangle(cv.angle()); }
-    var nsort = function(a,b) { return getangle(a)-getangle(b); }
-    function getPIs(i) {
+    var getangle = function(cv: C) { return normalizeangle(cv.angle()); }
+    var nsort = function(a:C,b:C) { return getangle(a)-getangle(b); }
+    function getPIs(i: number): Array<C> {
         var t = i*adelta;
         var z = c(numeric.cos(t), numeric.sin(t));
         var preimages = preimage(zs, z);
@@ -39,7 +39,7 @@ function getTangentSegments(zs: Array<C>, ajpct: number) : Array<Array<Intersect
         return preimages;
     }
     var deg = zs.length;
-    var imoddeg = function(arr, i) {
+    var imoddeg = function<T>(arr: Array<T>, i: number): T {
 	    return arr[i % deg];
     }
     var intersections = new Array<Array<IntersectionData>>(deg);
@@ -47,8 +47,8 @@ function getTangentSegments(zs: Array<C>, ajpct: number) : Array<Array<Intersect
 	    intersections[i] = new Array<IntersectionData>(ajpct);
     }
     var prevpis = getPIs(-1);
-    var tagpi  = function(z,i) { return {tag: "pi", i:i, tagi: "pi_" + i, z: z}; }
-    var tagppi = function(z,i) { return {tag: "ppi", i:i, tagi: "ppi_" + i, z: z}; }
+    var tagpi  = function(z:C,i: number) { return {tag: "pi", i:i, tagi: "pi_" + i, z: z}; }
+    var tagppi = function(z:C,i: number) { return {tag: "ppi", i:i, tagi: "ppi_" + i, z: z}; }
     for(var i = 0; i < ajpct; i++) {
         var pis = getPIs(i);
         var taggedpis = pis.map(tagpi);

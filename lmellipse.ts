@@ -13,13 +13,13 @@ var arcys = [ 1.04312,  1.12758,  1.21515,  1.31683,  1.47263,  1.51821,  1.6442
 	      2.08792,  2.0529 ,  2.04301,
               2.00292,  1.94969,  1.91225,  1.82351,  1.75461,  1.69008,  1.62968];
 
-function fitellipseZS(zs) {
-    var xs = zs.map(function(z) { return z.x; });
-    var ys = zs.map(function(z) { return fixy(z).y;});
+function fitellipseZS(zs: Array<C>) {
+    var xs = zs.map(function(z: C) { return z.x; });
+    var ys = zs.map(function(z: C) { return fixy(z).y;});
     return fitellipse(xs,ys);
 }
 
-function fitellipse(xs,ys) {
+function fitellipse(xs: Array<number>,ys: Array<number>) {
 
     var D = [
         numeric.mul(xs,xs),
@@ -55,12 +55,12 @@ function fitellipse(xs,ys) {
     // return EVS.E.getRow(i);
 }
 
-function ellipse_angle_of_rotation(ina) {
+function ellipse_angle_of_rotation(ina: Array<number>) {
     var b=ina[1]/2, c=ina[2], d=ina[3]/2, f=ina[4]/2, g=ina[5], a=ina[0];
     return 0.5*numeric.atan(2*b/(a-c))
 }
 
-function ellipse_center(ina) {
+function ellipse_center(ina: Array<number>) {
     var b=ina[1]/2, c=ina[2], d=ina[3]/2, f=ina[4]/2, g=ina[5], a=ina[0];
     var num = b*b-a*c;
     var x0 = (c*d-b*f)/num;
@@ -68,7 +68,7 @@ function ellipse_center(ina) {
     return new numeric.T(x0,y0);
 }
 
-function ellipse_axis_length(ina) {
+function ellipse_axis_length(ina: Array<number>) {
     var b=ina[1]/2, c=ina[2], d=ina[3]/2, f=ina[4]/2, g=ina[5], a=ina[0];
     var up = 2*(a*f*f+c*d*d+g*b*b-2*b*d*f-a*c*g);
     var down1=(b*b-a*c)*( (c-a)*numeric.sqrt(1+4*b*b/((a-c)*(a-c)))-(c+a));
@@ -81,7 +81,7 @@ function ellipse_axis_length(ina) {
 	    Math.min.apply(null, ret)]; */
 }
 
-function ellipse_foci(ina) {
+function ellipse_foci(ina: Array<number>) {
     var center = ellipse_center(ina);
     center = c.apply(null, center);
     var axislengths = ellipse_axis_length(ina);
@@ -150,8 +150,8 @@ function findLineByLeastSquares(values_x: Array<number>, values_y: Array<number>
     /*
      * We will make the x and y result line now
      */
-    var result_values_x = [];
-    var result_values_y = [];
+    var result_values_x = new Array<number>();
+    var result_values_y = new Array<number>();
 
     for (var v = 0; v < values_length; v++) {
         x = values_x[v];

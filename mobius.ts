@@ -6,7 +6,7 @@ function sm<T>(A: Array<Array<T>>, rows: Array<number>, cols: Array<number>): Ar
 }
 
 function cdet(A: Array<Array<C>>): C {
-    function tbtdet(B) {
+    function tbtdet(B: Array<Array<C>>) {
 	    return (B[0][0]).mul(B[1][1]).sub((B[0][1]).mul(B[1][0]));
     }
 

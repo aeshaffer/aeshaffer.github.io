@@ -46,7 +46,7 @@ function biggestanglediff(ints: Array<number>): Canglediff {
             maxind = i;
         }
     }
-    var midpt;
+    var midpt: number;
     if(t1 > t0) {
     	// t1-t0 is greater than zero.
 	    midpt = t0 + (t1-t0)/2;
@@ -64,20 +64,9 @@ interface XY {
     y: number;
 }
 
-function fixy(z) { return c(z.x, z.y == undefined ? 0 : z.y); }
+function fixy(z: C) { return c(z.x, z.y == undefined ? 0 : z.y); }
 
-function LCM(A)  // A is an integer array (e.g. [-50,25,-45,-18,90,447])
-{   
-    var n = A.length, a = Math.abs(A[0]);
-    for (var i = 1; i < n; i++)
-     { var b = Math.abs(A[i]), c = a;
-       while (a && b){ a > b ? a %= b : b %= a; } 
-       a = Math.abs(c*A[i])/(a+b);
-     }
-    return a;
-}
-
-function gcd_rec(a, b) {
+function gcd_rec(a: number, b: number): number {
   return b ? gcd_rec(b, a % b) : Math.abs(a);
 }
 
@@ -118,12 +107,12 @@ Array.prototype.csum = function() {
 }
 
 
-function cgrid(N) {
+function cgrid(N: number) {
     var xs = numeric.linspace(-1,1,N);
     var ys = numeric.linspace(-1,1,N);
-    var retval = Array(N);
+    var retval = new Array<Array<C>>(N);
     for(var i in xs) {
-        retval[i] = Array(N);
+        retval[i] = Array<C>(N);
         for(var j in ys) {
             retval[i][j] = c(xs[i], ys[j]);
         }
@@ -196,7 +185,7 @@ function dcp(z: C): string {
     return round5(z.x) + " " + (y >= 0 ? "+": "") +round5(y) + "j";
 }
 
-function dcomplex(z) {
+function dcomplex(z: C) {
     return dc(z) + " (arg=" + round2(normalizeangle(z.angle())) + ")";
 }
 
@@ -320,7 +309,7 @@ function polyroots(incs: polynomial): Array<numeric.T> {
     var deg = cs.length - 1;
     var leading = cs[cs.length - 1];    
     cs = polymult(cs, [none.div(leading)]);
-    var f = function(z) { return peval(cs, z); }
+    var f = function(z: C) { return peval(cs, z); }
     var roots = new Array<numeric.T>();
     for(var i = 0; i < deg; i++) {
 	    roots[i] = c(.4, .9).pow(i);
