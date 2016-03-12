@@ -1,5 +1,8 @@
+/// <reference path="numeric-1.2.3.d.ts" />
+/// <reference path="polynomials.ts" />
+/// <reference path="lmellipse.ts" />
 
-function bpgridevalArrayOrig(N, as, rowcallback) {
+function bpgridevalArrayOrig(N: number, as: Array<numeric.T>, rowcallback: any) {
     var bpe = getBPF(as);
     return bpgridevalArrayInner(bpe, N, as, rowcallback);
 }
@@ -61,56 +64,6 @@ function zsString(zs) {
 }
 
 
-// Normalize to between 0 and 2Pi.
-function normalizeangle(theta) {
-    while(true) {
-	if(theta > 2*Math.PI) {
-	    theta = theta - 2*Math.PI;
-	} else if(theta < 0) {
-	    theta = theta + 2*Math.PI;
-	} else {
-	    return theta;
-	}
-    }
-}
-
-// Normalize to between -Pi and Pi.
-function anglediff(theta) {
-    while(true) {
-	if(theta > Math.PI) {
-	    theta = theta - 2*Math.PI;
-	} else if(theta < -Math.PI) {
-	    theta = theta + 2*Math.PI;
-	} else {
-	    return theta;
-	}
-    }
-}
-
-function biggestanglediff(ints) {
-    var maxdiff = 0;
-    var maxind = 0;
-    var ts = ints.sort(function(i,j) { return normalizeangle(i)-normalizeangle(j); });
-    for(var i = 0; i < ts.length; i++) {
-	var t0 = ts[i];
-	var t1 = ts[(i+1) % ts.length];
-	var diff = normalizeangle(t1-t0);
-	//print("" + t0 + " " + t1 + " " + " "+diff);
-	if(diff > maxdiff) {
-	    maxdiff = diff;
-	    maxind = i;
-	}
-    }
-    var retval = {t0:ts[maxind], t1: ts[(maxind+1) % ts.length]};
-    if(t1 > t0) {
-	// t1-t0 is greater than zero.
-	retval.midpt = t0 + (t1-t0)/2;
-    } else {
-	retval.midpt = t0 + (t1-t0)/2;
-    }
-    return retval;
-}
-
 /*
 function lt(a) {
     
@@ -122,21 +75,21 @@ function lt(a) {
 }
 */
 
-function getBPFExpr(as, ignorefactor) {
-    var asNums = new Array();
-    var asDens = new Array();
-    var asVars = new Array();
+function getBPFExpr(as: BPZeroes, ignorefactor: boolean = null) {
+    var asNums = new Array<string>();
+    var asDens = new Array<string>()
+    var asVars = new Array<string>();
     function toc(a) { return "c("+a.x+","+a.y+")"; }
     for(var i  = 0; i < as.length; i++) {
-	var a = as[i];
-	asVars.push("var a"+i+" = "+toc(a));
-	if(iszero(a)) {
-	    asNums.push(".mul(z)");
-	    asDens.push(".div(none)");
-	} else {
-	    asNums.push(".mul(z.sub(a"+i+"))");
-	    asDens.push(".div(none.sub(a"+i+".conj().mul(z)))");
-	}
+        var a = as[i];
+        asVars.push("var a"+i+" = "+toc(a));
+        if(iszero(a)) {
+            asNums.push(".mul(z)");
+            asDens.push(".div(none)");
+        } else {
+            asNums.push(".mul(z.sub(a"+i+"))");
+            asDens.push(".div(none.sub(a"+i+".conj().mul(z)))");
+        }
     }
     
     var expr = asVars.join(';') + "; var f = function(z) { return c(1,0)" +  
@@ -145,66 +98,73 @@ function getBPFExpr(as, ignorefactor) {
     return expr;
 }
 
-function getBPF(as, ignorefactor) {
-    return eval(getBPFExpr(as, ignorefactor));
+type BPZeroes = Array<numeric.T>;
+
+interface BPF {
+    (z: numeric.T): numeric.T;
 }
 
-function bpeval0(as, z) {
+function getBPF(as: BPZeroes, ignorefactor: boolean = null): BPF {
+    var f = eval(getBPFExpr(as, ignorefactor));
+    return <BPF>f;
+}
+
+function bpeval0(as: BPZeroes, z: numeric.T): numeric.T {
     var f = getBPF(as);
     return f(z);
 }
 
-function bpepolys(as) {
+function bpepolys(as: BPZeroes): BPF {
     var num = bpnum(as);
     var den = bpden(as);
     return function(z) {
-	return peval(num, z).div(peval(den, z));
+	    return peval(num, z).div(peval(den, z));
     }
 }
 
-function bpeval(as, z) {
+function bpeval(as: BPZeroes, z: numeric.T): numeric.T {
 
-    function bpterm(a) {
-	var num;
-	if(!iszero(a)) {
-	    num = z.sub(a); // (z-a)
-	} else {
-	    num = z;
-	}
-	var den = none.sub(a.conj().mul(z)); // (1-a*z)
-	return num.div(den);
+    function bpterm(a: numeric.T) : numeric.T {
+        var num;
+        if(!iszero(a)) {
+            num = z.sub(a); // (z-a)
+        } else {
+            num = z;
+        }
+        var den = none.sub(a.conj().mul(z)); // (1-a*z)
+        return num.div(den);
     }
 
     var retval = none;
     for(var i = 0; i < as.length; i++) {
-	var term = bpterm(as[i], z);
-	retval = retval.mul(term);
+        var term = bpterm(as[i]);
+        retval = retval.mul(term);
     }
     return retval;
 }
 
-function bpnum(as) {
+function bpnum(as: BPZeroes): polynomial {
     var num = [none];
     for(var i = 0; i < as.length; i++) {
-	var polyterm;
-	// (z-a)
-	polyterm = [as[i].mul(-1), none];
-	num = polymult(polyterm, num);
+        var polyterm;
+        // (z-a)
+        polyterm = [as[i].mul(-1), none];
+        num = polymult(polyterm, num);
     }
     return num;
 }
 
-function bpden(as) {
+function bpden(as: BPZeroes): polynomial {
     var den = [none];
     for(var i =0; i < as.length; i++) {
-	var polyterm = [none, as[i].conj().mul(-1)];
-	den = polymult(polyterm, den);
+        var polyterm = [none, as[i].conj().mul(-1)];
+        den = polymult(polyterm, den);
     }
     return den;
 }
 
 // Gets the numerator of B'.
-function getBPprime(as) {
+function getBPprime(as: BPZeroes): polynomial {
     var num = bpnum(as);
     var nump = dcoeffs(num);
     var nonzeroas = as.filter(function(z) { return z.abs().x > .0001; });
@@ -213,7 +173,12 @@ function getBPprime(as) {
     return polysub(polymult(nump, den), polymult(denp, num));
 }
 
-function getFullBPprime(as) {
+class NumDen {
+    num: polynomial;
+    den: polynomial;
+}
+
+function getFullBPprime(as: BPZeroes): NumDen {
     var num = getBPprime(as);
     var nonzeroas = as.filter(function(z) { return z.abs().x > .0001; });
     var den = bpden(nonzeroas);
@@ -221,45 +186,51 @@ function getFullBPprime(as) {
     var dzmax = den2[den2.length -1];
     den2 = den2.map(function(z) { return z.div(dzmax);});
     num  = num.map(function(z) { return z.div(dzmax);});
-    return {"num": num, "den": den2};
+    return <NumDen>{"num": num, "den": den2};
 }
 
-function getBPTheta(as, ts) {
+function getBPTheta(as: BPZeroes, ts: Array<number>): Array<numeric.T> {
     var retval = new Array(ts.length);
     var bpnumden = getFullBPprime(as);
     for(var i = 0; i < ts.length; i++) {
-	var t = ts[i];
-	var z = ttcp(t);
-	var bpt = peval(bpnumden.num, z).div(peval(bpnumden.den, z));
-	bpt = bpt.mul(ni).mul(z);
-	retval[i] = bpt;
+        var t = ts[i];
+        var z = ttcp(t);
+        var bpt = peval(bpnumden.num, z).div(peval(bpnumden.den, z));
+        bpt = bpt.mul(ni).mul(z);
+        retval[i] = bpt;
     }
     return retval;
 }
 
-function getTanPoints(as, t) {
+class Z1Z2ZTan {
+    z1: numeric.T;
+    z2: numeric.T;
+    ztan: numeric.T;
+}
+
+function getTanPoints(as: BPZeroes, t: number): Array<Z1Z2ZTan> {
     var preimages = preimage(as, rt2c(1,t));
     preimages = preimages.sort(function(i,j) { 
-	return normalizeangle(i.angle()) - normalizeangle(j.angle());
+	    return normalizeangle(i.angle()) - normalizeangle(j.angle());
     });
 
     var ts = preimages.map(function(z) { return z.angle(); });
     var bps = getBPTheta(as, ts);
-    var retval = new Array(preimages.length);
+    var retval = new Array<Z1Z2ZTan>(preimages.length);
     for(var i = 0; i < preimages.length; i++) {
-	var j = (i+1) % preimages.length;
-	var z1 = preimages[i];
-	var z2 = preimages[j];
-	var bp1 = bps[i].abs();
-	var bp2 = bps[j].abs();
-	var l = bp2.div(bp2.add(bp1));
-	var ztan = z1.add(z2.sub(z1).mul(l));
-	retval[i] = {"z1": z1, "z2": z2, "ztan": ztan};
+        var j = (i+1) % preimages.length;
+        var z1 = preimages[i];
+        var z2 = preimages[j];
+        var bp1 = bps[i].abs();
+        var bp2 = bps[j].abs();
+        var l = bp2.div(bp2.add(bp1));
+        var ztan = z1.add(z2.sub(z1).mul(l));
+        retval[i] = {"z1": z1, "z2": z2, "ztan": ztan};
     }
     return retval;
 }
 
-function preimage(zs, beta) {
+function preimage(zs: BPZeroes, beta: numeric.T): Array<numeric.T> {
     var num = bpnum(zs);
     var den = bpden(zs);
     var alphaden = polymult([beta], den);
@@ -268,48 +239,59 @@ function preimage(zs, beta) {
     return preimages;
 }
 
-function bpcompose2(zs1, zs2) {
-    var retval = Array();
+class OuterZeroAndPreimages {
+    outerzero: numeric.T;
+    preimages: Array<numeric.T>;
+}
+
+function bpcompose2(zs1: BPZeroes, zs2: BPZeroes): Array<OuterZeroAndPreimages> {
+    var retval = new Array<OuterZeroAndPreimages>();
     for(var i = 0; i < zs1.length; i++) {
-	// Find points that zs2 maps to alpha.
-	alpha = zs1[i];
-	alpharoots = preimage(zs2, alpha);
-	var o = {'outerzero': alpha, 'preimages': alpharoots};
-	retval.push(o);
+        // Find points that zs2 maps to alpha.
+        var alpha = zs1[i];
+        var alpharoots = preimage(zs2, alpha);
+        var o = {'outerzero': alpha, 'preimages': alpharoots};
+        retval.push(o);
     }
     return retval;
 }
 
-function bpcompose(zs1, zs2) {
+function bpcompose(zs1: BPZeroes, zs2: BPZeroes): BPZeroes {
     var preimages = bpcompose2(zs1, zs2);
     return [].concat.apply([], preimages.map(function(pimg) {return pimg.preimages;}));
 }
 
-function roll(ar) {
+function roll<T>(ar: Array<T>): Array<T> {
     var retval = ar.slice(0);
     var end = retval.shift();
     retval.push(end);
     return retval;
 }
 
-function zeroToNm1(N) {
-    var foo = [];
+function zeroToNm1(N: number): Array<number> {
+    var foo = new Array<number>();
     
     for (var i = 0; i < N; i++) {
-	foo.push(i);
+	    foo.push(i);
     }
     return foo;
 }
 
-function sortBy(vals, indices) {
-    var foo = []; 
-    for(i = 0; i < indices.length; i++) { 
-	foo.push(vals[indices[i]]); 
+function sortBy<T>(vals: Array<T>, indices: Array<number>): Array<T> {
+    var foo = new Array<T>(); 
+    for(var i = 0; i < indices.length; i++) { 
+	    foo.push(vals[indices[i]]); 
     }
     return foo;
 }
 
-function cpinfo(zs) {
+class CPInfo {
+    cps: Array<numeric.T>;
+    cvs: Array<numeric.T>;
+    cvangles : Array<number>;
+}
+
+function cpinfo(zs: BPZeroes): CPInfo {
 
     var bpp = getBPprime(zs);
     // FIXME: For some reason, for a large number
@@ -321,10 +303,10 @@ function cpinfo(zs) {
     var cps = polyroots(bpp);
     var circlecps = new Array();
     for(var i=0; i < cps.length;i++) {
-	var cp = cps[i];
-	if(cp.abs().x < 1) {
-	    circlecps.push(cp);
-	}
+        var cp = cps[i];
+        if(cp.abs().x < 1) {
+            circlecps.push(cp);
+        }
     }
 
     var cvs = circlecps.map(function(cp) {return bpeval(zs, cp);});
@@ -340,35 +322,35 @@ function cpinfo(zs) {
     return {"cps": sortedcps, "cvs": sortedcvs, "cvangles": cvangles};
 }
 
-function getangleindex(theta, ts) {
+function getangleindex(theta: number, ts: Array<number>): number {
     // Check the first N-1
     for(var i = 0; i < ts.length-1; i++) {
-	if(normalizeangle(theta) >= ts[i] && normalizeangle(theta) < ts[i+1]) {
-	    return i;
-	}
+        if(normalizeangle(theta) >= ts[i] && normalizeangle(theta) < ts[i+1]) {
+            return i;
+        }
     }
     return ts.length - 1;
 }
 
-function quadPerspective(zs) {
+function quadPerspective(zs: Array<numeric.T>) {
     var N = 16;
     var ts = numeric.linspace(0, Math.PI*2, N).slice(0,N-1).map(function(t) { return rt2c(1,t); });
     var preimages = ts.map(function(z) { return preimage(zs, z); });
     function anglesort(z1,z2) {
-	return normalizeangle(z1.angle()) - normalizeangle(z2.angle());
+	    return normalizeangle(z1.angle()) - normalizeangle(z2.angle());
     };
     var angleSorted = preimages.map(function(zs2) { return zs2.sort(anglesort);});    
     var goodpoints = new Array();
     for(var i = 0; i < 4; i++) {
-	for(var j = 0; j < angleSorted.length; j++) {
-	    var ppt = perspective(angleSorted[j], i);
-	    if(isNaN(ppt.x) || isNaN(ppt.y) || Math.abs(ppt.x) > 10000 || Math.abs(ppt.y) > 10000) {
-		//console.log("Burp.");
-	    } else {
-		//console.log(ppt);
-		goodpoints.push(ppt);
-	    }
-	}
+        for(var j = 0; j < angleSorted.length; j++) {
+            var ppt = perspective(angleSorted[j], i);
+            if(isNaN(ppt.x) || isNaN(ppt.y) || Math.abs(ppt.x) > 10000 || Math.abs(ppt.y) > 10000) {
+                //console.log("Burp.");
+            } else {
+                //console.log(ppt);
+                goodpoints.push(ppt);
+            }
+        }
     }
     goodpoints = goodpoints.sort(function(a,b) { return a.x - b.x; });
     var gpxs = goodpoints.map(function(xy) { return xy.x;});
@@ -376,7 +358,7 @@ function quadPerspective(zs) {
     var ls = findLineByLeastSquares(gpxs, gpys);
     var diffs = new Array();
     for(var i = 0; i < ls.points[1].length; i++) { 
-	diffs[i] = Math.abs(ls.points[1][i] - gpys[i]);
+	    diffs[i] = Math.abs(ls.points[1][i] - gpys[i]);
     }
     
 }

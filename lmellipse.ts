@@ -1,3 +1,5 @@
+/// <reference path="numeric-1.2.3.d.ts" />
+
 // Ported from Python code originally located at:
 // http://nicky.vanforeest.com/misc/fitEllipse/fitEllipse.html
 
@@ -20,12 +22,12 @@ function fitellipseZS(zs) {
 function fitellipse(xs,ys) {
 
     var D = [
-	numeric.mul(xs,xs),
-	numeric.mul(xs,ys),
-	numeric.mul(ys,ys),
-	xs,
-	ys,
-	xs.map(function(x) { return 1; }),
+        numeric.mul(xs,xs),
+        numeric.mul(xs,ys),
+        numeric.mul(ys,ys),
+        xs,
+        ys,
+        xs.map(function(x) { return 1; }),
     ];
 
     // Turn the rows into columns.  (Matches sample python code.)
@@ -63,7 +65,7 @@ function ellipse_center(ina) {
     var num = b*b-a*c;
     var x0 = (c*d-b*f)/num;
     var y0 = (a*f-b*d)/num;
-    return numeric.t(x0,y0);
+    return new numeric.T(x0,y0);
 }
 
 function ellipse_axis_length(ina) {
@@ -100,7 +102,7 @@ function ellipse_foci(ina) {
 
 // http://dracoblue.net/dev/linear-least-squares-in-javascript/
 
-function findLineByLeastSquares(values_x, values_y) {
+function findLineByLeastSquares(values_x: Array<number>, values_y: Array<number>) {
     var sum_x = 0;
     var sum_y = 0;
     var sum_xy = 0;
@@ -122,7 +124,7 @@ function findLineByLeastSquares(values_x, values_y) {
      * Nothing to do.
      */
     if (values_length === 0) {
-        return [ [], [] ];
+        throw new Error('No Values!');
     }
 
     /*
