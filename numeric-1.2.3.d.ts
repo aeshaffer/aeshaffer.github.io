@@ -23,8 +23,6 @@ declare module numeric {
     
     function linspace(a: number, b:number) : Array<number>;
     function linspace(a: number, b:number, n:number) : Array<number>;    
-    
-    function solve(A: Array<Array<number>>, b: Array<number>): Array<number>;
     function sqrt(x: number): number;
     function atan(x: number): number;
     function atan(x: number, y:number): number;
@@ -37,5 +35,8 @@ declare module numeric {
     function transpose(x: Array<Array<number>>): Array<Array<number>>;
     function inv(x: Array<Array<number>>): Array<Array<number>>;
     function eig(x: Array<Array<number>>): EIG;
+    function solve(A: Array<Array<number>>, b: Array<number>): Array<number>;
     function dot(x: Array<Array<number>>, y: Array<Array<number>>): Array<Array<number>>;
 }
+
+type C = numeric.T;

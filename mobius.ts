@@ -1,10 +1,13 @@
-function sm(A, rows, cols) {
+/// <reference path="numeric-1.2.3.d.ts" />
+/// <reference path="polynomials.ts" />
+
+function sm<T>(A: Array<Array<T>>, rows: Array<number>, cols: Array<number>): Array<Array<T>> {
     return rows.map(function(r) { return cols.map(function(c) { return A[r][c];})});
 }
 
-function cdet(A) {
+function cdet(A: Array<Array<C>>): C {
     function tbtdet(B) {
-	return (B[0][0]).mul(B[1][1]).sub((B[0][1]).mul(B[1][0]));
+	    return (B[0][0]).mul(B[1][1]).sub((B[0][1]).mul(B[1][0]));
     }
 
     var M0 = sm(A, [1,2], [1,2]);
@@ -18,7 +21,14 @@ function cdet(A) {
     return t0.sub(t1).add(t2);
 }
 
-function gettransform(zs, ws) {
+class MT {
+    a: C;
+    b: C;
+    c: C;
+    d: C;
+}
+
+function gettransform(zs: Array<C>, ws: Array<C>): MT {
 
     var z1 = zs[0];
     var z2 = zs[1];
@@ -47,7 +57,7 @@ function gettransform(zs, ws) {
 
 }
 
-function meval(mt, z) {
+function meval(mt: MT, z: C): C {
     var a = mt.a, b = mt.b, c = mt.c, d = mt.d;
     var num = a.mul(z).add(b);
     var den = c.mul(z).add(d);

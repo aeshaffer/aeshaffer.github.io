@@ -103,7 +103,7 @@ numeric.T.prototype.pow = function(n) {
 
 interface Array<T> {
     sum(): T;
-    csum(): numeric.T;
+    csum(): C;
 }
 
 Array.prototype.sum = function(){
@@ -131,22 +131,22 @@ function cgrid(N) {
     return retval;
 }
 
-function rt2c(r: number, t: number): numeric.T {
+function rt2c(r: number, t: number): C {
     return ni.mul(t).exp().mul(r);
 }
 
-function c(x: number,y: number): numeric.T {
+function c(x: number,y: number): C {
     return new numeric.T(x,y);
 }
 
-function c2xy(z: numeric.T): Array<number> {
+function c2xy(z: C): Array<number> {
     return [z.x, z.y];
 }
 
 // Theta to exp[i*t]
-function t2c(t: number): numeric.T { return rt2c(1,t); }
+function t2c(t: number): C { return rt2c(1,t); }
 
-function ttcp(t: number) : numeric.T {
+function ttcp(t: number) : C {
     return c(numeric.cos(t), numeric.sin(t));
 }
 
@@ -186,12 +186,12 @@ function round5(n: number): number {
     return Math.round(n*100000)/100000;
 }
 
-function dc(z: numeric.T): string {
+function dc(z: C): string {
     var y = z.y == undefined ? 0 : z.y;
     return round5(z.x) + " " + (y >= 0 ? "+": "") +round5(y) + "i";
 }
 
-function dcp(z: numeric.T): string {
+function dcp(z: C): string {
     var y = z.y == undefined ? 0 : z.y;
     return round5(z.x) + " " + (y >= 0 ? "+": "") +round5(y) + "j";
 }
@@ -208,7 +208,7 @@ var nnone = new numeric.T(-1,0);
 var ni = new numeric.T(0.0, 1.0);
 var nni = new numeric.T(0.0, -1.0);
 
-function iszero(z: numeric.T): boolean {
+function iszero(z: C): boolean {
     return z.abs().x == 0;
 }
 
@@ -253,7 +253,7 @@ function cps(zs: Array<numeric.T>): Array<numeric.T> {
     return polyroots(dcs);
 }
 
-function zpowers(z: numeric.T,n: number): Array<numeric.T> {
+function zpowers(z: C,n: number): Array<numeric.T> {
     var zpowers = new Array<numeric.T>();
     var zn = none;
     zpowers.push(zn);
@@ -264,7 +264,7 @@ function zpowers(z: numeric.T,n: number): Array<numeric.T> {
     return zpowers;
 }
 
-function peval(coeffs: polynomial, z: numeric.T) {    
+function peval(coeffs: polynomial, z: C) {    
     var retval = nzero;
     var zs = zpowers(z, coeffs.length);
 
@@ -304,7 +304,7 @@ function printzs(zs: Array<numeric.T>): string {
     return "[" + zs.map(dcp).join(",") + "]";
 }
 
-function product(zs: Array<numeric.T>): numeric.T {
+function product(zs: Array<numeric.T>): C {
     return zs.filter(function(z) { return z != undefined; })
 	.reduce(function(z1,z2) { return z1.mul(z2);}, none);
 }

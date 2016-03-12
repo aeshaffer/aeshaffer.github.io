@@ -101,7 +101,7 @@ function getBPFExpr(as: BPZeroes, ignorefactor: boolean = null) {
 type BPZeroes = Array<numeric.T>;
 
 interface BPF {
-    (z: numeric.T): numeric.T;
+    (z: C): C;
 }
 
 function getBPF(as: BPZeroes, ignorefactor: boolean = null): BPF {
@@ -109,7 +109,7 @@ function getBPF(as: BPZeroes, ignorefactor: boolean = null): BPF {
     return <BPF>f;
 }
 
-function bpeval0(as: BPZeroes, z: numeric.T): numeric.T {
+function bpeval0(as: BPZeroes, z: C): C {
     var f = getBPF(as);
     return f(z);
 }
@@ -122,9 +122,9 @@ function bpepolys(as: BPZeroes): BPF {
     }
 }
 
-function bpeval(as: BPZeroes, z: numeric.T): numeric.T {
+function bpeval(as: BPZeroes, z: C): C {
 
-    function bpterm(a: numeric.T) : numeric.T {
+    function bpterm(a: C) : C {
         var num;
         if(!iszero(a)) {
             num = z.sub(a); // (z-a)
@@ -203,9 +203,9 @@ function getBPTheta(as: BPZeroes, ts: Array<number>): Array<numeric.T> {
 }
 
 class Z1Z2ZTan {
-    z1: numeric.T;
-    z2: numeric.T;
-    ztan: numeric.T;
+    z1: C;
+    z2: C;
+    ztan: C;
 }
 
 function getTanPoints(as: BPZeroes, t: number): Array<Z1Z2ZTan> {
@@ -230,7 +230,7 @@ function getTanPoints(as: BPZeroes, t: number): Array<Z1Z2ZTan> {
     return retval;
 }
 
-function preimage(zs: BPZeroes, beta: numeric.T): Array<numeric.T> {
+function preimage(zs: BPZeroes, beta: C): Array<numeric.T> {
     var num = bpnum(zs);
     var den = bpden(zs);
     var alphaden = polymult([beta], den);
@@ -240,7 +240,7 @@ function preimage(zs: BPZeroes, beta: numeric.T): Array<numeric.T> {
 }
 
 class OuterZeroAndPreimages {
-    outerzero: numeric.T;
+    outerzero: C;
     preimages: Array<numeric.T>;
 }
 
@@ -370,9 +370,9 @@ function perspective(zs, i) {
     var z4 = zs[(3+i) % zs.length];
     var m12 = z2.sub(z1);
     var m34 = z4.sub(z3);
-    var b = [z1.sub(z3).x, z1.sub(z3).y];
+    var b: Array<number> = [z1.sub(z3).x, z1.sub(z3).y];
     var M = [[-z2.sub(z1).x, -fixy(z2.sub(z1)).y], [z4.sub(z3).x, fixy(z4.sub(z3)).y]];
-    var ts = numeric.solve(numeric.transpose(M),b);
+    var ts = numeric.solve(numeric.transpose(M),b);    
     var intz12 = z1.add(z2.sub(z1).mul(ts[0]));
     var intz34 = z3.add(z4.sub(z3).mul(ts[1]));
     return intz12;
