@@ -640,23 +640,44 @@ function getCurrentSegment(zs, targetLength) {
 	return {segment : [z0, z1], point: z1};
 }
 
-BPWidget.prototype.drawPILinesInner = function(lines, piangles, skip, totalLength){
+function getSkippedAngles(piangles, skip) {
+	var numLines;
+
+	if(piangles.length % skip == 0) {
+		numLines = skip;
+	} else {
+		numLines = gcd_rec(skip, piangles.length);
+	}
+
+	var retval = new Array(numLines);
+	for(var j = 0; j < numLines; j++) {
+		var polyarray = new Array();
+		var i = j;
+		do {
+		    polyarray.push(piangles[i % (piangles.length)]);
+		    i = (i + skip) % piangles.length;
+		} while(i != j);		
+		retval[j] = polyarray
+	}
+
+	return retval;
+}
+
+BPWidget.prototype.drawPILinesInner = function(lines, piangles, skip, timepct){
 
     var N = this.plotDims().windowN;
     var ctx = setupCTX(lines, N);
 
 	var frontier = [];
 
-    for(var j = 0; j < skip; j++) {
-		var drawnLength = 0;
-		var skippedangles = [];
+	var skippedangleses = getSkippedAngles(piangles, skip);
+	var numLines = skippedangleses.length;
 
-		skippedangles.push(piangles[j]);
-		var i = j;
-		do {
-		    skippedangles.push(piangles[i % (piangles.length)]);
-		    i = (i + skip) % piangles.length;
-		} while(i != j);
+    for(var j = 0; j < numLines; j++) {
+		var drawnLength = 0;
+		var skippedangles = skippedangleses[j];
+		
+		var totalLength = timepct * getPolylength(skippedangles.map(t2c));
 
 		var t0 = skippedangles[0];
 		var t1 = null;
@@ -674,10 +695,12 @@ BPWidget.prototype.drawPILinesInner = function(lines, piangles, skip, totalLengt
 				// Draw in the same direction with whatever length we have left over.
 				var z = t0z.add(t1z.sub(t0z).div(lineLength).mul(totalLength - drawnLength));
 				t1z = z;
+				console.log("Drawing from" + dc(t0z) + " to " + dc(t1z) + " length " + lineLength);
 				(ctx.lineTo).apply(ctx, c2xy(z));	
 				drawnLength = totalLength;
 				break;
 			} else {
+				console.log("Drawing from" + dc(t0z) + " to " + dc(t1z) + " length " + lineLength);
 				(ctx.lineTo).apply(ctx, ttp(t1));			
 				drawnLength += lineLength;
 				t0 = t1;
@@ -976,8 +999,7 @@ var tangentsframe = function(widget, timeZero, preimages) {
     		var skip = skips[s];
 			for(var i = 0; i < preimages.length; i++) {
 				var piangles = preimages[i];
-				var polylength = getPolylength(piangles.map(t2c));
-				var myfrontier = widget.drawPILinesInner(widget.rblines[0], piangles, skip, polylength*timepct);
+				var myfrontier = widget.drawPILinesInner(widget.rblines[0], piangles, skip, timepct);
 				for(var j = 0; j < myfrontier.length; j++) {
 					frontier.push(myfrontier[j]);
 				}
