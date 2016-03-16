@@ -8,6 +8,7 @@ declare module numeric {
         mul(z2: T) : T;
         mul(z2: number) : T;
         div(z2: T) : T;
+        div(x2: number): T;
         dot(z2: T) : T;        
         angle(): number;
         pow(n: number): T;

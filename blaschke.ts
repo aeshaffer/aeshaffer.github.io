@@ -208,6 +208,8 @@ class Z1Z2ZTan {
     ztan: C;
 }
 
+// Get lists of preimages of exp(i*t), along with the point of
+// intersection.
 function getTanPoints(as: BPZeroes, t: number): Array<Z1Z2ZTan> {
     var preimages = preimage(as, rt2c(1,t));
     preimages = preimages.sort(function(i,j) { 
@@ -228,6 +230,109 @@ function getTanPoints(as: BPZeroes, t: number): Array<Z1Z2ZTan> {
         retval[i] = {"z1": z1, "z2": z2, "ztan": ztan};
     }
     return retval;
+}
+
+function getCurrentSegment(zs : BPZeroes, targetLength: number) {
+	var drawnLength = 0;
+	var z0 : C;
+	var z1 : C;
+	for(var i = 0; i < zs.length + 1; i++) {
+		z0 = zs[i % zs.length];
+		z1 = zs[(i+1) % zs.length];
+		var z1mz0 = z1.sub(z0);
+		var lineLength = z1mz0.abs().x;
+		if(drawnLength + lineLength >= targetLength) {
+			// Draw in the same direction with whatever length we have left over.
+			var z = z0.add(z1mz0.div(lineLength).mul(targetLength - drawnLength));
+			return {segment : [z0, z1], point: z};
+		} 			
+		drawnLength += lineLength;	
+	}
+	return {segment : [z0, z1], point: z1};
+}
+
+function getSkippedAngles(piangles: Array<number>, skip: number): Array<Array<number>> {
+	var numLines: number;
+
+	if(piangles.length % skip == 0) {
+		numLines = skip;
+	} else {
+		numLines = gcd_rec(skip, piangles.length);
+	}
+
+	var retval = new Array<Array<number>>(numLines);
+	for(var j = 0; j < numLines; j++) {
+		var polyarray = new Array<number>();
+		var i = j;
+		do {
+		    polyarray.push(piangles[i % (piangles.length)]);
+		    i = (i + skip) % piangles.length;
+		} while(i != j);		
+		retval[j] = polyarray;
+	}
+
+	return retval;
+}
+
+function getPIAngles(zs: BPZeroes, t: number): Array<number> {	
+	var z2 = c(numeric.cos(t), numeric.sin(t));
+	// var bz2 = bpeval0(this.zs, z2);
+	var bz2 = z2;
+	var preimages = preimage(zs, bz2);
+	var piangles = preimages.map(function(cv) { return cv.angle();})
+	piangles = piangles.sort(function(a,b){return a-b});	
+	return piangles;
+}
+
+function getPolylength(zs: Array<C>): number {
+	var retval = 0;
+	for(var i = 0; i < zs.length; i++) {
+		var z0 = zs[i % zs.length];
+		var z1 = zs[(i+1) % zs.length];
+		retval += z0.sub(z1).abs().x;
+	}
+	return retval;
+}
+
+
+function getSortedByCenter(intersections: Array<Array<IntersectionData>>) : Array<C>{
+    var ints = new Array<C>();
+    for(var i = 0; i < intersections.length; i++) {
+        for(var j = 0; j < intersections[i].length; j++) {
+            ints.push(intersections[i][j].inter);
+        }
+    }
+    
+    // Find the center of mass
+    var avg = nzero;
+    for(var i = 0; i < ints.length; i++) {
+	    avg = avg.add(ints[i]);
+    }
+    avg = avg.div(ints.length);
+    // Sort them by angle around this center.
+    ints = ints.map(function(z) { return z.sub(avg); });
+    ints = ints.sort(function(a,b) { return b.angle() - a.angle(); });
+    ints = ints.map(function(z) { return z.add(avg); });
+    
+    return ints;
+}
+
+function maxDistPair(ints: Array<C>) {
+
+    var maxDist = 0;
+    var maxI = -1;
+    var maxJ = -1;
+    for(var i = 0; i < ints.length; i++) {
+        for(var j = i+1; j < ints.length; j++) {
+            var dist0 = ints[i].sub(ints[j]).abs().x;
+            if(dist0 > maxDist) {
+                maxI = i;
+                maxJ = j;
+                maxDist = dist0;
+            }
+        }
+    }
+    return {p0 : ints[maxI], p1: ints[maxJ]};
 }
 
 function preimage(zs: BPZeroes, beta: C): Array<numeric.T> {

@@ -355,3 +355,15 @@ function polyroots(incs: polynomial): Array<numeric.T> {
     return roots;
 }
 
+function linterp(xmin: number, xmax: number, ymin: number, ymax: number): (number) => number {
+    return function(x) { return ymin + (ymax-ymin)*(x-xmin)/(xmax-xmin); };
+}
+
+function zinterp(xmin: number, xmax: number, ymin: number, ymax: number): (C) => C {
+    var li = linterp(xmin, xmax, ymin, ymax);
+    return function(z) {
+        var unitvec = z.div(z.abs());
+        var znorm = z.abs().x; 
+        return unitvec.mul(li(znorm));
+    }
+}

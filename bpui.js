@@ -561,26 +561,6 @@ BPWidget.prototype.fastReplot = function(as, N, cpi, raythreshold) {
     }
 };
 
-function getPIAngles(zs, t) {	
-	var z2 = c(numeric.cos(t), numeric.sin(t));
-	// var bz2 = bpeval0(this.zs, z2);
-	var bz2 = z2;
-	var preimages = preimage(zs, bz2);
-	var piangles = preimages.map(function(cv) { return cv.angle();})
-	piangles = piangles.sort(function(a,b){return a-b});	
-	return piangles;
-}
-
-function getPolylength(zs) {
-	var retval = 0;
-	for(var i = 0; i < zs.length; i++) {
-		var z0 = zs[i % zs.length];
-		var z1 = zs[(i+1) % zs.length];
-		retval += z0.sub(z1).abs().x;
-	}
-	return retval;
-}
-
 BPWidget.prototype.getSkips = function () {
 	var skips0 = this.skippoints.val().split(",");
 	var skips = skips0.map(function(skip) { return parseInt(skip); });
@@ -619,48 +599,6 @@ function setupCTX(lines, N) {
     ctx.scale(Nover2, -Nover2);
     ctx.lineWidth = 1.00001/Nover2;
     return ctx;
-}
-
-function getCurrentSegment(zs, targetLength) {
-	var drawnLength = 0;
-	var z0;
-	var z1;
-	for(var i = 0; i < zs.length + 1; i++) {
-		z0 = zs[i % zs.length];
-		z1 = zs[(i+1) % zs.length];
-		var z1mz0 = z1.sub(z0);
-		var lineLength = z1mz0.abs().x;
-		if(drawnLength + lineLength >= targetLength) {
-			// Draw in the same direction with whatever length we have left over.
-			var z = z0.add(z1mz0.div(lineLength).mul(targetLength - drawnLength));
-			return {segment : [z0, z1], point: z};
-		} 			
-		drawnLength += lineLength;	
-	}
-	return {segment : [z0, z1], point: z1};
-}
-
-function getSkippedAngles(piangles, skip) {
-	var numLines;
-
-	if(piangles.length % skip == 0) {
-		numLines = skip;
-	} else {
-		numLines = gcd_rec(skip, piangles.length);
-	}
-
-	var retval = new Array(numLines);
-	for(var j = 0; j < numLines; j++) {
-		var polyarray = new Array();
-		var i = j;
-		do {
-		    polyarray.push(piangles[i % (piangles.length)]);
-		    i = (i + skip) % piangles.length;
-		} while(i != j);		
-		retval[j] = polyarray
-	}
-
-	return retval;
 }
 
 BPWidget.prototype.drawPILinesInner = function(lines, piangles, skip, timepct){
@@ -746,46 +684,6 @@ function crossHairs(lines, N, skippedangles, drawnLength) {
 	ctx.fillStyle = "#FF0000";
 	ctx.fill();
 		*/
-}
-
-function getSortedByCenter(intersections) {
-    var ints = [];
-    for(var i = 0; i < intersections.length; i++) {
-	for(var j = 0; j < intersections[i].length; j++) {
-	    ints.push(intersections[i][j].inter);
-	}
-    }
-    
-    // Find the center of mass
-    var avg = nzero;
-    for(var i = 0; i < ints.length; i++) {
-	avg = avg.add(ints[i]);
-    }
-    avg = avg.div(ints.length);
-    // Sort them by angle around this center.
-    ints = ints.map(function(z) { return z.sub(avg); });
-    ints = ints.sort(function(a,b) { return b.angle() - a.angle(); });
-    ints = ints.map(function(z) { return z.add(avg); });
-    
-    return ints;
-}
-
-function maxDistPair(ints) {
-
-    var maxDist = 0;
-    var maxI = -1;
-    var maxJ = -1;
-    for(var i = 0; i < ints.length; i++) {
-	for(var j = i+1; j < ints.length; j++) {
-	    var dist0 = ints[i].sub(ints[j]).abs().x;
-	    if(dist0 > maxDist) {
-		maxI = i;
-		maxJ = j;
-		maxDist = dist0;
-	    }
-	}
-    }
-    return {p0 : ints[maxI], p1: ints[maxJ]};
 }
 
 // Scrap code to find points which are closest to the 
@@ -1069,22 +967,22 @@ BPWidget.prototype.autojoinpoints = function() {
 	
 	if(this.doguessellipse.is(":checked")) {
 	    try {
-		var a;
-		
-		a = fitellipseZS(ints2);
-		
-		console.log(numeric.prettyPrint(ellipse_foci(a)));
-		console.log(ellipse_axis_length(a));
-		
-		var cent = ellipse_center(a);
-		var axes = ellipse_axis_length(a);
-		var angle = ellipse_angle_of_rotation(a);
-		var majorAxisVector = rt2c(axes[0], angle);
-		var minorAxisVector = rt2c(axes[1], angle + Math.PI/2);
-		
-		this.drawDecoratedEllipse(ctx, cent, majorAxisVector, minorAxisVector);
+            var a;
+            
+            a = fitellipseZS(ints2);
+            
+            console.log(numeric.prettyPrint(ellipse_foci(a)));
+            console.log(ellipse_axis_length(a));
+            
+            var cent = ellipse_center(a);
+            var axes = ellipse_axis_length(a);
+            var angle = ellipse_angle_of_rotation(a);
+            var majorAxisVector = rt2c(axes[0], angle);
+            var minorAxisVector = rt2c(axes[1], angle + Math.PI/2);
+            
+            this.drawDecoratedEllipse(ctx, cent, majorAxisVector, minorAxisVector);
 	    } catch (err) {
-		alert(err);
+		    alert(err);
 	    }
 	    
 	    //	this.guessellipse(ctx, ints2);
@@ -1115,19 +1013,6 @@ BPWidget.prototype.addZero = function(z) {
     if(z.abs().x <=1) {
 	this.zs.push(z);
 	this.rescatter();
-    }
-}
-
-function linterp(xmin, xmax, ymin, ymax) {
-    return function(x) { return ymin + (ymax-ymin)*(x-xmin)/(xmax-xmin); };
-}
-
-function zinterp(xmin, xmax, ymin, ymax) {
-    var li = linterp(xmin, xmax, ymin, ymax);
-    return function(z) {
-	var unitvec = z.div(z.abs());
-	var znorm = z.abs().x; 
-	return unitvec.mul(li(znorm));
     }
 }
 
