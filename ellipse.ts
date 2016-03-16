@@ -27,10 +27,14 @@ function pdc(z: C): string {
 
 class IntersectionData {inter:numeric.T; dc: string;}
 
+// Get information for subsequent segments so we can
+// draw the red line that progressively approximates
+// the Poncelet curve.
 function getTangentSegments(zs: Array<C>, ajpct: number) : Array<Array<IntersectionData>> {
     var adelta = 2.0*Math.PI/ajpct;
     var getangle = function(cv: C) { return normalizeangle(cv.angle()); }
     var nsort = function(a:C,b:C) { return getangle(a)-getangle(b); }
+    // Get Preimages of i*angleDelta
     function getPIs(i: number): Array<C> {
         var t = i*adelta;
         var z = c(numeric.cos(t), numeric.sin(t));

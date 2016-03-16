@@ -608,9 +608,9 @@ BPWidget.prototype.drawPILinesInner = function(lines, piangles, skip, timepct) {
     var frontier = [];
 
     var skippedangleses = getSkippedAngles(piangles, skip);
-    var numLines = skippedangleses.length;
+    var numPolys = skippedangleses.length;
 
-    for (var j = 0; j < numLines; j++) {
+    for (var j = 0; j < numPolys; j++) {
         var drawnLength = 0;
         var skippedangles = skippedangleses[j];
 
@@ -952,25 +952,7 @@ BPWidget.prototype.autojoinpoints = function() {
     // Setup another context
     var ctx = setupCTX(this.rblines[0], this.plotDims().windowN);
 
-    var ints2 = new Array(); // ajpct*this.zs.length);
-    var tpts = numeric.linspace(0, 2 * Math.PI - 2 * Math.PI / ajpct, ajpct);
-    for (var ti = 0; ti < tpts.length; ti++) {
-        if(this.parseSkip() == 1) {
-            var pts = getTanPoints(this.zs, tpts[ti]);
-            for (var j = 0; j < pts.length; j++) {
-                ints2.push(pts[j].ztan);
-            }            
-        } else {
-            var pts = getTanPointsWithSkip(this.zs, tpts[ti], this.parseSkip());
-            for(var i = 0; i < pts.length; i++) {
-                for (var j = 0; j < pts[i].length; j++) {
-                    ints2.push(pts[i][j].ztan);
-                }   
-            }
-        }
-    }
-
-    //if (parseInt(this.skippoints.val(), 10) == 1) {
+    if (this.parseSkip() == 1) {
         var drawsolid = this.solidtangents.is(":checked");
         this.drawtangents(ctx, ajpct, drawsolid);
         
@@ -980,30 +962,48 @@ BPWidget.prototype.autojoinpoints = function() {
             var ints = getSortedByCenter(intersections);
             this.drawponcelet(ctx, ints);
         }
-        
-        if (this.doguessellipse.is(":checked")) {
-            try {
-                var a;
-
-                a = fitellipseZS(ints2);
-
-                console.log(numeric.prettyPrint(ellipse_foci(a)));
-                console.log(ellipse_axis_length(a));
-
-                var cent = ellipse_center(a);
-                var axes = ellipse_axis_length(a);
-                var angle = ellipse_angle_of_rotation(a);
-                var majorAxisVector = rt2c(axes[0], angle);
-                var minorAxisVector = rt2c(axes[1], angle + Math.PI / 2);
-
-                this.drawDecoratedEllipse(ctx, cent, majorAxisVector, minorAxisVector);
-            } catch (err) {
-                alert(err);
+    }
+    
+    if (this.doguessellipse.is(":checked")) {
+        var ints2 = new Array(); // ajpct*this.zs.length);
+        var tpts = numeric.linspace(0, 2 * Math.PI - 2 * Math.PI / ajpct, ajpct);
+        for (var ti = 0; ti < tpts.length; ti++) {
+            if (this.parseSkip() == 1) {
+                var pts = getTanPoints(this.zs, tpts[ti]);
+                for (var j = 0; j < pts.length; j++) {
+                    ints2.push(pts[j].ztan);
+                }
+            } else {
+                var pts = getTanPointsWithSkip(this.zs, tpts[ti], this.parseSkip());
+                for (var i = 0; i < pts.length; i++) {
+                    for (var j = 0; j < pts[i].length; j++) {
+                        ints2.push(pts[i][j].ztan);
+                    }
+                }
             }
-
-            //	this.guessellipse(ctx, ints2);
         }
-    //}
+
+        try {
+            var a;
+
+            a = fitellipseZS(ints2);
+
+            console.log(numeric.prettyPrint(ellipse_foci(a)));
+            console.log(ellipse_axis_length(a));
+
+            var cent = ellipse_center(a);
+            var axes = ellipse_axis_length(a);
+            var angle = ellipse_angle_of_rotation(a);
+            var majorAxisVector = rt2c(axes[0], angle);
+            var minorAxisVector = rt2c(axes[1], angle + Math.PI / 2);
+
+            this.drawDecoratedEllipse(ctx, cent, majorAxisVector, minorAxisVector);
+        } catch (err) {
+            alert(err);
+        }
+
+        //	this.guessellipse(ctx, ints2);
+    }
 
     ctx.restore();
 };
