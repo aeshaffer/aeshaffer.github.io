@@ -215,7 +215,26 @@ function getTanPoints(as: BPZeroes, t: number): Array<Z1Z2ZTan> {
     preimages = preimages.sort(function(i,j) { 
 	    return normalizeangle(i.angle()) - normalizeangle(j.angle());
     });
+    return getTanPointsForPIs(as, preimages);
+}
 
+function getTanPointsWithSkip(as: BPZeroes, t: number, skip: number): Z1Z2ZTan[][] {
+    var preimages = preimage(as, rt2c(1,t));
+    preimages = preimages.sort(function(i,j) { 
+	    return normalizeangle(i.angle()) - normalizeangle(j.angle());
+    });
+    var polys = getSkippedAngles(preimages.map(z => z.angle()), skip);
+    var retval = new Array<Array<Z1Z2ZTan>>();
+    for(var i = 0; i < polys.length; i++) {
+        var polyangles = polys[i];
+        var polyZs = polyangles.map(t2c);
+        var x = getTanPointsForPIs(as, polyZs);
+        retval.push(x);
+    }
+    return retval;
+}
+
+function getTanPointsForPIs(as: BPZeroes, preimages: Array<C>): Array<Z1Z2ZTan> {
     var ts = preimages.map(function(z) { return z.angle(); });
     var bps = getBPTheta(as, ts);
     var retval = new Array<Z1Z2ZTan>(preimages.length);

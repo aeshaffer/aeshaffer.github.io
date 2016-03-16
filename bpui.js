@@ -792,12 +792,21 @@ BPWidget.prototype.drawDecoratedEllipse = function(ctx, cent, majorAxisVector, m
     var f1 = cent.sub(focusvector);
     var f2 = cent.add(focusvector);
 
+    var majorUnitVector = majorAxisVector.div(majorAxisVector.abs());
+    var minorUnitVector = minorAxisVector.div(minorAxisVector.abs());
+
     function drawCircle(p) {
         // Draw Center
         ctx.beginPath();
         ctx.strokeStyle = "#f00";
         ctx.arc(p.x, fixy(p).y, .05, 0, 2.0 * Math.PI);
         ctx.stroke();
+        var pPlusMinor = fixy(p.add(minorUnitVector.mul(.05)));
+        var pMinusMinor = fixy(p.sub(minorUnitVector.mul(.05)));
+        ctx.beginPath();
+        ctx.moveTo(pPlusMinor.x, pPlusMinor.y);
+        ctx.lineTo(pMinusMinor.x, pMinusMinor.y);
+        ctx.stroke();        
     }
 
     function drawAxis(p0, p1) {
@@ -930,6 +939,10 @@ var tangentsframe = function(widget, timeZero, preimages) {
 
 var animateCallback;
 
+BPWidget.prototype.parseSkip = function () {
+    return parseInt(this.skippoints.val(), 10);
+}
+
 BPWidget.prototype.autojoinpoints = function() {
     this.doclearlines();
 
@@ -942,26 +955,32 @@ BPWidget.prototype.autojoinpoints = function() {
     var ints2 = new Array(); // ajpct*this.zs.length);
     var tpts = numeric.linspace(0, 2 * Math.PI - 2 * Math.PI / ajpct, ajpct);
     for (var ti = 0; ti < tpts.length; ti++) {
-        var pts = getTanPoints(this.zs, tpts[ti]);
-        for (var j = 0; j < pts.length; j++) {
-            ints2.push(pts[j].ztan);
+        if(this.parseSkip() == 1) {
+            var pts = getTanPoints(this.zs, tpts[ti]);
+            for (var j = 0; j < pts.length; j++) {
+                ints2.push(pts[j].ztan);
+            }            
+        } else {
+            var pts = getTanPointsWithSkip(this.zs, tpts[ti], this.parseSkip());
+            for(var i = 0; i < pts.length; i++) {
+                for (var j = 0; j < pts[i].length; j++) {
+                    ints2.push(pts[i][j].ztan);
+                }   
+            }
         }
     }
 
-    if (parseInt(this.skippoints.val(), 10) == 1) {
+    //if (parseInt(this.skippoints.val(), 10) == 1) {
         var drawsolid = this.solidtangents.is(":checked");
-        if (drawsolid) {
+        this.drawtangents(ctx, ajpct, drawsolid);
+        
+        if (drawsolid && this.plotpolygon.is(":checked")) {
             // Get tangent segments.
             var intersections = getTangentSegments(this.zs, ajpct);
             var ints = getSortedByCenter(intersections);
-            this.drawtangents(ctx, ajpct, drawsolid);
-            if (this.plotpolygon.is(":checked")) {
-                this.drawponcelet(ctx, ints);
-            }
-        } else {
-            this.drawtangents(ctx, ajpct, drawsolid);
+            this.drawponcelet(ctx, ints);
         }
-
+        
         if (this.doguessellipse.is(":checked")) {
             try {
                 var a;
@@ -984,7 +1003,7 @@ BPWidget.prototype.autojoinpoints = function() {
 
             //	this.guessellipse(ctx, ints2);
         }
-    }
+    //}
 
     ctx.restore();
 };

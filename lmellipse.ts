@@ -83,12 +83,17 @@ function ellipse_axis_length(ina: Array<number>) {
 
 function ellipse_foci(ina: Array<number>) {
     var center = ellipse_center(ina);
-    center = c.apply(null, center);
     var axislengths = ellipse_axis_length(ina);
     var angle = ellipse_angle_of_rotation(ina);
 
     var major = axislengths[0];
     var minor = axislengths[1];
+
+    if(major < minor) {
+        angle = angle+ Math.PI/2;
+        major = axislengths[1];
+        minor = axislengths[0];
+    }
 
     var rootC = Math.sqrt(major*major-minor*minor);
     var ctof = fixy(rt2c(rootC, angle));
