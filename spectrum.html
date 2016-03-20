@@ -1,0 +1,33 @@
+<html>
+  <head>
+    <title>Spectrum</title>
+    <script src="tsjs/hsvToRGB.js" type="text/javascript"></script>
+    <style type="text/css">
+    .tickmarks span {
+      position: absolute;
+      display: block;
+      text-align: left;
+      float: left;
+    }
+    </style>
+  </head>
+  <body>
+    <canvas width="628" height="157"></canvas>
+    <div class="tickmarks" style="position: relative; width: 628px;"> 
+      <span style="left: 0px;">|<br/>0</span>  
+      <span style="left: 157px;">|<br/>&pi;/2</span>
+      <span style="left: 314px;">|<br/>&pi;</span>
+      <span style="left: 471px;">|<br/>3&pi;/2</span>
+      <span style="right: 0px; text-align: right;">|<br/>2&pi;</span>
+    </div>
+  </body>
+  <script type="text/javascript">
+    var c = document.getElementsByTagName("canvas");
+    var ctx = c[0].getContext("2d");
+    for(var i = 0; i < 628; i++) {
+      var rgb = hsvToRgb(i/628.0, 1, 1);
+      ctx.fillStyle = "rgb("+rgb[0].toFixed(0) + "," + rgb[1].toFixed(0) + "," + rgb[2].toFixed(0)+")";
+      ctx.fillRect(i, 0, 1, 628);
+    }
+  </script>	
+</html>
