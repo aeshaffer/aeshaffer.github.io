@@ -16,12 +16,12 @@ class JQuerySingletonWrapper<T extends HTMLElement> {
     element: T;
     constructor(...args: any[]) {
         this.inner = $.apply(null, args);
-        if (this.inner.length != 1) {
-            throw "WRONG!";
-        } else {
-            this.element = <T>this.inner[0];
-            this.length = this.inner.length;
-        }
+        this.element = <T>this.inner[0];
+        this.length = this.inner.length;
+        // if (this.inner.length != 1) {
+        //     throw "WRONG!";
+        // } else {
+        // }
     }
     empty(...args: any[]) { return this.inner.empty.apply(this.inner, args); }
     append(...args: any[]) { return this.inner.append.apply(this.inner, args); }
@@ -108,12 +108,15 @@ class BPWidget {
     rainbowworker: Worker;
     regionsworker: Worker;
 
-    constructor(obj: JQuery) {
+    constructor(obj: JQuery, allElements: boolean) {
 
         function g<T extends HTMLElement>(sel): JQuerySingletonWrapper<any> {
             var retval = new JQuerySingletonWrapper<T>(obj.find(sel));
-            if (retval.length > 0) { return retval; }
-            else { return null; }
+            if (allElements && retval.length == 0) {
+                return null;
+            } else {
+                return retval;
+            }
         }
 
         this.container = obj;

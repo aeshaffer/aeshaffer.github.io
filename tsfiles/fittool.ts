@@ -1,3 +1,6 @@
+/// <reference path="bpui.ts" />
+/// <reference path="jquery.flot.d.ts" />
+
 var targetwidget;
 
 function fitSetup() {
@@ -17,16 +20,18 @@ function fitSetup() {
     replotBoundaries();
 }
 
-var FitWidget = function(obj) {
-    BPWidgetSetup.call(this, obj);
-    var that = this;
-    this.zsstring.change(function() {
-	that.zs = parseZsString(that.zsstring.val());
-	that.rescatter();
-	replotBoundaries();
-    });
-    this.plotDims = function() {
-	return {N: 100, zoom: 3, windowN: 300, graphN: 300};
+class FitWidget extends BPWidget {
+    constructor(obj) {
+        super(obj, false);        
+        var that = this;
+        this.zsstring.change(function() {
+            that.zs = parseZsString(that.zsstring.val());
+            that.rescatter();
+            replotBoundaries();
+        });
+        this.plotDims = function() {
+            return {N: 100, zoom: 3, windowN: 300, graphN: 300};
+        }
     }
 }
 
@@ -37,19 +42,15 @@ function getflips(ts) {
     var flippoints = new Array();
 
     var l;
-    var r;
-
     for(var r = 0; r < ts.length; r++) {
-	l = (r - 1 + ts.length) % ts.length;
-	if(ts[l] > ts[r]) {
-	    flippoints.push(r);
-	}
+        l = (r - 1 + ts.length) % ts.length;
+        if(ts[l] > ts[r]) {
+            flippoints.push(r);
+        }
     }
     
     return flippoints
 }
-
-FitWidget.prototype = new BPWidget();
 
 var thetaplot;
 var diffplot;
@@ -140,7 +141,7 @@ function replotBoundaries() {
 	], 
 	{
 	    series: { lines: {show: true}}, 
-	    crosshair: { mode: "xy"}, 
+	    //crosshair: { mode: "xy"}, 
 	    grid: {hoverable: true, autoHighlight: false}, 
 	    yaxes: [
 		{ 
