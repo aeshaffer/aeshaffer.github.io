@@ -109,8 +109,8 @@ function rt2c(r, t) {
 function c(x, y) {
     return new numeric.T(x, y);
 }
-function c2xy(z) {
-    return { x: z.x, y: z.y };
+function c2xyArray(z) {
+    return [z.x, z.y];
 }
 // Theta to exp[i*t]
 function t2c(t) { return rt2c(1, t); }

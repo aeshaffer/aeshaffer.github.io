@@ -517,7 +517,7 @@ var BPWidget = (function () {
                     var z = t0z.add(t1z.sub(t0z).div(lineLength).mul(totalLength - drawnLength));
                     t1z = z;
                     console.log("Drawing from" + dc(t0z) + " to " + dc(t1z) + " length " + lineLength);
-                    (ctx.lineTo).apply(ctx, c2xy(z));
+                    (ctx.lineTo).apply(ctx, c2xyArray(z));
                     drawnLength = totalLength;
                     break;
                 }
@@ -660,7 +660,7 @@ var BPWidget = (function () {
             preimageangles.push(piangles);
         }
         var widget = this;
-        window.requestAnimationFrame(function () { this.tangentsframe(widget, new Date(), preimageangles); });
+        window.requestAnimationFrame(function () { widget.tangentsframe(widget, new Date(), preimageangles); });
     };
     BPWidget.prototype.tangentsframe = function (widget, timeZero, preimages) {
         var time = new Date();
@@ -673,7 +673,7 @@ var BPWidget = (function () {
                 var skip = skips[s];
                 for (var i = 0; i < preimages.length; i++) {
                     var piangles = preimages[i];
-                    var myfrontier = widget.drawPILinesInner(widget.rblines[0], piangles, skip, timepct);
+                    var myfrontier = widget.drawPILinesInner(widget.rblines.element, piangles, skip, timepct);
                     for (var j = 0; j < myfrontier.length; j++) {
                         frontier.push(myfrontier[j]);
                     }
@@ -681,7 +681,7 @@ var BPWidget = (function () {
             }
         }
         var N = widget.plotDims().windowN;
-        var ctx = setupCTX(widget.rblines[0], N);
+        var ctx = setupCTX(widget.rblines.element, N);
         for (var i = 0; i < frontier.length; i++) {
             var t = frontier[i].t;
             var dot = frontier[i].dot;
@@ -695,7 +695,7 @@ var BPWidget = (function () {
         }
         ctx.restore();
         if (timepct <= 1) {
-            window.requestAnimationFrame(function () { this.tangentsframe(widget, timeZero, preimages); });
+            window.requestAnimationFrame(function () { widget.tangentsframe(widget, timeZero, preimages); });
         }
     };
     BPWidget.prototype.parseSkip = function () {
@@ -924,7 +924,7 @@ var BPWidget = (function () {
                 that.progress.append(" WRB:" + ((new Date()).getTime() - event.data.senddate));
                 workerRegions(that.regionsworker, event.data.rpip, that.plotDims().N, that.cpi.cvangles);
                 that.progress.append(" WRG:" + ((new Date()).getTime() - event.data.senddate));
-                doRange(that.range[0], bpzs, that.cpi, that.plotDims().N);
+                doRange(that.range.element, bpzs, that.cpi, that.plotDims().N);
             }
             if (event.data.rowComplete != null) {
                 that.progress.text(event.data.rowComplete + " " + event.data.comptime);
@@ -932,10 +932,10 @@ var BPWidget = (function () {
         };
         if (this.worker != null) {
             this.rainbowworker.onmessage = function (e) {
-                graphicsWorkerHandler(e, that.rainbow[0], that.regions[0], that.cpi, that.zs);
+                graphicsWorkerHandler(e, that.rainbow.element, that.regions.element, that.cpi, that.zs);
             };
             this.regionsworker.onmessage = function (e) {
-                graphicsWorkerHandler(e, that.rainbow[0], that.regions[0], that.cpi, that.zs);
+                graphicsWorkerHandler(e, that.rainbow.element, that.regions.element, that.cpi, that.zs);
             };
             this.worker.onmessage = wom;
             this.workergo.click(function () {
@@ -966,7 +966,7 @@ var BPWidget = (function () {
             $.each(pilis, function (i, e) { that.foundpreimages.append(e); });
         });
         this.screenshot.click(function () {
-            var rainbowcanvas = (that.rainbow[0]);
+            var rainbowcanvas = (that.rainbow.element);
             window.open("./screenshot.html", "width=" + rainbowcanvas.width + "height=" + rainbowcanvas.height);
         });
         this.plotbutton.click(function () {
