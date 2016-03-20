@@ -1,6 +1,7 @@
 /// <reference path="numeric-1.2.3.d.ts" />
 /// <reference path="polynomials.ts" />
 /// <reference path="lmellipse.ts" />
+/// <reference path="ellipse.ts" />
 
 function bpgridevalArrayOrig(N: number, as: Array<numeric.T>, rowcallback: any) {
     var bpe = getBPF(as);

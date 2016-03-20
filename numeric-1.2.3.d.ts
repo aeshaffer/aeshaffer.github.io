@@ -22,6 +22,8 @@ declare module numeric {
         E: {x: Array<Array<number>>; y: Array<Array<number>>};
     }
     
+    function prettyPrint(w: any) : string;
+    
     function linspace(a: number, b:number) : Array<number>;
     function linspace(a: number, b:number, n:number) : Array<number>;    
     function sqrt(x: number): number;

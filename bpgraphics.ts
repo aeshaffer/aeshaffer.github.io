@@ -3,13 +3,13 @@ function graphicsWorkerHandler(event, rainbow, regions, cpi, zs) {
     var rsst = $("#drawstatus");
     var dd = (new Date()).getTime();
     if(event.data.rainbowidata != null) {
-	finishCanvas(event.data.rainbowidata, rainbow, cpi, zs);
+	finishCanvas(event.data.rainbowidata, rainbow, cpi);
 	$("#rainbowstatus")
 	    .append($("<li>"+(dd - rainbowStart.getTime())+"</li>"))	
 	    .append($("<li>"+(dd - event.data.senddate)+"</li>"));
     }
     if(event.data.regionsidata != null) {
-	finishCanvas(event.data.regionsidata, regions, cpi, zs);
+	finishCanvas(event.data.regionsidata, regions, cpi);
 	$("#regionsstatus")
 	    .append($("<li>"+(dd - regionsStart.getTime())+"</li>"))
 	    .append($("<li>"+(dd - event.data.senddate)+"</li>"));
@@ -17,7 +17,7 @@ function graphicsWorkerHandler(event, rainbow, regions, cpi, zs) {
 }
 
 
-function finishCanvas(idata0, canvas, cpi, zs) {
+function finishCanvas(idata0, canvas, cpi) {
     var N = Math.sqrt(idata0.length/4);
     var rainbowctx = canvas.getContext("2d");
     var idata1 = rainbowctx.createImageData(N, N);
@@ -72,7 +72,7 @@ function region(cvangles, bpz) {
     return 1.0*i/(cvangles.length);
 }
 
-function showRegions(idata, zs, bpzs, cvangles, rowcallback) {    
+function showRegions(idata, zs, bpzs, cvangles, rowcallback?) {    
     return mapOverbpzs(idata, zs, bpzs, 
 		       function(z, bpz) { return region(cvangles, bpz); },
 		       rowcallback);
@@ -127,7 +127,7 @@ function draweval(idata, zs, bpzs, rowcallback) {
 
 
 
-function rpipToHue(rpip, idata, huefn, valfn) {
+function rpipToHue(rpip, idata, huefn, valfn? ) {
     var rp = rpip.realparts;
     var ip = rpip.imagparts;
     var N = Math.sqrt(rp.length);

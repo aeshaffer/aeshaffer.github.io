@@ -1,5 +1,7 @@
-// load("numeric-1.2.3.js");
-// load("polynomials.js");
+/// <reference path="numeric-1.2.3.d.ts" />
+/// <reference path="polynomials.ts" />
+/// <reference path="blaschke.ts" />
+/// <reference path="mobius.ts" />
 
 function o(a,b) { return a-b; }
 
@@ -41,11 +43,11 @@ function pqeval(pq, z) {
 }
 
 function randalphasbetas(N) {
-    arr = []; 
-    for(i = 0; i < 2*N;i++) { arr.push(Math.random()*2*pi);}
+    var arr = []; 
+    for(var i = 0; i < 2*N;i++) { arr.push(Math.random()*2*pi);}
     arr.sort(function(a,b) { return a-b;})
-    alphas = [];
-    betas = []
+    var alphas = [];
+    var betas = []
     for(i = 0; i < N; i++) {
 	alphas[i] = arr[2*i];
 	betas[i] = arr[2*i+1];
@@ -68,17 +70,17 @@ function pqzeroes(pq) {
 }
 
 function test(ab, pq) {
-    zeroes = pqzeroes(pq);    
+    var zeroes = pqzeroes(pq);    
     function ev(t) {
 	return dcp(pqeval(pq, rt2c(1, t)));
     }
     function evbp(t) {
 	return dcp(bpeval(zeroes, rt2c(1, t)));
     }
-    print(ab.alphas.map(ev));
-    print(ab.alphas.map(evbp));
-    print(ab.betas.map(ev));
-    print(ab.betas.map(evbp));
+    // print(ab.alphas.map(ev));
+    // print(ab.alphas.map(evbp));
+    // print(ab.betas.map(ev));
+    // print(ab.betas.map(evbp));
 }
 
 // N is the guessed size of the inner factor.
@@ -111,12 +113,12 @@ function bppqcompare(b1) {
     console.log(b1nonethetas.map(function(t) { return pqeval(pq1, rt2c(1, t));}).map(dcp));
 }
 
-function comparepes(bp, pq, z) {
-    return {
-	pqvals : preimage(b2, z).map(function(z) { return pqeval(pq, z); }).map(dcp),
-	bpvals : pqpreimages(pq, z).map(function(z) { return bpeval(bp, z); }).map(dcp)
-    };
-}
+// function comparepes(bp, pq, z) {
+//     return {
+// 	pqvals : preimage(b2, z).map(function(z) { return pqeval(pq, z); }).map(dcp),
+// 	bpvals : pqpreimages(pq, z).map(function(z) { return bpeval(bp, z); }).map(dcp)
+//     };
+// }
 
 function algorithmtest0(b1, b2) {
     var b3 = bpcompose(b1, b2);
@@ -173,7 +175,15 @@ function algorithmtest(b3, N) {
 // Return a Blaschke product which identifies idpoints[0] to 1 
 // and idpoints[1] to -1.
 
-function interpolate(idpoints) {
+class interpolateOutput {
+    zeroes: C[];
+    Binvs: any;
+    pq: any;
+    w0: any;
+    pqzeroes: any;
+}
+
+function interpolate(idpoints) : interpolateOutput {
     var pq = abpolynomial(idpoints[0], idpoints[1]);
     var pqzeroes = pqpreimages(pq, nzero);
     var w0 = pqeval(pq, nzero);
@@ -181,10 +191,6 @@ function interpolate(idpoints) {
 
     return {zeroes: innerzeroes, Binvs : idpoints, pq: pq, w0: w0, pqzeroes: pqzeroes};
 }
-
-
-
-    
     
     //var onethetas = spacedpreimages(b3, none, b1.length);
 /*
@@ -209,6 +215,6 @@ function interpolate(idpoints) {
     console.log(onethetas.spaced.map(bpe));
 */
 
-b1 = [nzero, none.div(2), ni.div(2)];
+var b1 = [nzero, none.div(2), ni.div(2)];
 
-b2 = [nzero, none.div(-3), ni.div(-3), ni.add(none).div(3), ni.div(2).sub(none.div(2))];
+var b2 = [nzero, none.div(-3), ni.div(-3), ni.add(none).div(3), ni.div(2).sub(none.div(2))];

@@ -128,8 +128,8 @@ function c(x: number,y: number): C {
     return new numeric.T(x,y);
 }
 
-function c2xy(z: C): Array<number> {
-    return [z.x, z.y];
+function c2xy(z: C) {
+    return {x: z.x, y: z.y};
 }
 
 // Theta to exp[i*t]
