@@ -57,7 +57,8 @@ function bpgridevalArrayInner(bpe: BPF, N: number, as: BPZeroes, rowcallback: (n
             rowcallback(yi);
         }
     }
-    return {realparts: realparts, imagparts: imagparts, N: N};
+    var retval : RPIP = {realparts: realparts, imagparts: imagparts /*, N: N */};
+    return retval;
 }
 
 function zsString(zs: Array<C>) : string {

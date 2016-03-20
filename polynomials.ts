@@ -147,9 +147,9 @@ function cifygrid(zs: Array<Array<XY>>): Array<Array<numeric.T>> {
     return zs.map(function(r) { return cifyrow(r);});
 }
 
-interface RPIP {
-    realparts: Array<number>;
-    imagparts: Array<number>;
+class RPIP {
+    realparts: Float32Array;
+    imagparts: Float32Array;
 }
 
 function cifyrpip(rpip: RPIP): Array<Array<numeric.T>> {

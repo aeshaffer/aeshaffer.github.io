@@ -10,72 +10,108 @@
 
 "use strict";
 
+class JQuerySingletonWrapper<T extends HTMLElement> {
+    length: number;
+    inner : JQuery;
+    element: T;
+    constructor(...args: any[]) {
+        this.inner = $.apply(null, args);
+        if(this.inner.length != 1) {
+            throw "WRONG!";
+        }
+        this.element = <T>this.inner[0];
+        this.length = this.inner.length;
+    }
+    empty(...args: any[]) {return this.inner.empty.apply(this.inner, args);}
+    append(...args: any[]) { return this.inner.append.apply(this.inner, args); }
+    val(...args: any[]) { return this.inner.val.apply(this.inner, args);}
+    attr(...args: any[]) { 
+        return this.inner.attr.apply(this.inner, args);}
+    change(...args: any[]) { return this.inner.change.apply(this.inner, args);}
+    is(...args: any[]) { return this.inner.is.apply(this.inner, args);}
+    parent(...args: any[]) { return this.inner.parent.apply(this.inner, args);}
+    css(...args: any[]) { return this.inner.css.apply(this.inner, args);}
+    on(...args: any[]) { return this.inner.on.apply(this.inner, args);}
+    siblings(...args: any[]) { return this.inner.siblings.apply(this.inner, args);}
+    click(...args: any[]) { return this.inner.click.apply(this.inner, args);}
+    text(...args: any[]) { return this.inner.text.apply(this.inner, args);}
+    hide(...args: any[]) { return this.inner.hide.apply(this.inner, args);}    
+    each(...args: any[]) { return this.inner.each.apply(this.inner, args);}    
+}
+
+class PlotDimensions {
+    N: number;
+    zoom: number;
+    windowN: number;
+    graphN: number;
+}
+
 class BPWidget {
 
     container: JQuery; //
 
-    showadvanced: JQuery; // HTMLInputElement;
-    criticalpoints: JQuery; // HTMLUListElement;
-    criticalvalues: JQuery; // HTMLUListElement;
-    criticalangles: JQuery; // HTMLUListElement;
-    zeroes: JQuery; // HTMLUListElement;
-    permalink: JQuery; // HTMLAnchorElement;
-    point: JQuery; // HTMLTableDataCellElement;
-    dest: JQuery; // HTMLTableDataCellElement;
+    showadvanced: JQuerySingletonWrapper<HTMLInputElement>;
+    criticalpoints: JQuerySingletonWrapper<HTMLUListElement>;
+    criticalvalues: JQuerySingletonWrapper<HTMLUListElement>;
+    criticalangles: JQuerySingletonWrapper<HTMLUListElement>;
+    zeroes: JQuerySingletonWrapper<HTMLUListElement>;
+    permalink: JQuerySingletonWrapper<HTMLAnchorElement>;
+    point: JQuerySingletonWrapper<HTMLTableDataCellElement>;
+    dest: JQuerySingletonWrapper<HTMLTableDataCellElement>;
 
-    rainbow: JQuery; // HTMLCanvasElement;
-    regions: JQuery; // HTMLCanvasElement;
-    range: JQuery; // HTMLCanvasElement;
-    rblines: JQuery; // HTMLCanvasElement;
-    rglines: JQuery; // HTMLCanvasElement;
+    rainbow: JQuerySingletonWrapper<HTMLCanvasElement>;
+    regions: JQuerySingletonWrapper<HTMLCanvasElement>;
+    range: JQuerySingletonWrapper<HTMLCanvasElement>;
+    rblines: JQuerySingletonWrapper<HTMLCanvasElement>;
+    rglines: JQuerySingletonWrapper<HTMLCanvasElement>;
 
-    reidonrplot: JQuery; // HTMLInputElement;
-    solidtangents: JQuery; // HTMLInputElement;
-    doguessellipse: JQuery; // HTMLInputElement;
-    plotinterp: JQuery; // HTMLInputElement;
-    plotpolygon: JQuery; // HTMLInputElement;
-    hidecps: JQuery; // HTMLInputElement;
+    reidonrplot: JQuerySingletonWrapper<HTMLInputElement>;
+    solidtangents: JQuerySingletonWrapper<HTMLInputElement>;
+    doguessellipse: JQuerySingletonWrapper<HTMLInputElement>;
+    plotinterp: JQuerySingletonWrapper<HTMLInputElement>;
+    plotpolygon: JQuerySingletonWrapper<HTMLInputElement>;
+    hidecps: JQuerySingletonWrapper<HTMLInputElement>;
 
-    windowscale: JQuery; // HTMLInputElement;
-    rayThreshold: JQuery; // HTMLInputElement;
-    graphzoom: JQuery; // HTMLInputElement;
-    pixels: JQuery; // HTMLInputElement;
-    workergo: JQuery; // HTMLButtonElement;
-    progress: JQuery; // HTMLDivElement;
-    loadbutton: JQuery; // HTMLButtonElement;
-    zsstring: JQuery; // HTMLTextAreaElement;
-    plotbutton: JQuery; // HTMLButtonElement;
-    screenshot: JQuery; // HTMLButtonElement;
-    skippoints: JQuery; // HTMLInputElement;
-    autolinespoints: JQuery; // HTMLInputElement;
-    // theta : JQuery; // g(".theta");
-    clearplots: JQuery; // HTMLButtonElement;;
-    clearlines: JQuery; // HTMLButtonElement;;
-    autolinesgo: JQuery; // HTMLButtonElement;;
-    animatelines: JQuery; // HTMLButtonElement;;
-    // timesPI : JQuery; // g(".timesPI");
-    // plottheta : JQuery; // g(".plottheta");
-    clearpreimages: JQuery; // HTMLButtonElement;
-    showpreimages: JQuery; // HTMLButtonElement;
-    textz: JQuery; // HTMLInputElement;
-    gotextz: JQuery; // HTMLButtonElement;
+    windowscale: JQuerySingletonWrapper<HTMLInputElement>;
+    rayThreshold: JQuerySingletonWrapper<HTMLInputElement>;
+    graphzoom: JQuerySingletonWrapper<HTMLInputElement>;
+    pixels: JQuerySingletonWrapper<HTMLInputElement>;
+    workergo: JQuerySingletonWrapper<HTMLButtonElement>;
+    progress: JQuerySingletonWrapper<HTMLDivElement>;
+    loadbutton: JQuerySingletonWrapper<HTMLButtonElement>;
+    zsstring: JQuerySingletonWrapper<HTMLTextAreaElement>;
+    plotbutton: JQuerySingletonWrapper<HTMLButtonElement>;
+    screenshot: JQuerySingletonWrapper<HTMLButtonElement>;
+    skippoints: JQuerySingletonWrapper<HTMLInputElement>;
+    autolinespoints: JQuerySingletonWrapper<HTMLInputElement>;
+    // theta : JQuerySingletonWrapper<g(".theta")>;
+    clearplots: JQuerySingletonWrapper<HTMLButtonElement>;
+    clearlines: JQuerySingletonWrapper<HTMLButtonElement>;
+    autolinesgo: JQuerySingletonWrapper<HTMLButtonElement>;
+    animatelines: JQuerySingletonWrapper<HTMLButtonElement>;
+    // timesPI : JQuerySingletonWrapper<g(".timesPI")>;
+    // plottheta : JQuerySingletonWrapper<g(".plottheta")>;
+    clearpreimages: JQuerySingletonWrapper<HTMLButtonElement>;
+    showpreimages: JQuerySingletonWrapper<HTMLButtonElement>;
+    textz: JQuerySingletonWrapper<HTMLInputElement>;
+    gotextz: JQuerySingletonWrapper<HTMLButtonElement>;
 
-    rangepoint: JQuery; // HTMLInputElement;
-    findpreimages: JQuery; // HTMLButtonElement;
-    foundpreimages: JQuery; // HTMLUListElement;
+    rangepoint: JQuerySingletonWrapper<HTMLInputElement>;
+    findpreimages: JQuerySingletonWrapper<HTMLButtonElement>;
+    foundpreimages: JQuerySingletonWrapper<HTMLUListElement>;
 
     zs: BPZeroes;
     cpi: CPInfo;
     bpzs: BPZeroes;
     
-    worker: any;
-    rainbowworker: any;
-    regionsworker: any;
+    worker: Worker;
+    rainbowworker: Worker;
+    regionsworker: Worker;
 
     constructor(obj: JQuery) {
 
-        function g<T extends HTMLElement>(sel): JQuery {
-            var retval = obj.find(sel);
+        function g<T extends HTMLElement>(sel): JQuerySingletonWrapper<any> {
+            var retval = new JQuerySingletonWrapper<T>(obj.find(sel));
             if (retval.length > 0) { return retval; }
             else { return null; }
         }
@@ -297,9 +333,9 @@ class BPWidget {
 
         if (this.reidonrplot.is(":checked")) {
             this.autojoinpoints();
-            clearCanvas(this.rainbow);
-            clearCanvas(this.regions);
-            clearCanvas(this.range);
+            clearCanvas(this.rainbow.inner);
+            clearCanvas(this.regions.inner);
+            clearCanvas(this.range.inner);
         }
 
         this.cpi = cpinfo(this.zs);
@@ -381,7 +417,8 @@ class BPWidget {
         this.resizeCanvases();
         this.rescatter();
     };
-    plotDims() {
+    
+    plotDims() : PlotDimensions {
         var N = parseFloat(this.pixels.val());
         var zoom = parseFloat(this.graphzoom.val());
         var windowscaleval = parseFloat(this.windowscale.val());
@@ -392,11 +429,11 @@ class BPWidget {
 
     resizeCanvases() {
         var pd = this.plotDims();
-        resize(this.range, pd);
-        resize(this.rainbow, pd);
-        resize(this.regions, pd);
-        resize(this.rglines, pd);
-        resize(this.rblines, pd);
+        resize(this.range.inner, pd);
+        resize(this.rainbow.inner, pd);
+        resize(this.regions.inner, pd);
+        resize(this.rglines.inner, pd);
+        resize(this.rblines.inner, pd);
         // drawPlots(bpzs, N, zs, cpi);
     };
 
@@ -428,10 +465,10 @@ class BPWidget {
 
         var rbidata = new Uint8Array(4 * N * N);
         rpipToHue(rpip, rbidata, anglehue, valfun);
-        finishCanvas(rbidata, this.rainbow[0], cpi);
+        finishCanvas(rbidata, this.rainbow.element, cpi);
 
         if (this.range.length > 0) {
-            doRange(this.range[0], bpzs, cpi, this.plotDims().N);
+            doRange(this.range.element, bpzs, cpi, this.plotDims().N);
         }
     };
 
@@ -459,7 +496,7 @@ class BPWidget {
             var piangles = getPIAngles(this.zs, t);
             for (var i = 0; i < skips.length; i++) {
                 var skip = skips[i];
-                this.drawPILinesInner(this.rblines[0], piangles, skip);
+                this.drawPILinesInner(this.rblines.element, piangles, skip);
             }
         }
         //drawPILinesInner(rglines, piangles, skip);
@@ -732,7 +769,7 @@ class BPWidget {
         this.joinpis(ajpct);
 
         // Setup another context
-        var ctx = setupCTX(this.rblines[0], this.plotDims().windowN);
+        var ctx = setupCTX(this.rblines.element, this.plotDims().windowN);
 
         if (this.parseSkip() == 1) {
             var drawsolid = this.solidtangents.is(":checked");
@@ -792,8 +829,8 @@ class BPWidget {
 
 
     doclearlines() {
-        clearCanvas(this.rglines);
-        clearCanvas(this.rblines);
+        clearCanvas(this.rglines.inner);
+        clearCanvas(this.rblines.inner);
     };
 
     addZero(z) {
