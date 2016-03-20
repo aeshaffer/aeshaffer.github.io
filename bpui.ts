@@ -12,31 +12,31 @@
 
 class JQuerySingletonWrapper<T extends HTMLElement> {
     length: number;
-    inner : JQuery;
+    inner: JQuery;
     element: T;
     constructor(...args: any[]) {
         this.inner = $.apply(null, args);
-        if(this.inner.length != 1) {
+        if (this.inner.length != 1) {
             throw "WRONG!";
+        } else {
+            this.element = <T>this.inner[0];
+            this.length = this.inner.length;
         }
-        this.element = <T>this.inner[0];
-        this.length = this.inner.length;
     }
-    empty(...args: any[]) {return this.inner.empty.apply(this.inner, args);}
+    empty(...args: any[]) { return this.inner.empty.apply(this.inner, args); }
     append(...args: any[]) { return this.inner.append.apply(this.inner, args); }
-    val(...args: any[]) { return this.inner.val.apply(this.inner, args);}
-    attr(...args: any[]) { 
-        return this.inner.attr.apply(this.inner, args);}
-    change(...args: any[]) { return this.inner.change.apply(this.inner, args);}
-    is(...args: any[]) { return this.inner.is.apply(this.inner, args);}
-    parent(...args: any[]) { return this.inner.parent.apply(this.inner, args);}
-    css(...args: any[]) { return this.inner.css.apply(this.inner, args);}
-    on(...args: any[]) { return this.inner.on.apply(this.inner, args);}
-    siblings(...args: any[]) { return this.inner.siblings.apply(this.inner, args);}
-    click(...args: any[]) { return this.inner.click.apply(this.inner, args);}
-    text(...args: any[]) { return this.inner.text.apply(this.inner, args);}
-    hide(...args: any[]) { return this.inner.hide.apply(this.inner, args);}    
-    each(...args: any[]) { return this.inner.each.apply(this.inner, args);}    
+    val(...args: any[]) { return this.inner.val.apply(this.inner, args); }
+    attr(...args: any[]) { return this.inner.attr.apply(this.inner, args); }
+    change(...args: any[]) { return this.inner.change.apply(this.inner, args); }
+    is(...args: any[]) { return this.inner.is.apply(this.inner, args); }
+    parent(...args: any[]) { return this.inner.parent.apply(this.inner, args); }
+    css(...args: any[]) { return this.inner.css.apply(this.inner, args); }
+    on(...args: any[]) { return this.inner.on.apply(this.inner, args); }
+    siblings(...args: any[]) { return this.inner.siblings.apply(this.inner, args); }
+    click(...args: any[]) { return this.inner.click.apply(this.inner, args); }
+    text(...args: any[]) { return this.inner.text.apply(this.inner, args); }
+    hide(...args: any[]) { return this.inner.hide.apply(this.inner, args); }
+    each(...args: any[]) { return this.inner.each.apply(this.inner, args); }
 }
 
 class PlotDimensions {
@@ -103,7 +103,7 @@ class BPWidget {
     zs: BPZeroes;
     cpi: CPInfo;
     bpzs: BPZeroes;
-    
+
     worker: Worker;
     rainbowworker: Worker;
     regionsworker: Worker;
@@ -417,8 +417,8 @@ class BPWidget {
         this.resizeCanvases();
         this.rescatter();
     };
-    
-    plotDims() : PlotDimensions {
+
+    plotDims(): PlotDimensions {
         var N = parseFloat(this.pixels.val());
         var zoom = parseFloat(this.graphzoom.val());
         var windowscaleval = parseFloat(this.windowscale.val());
@@ -1075,7 +1075,7 @@ class BPWidget {
             that.replotMe();
         });
     };
-    
+
 
     replotMe() {
         this.resizeCanvasesRescatter();
@@ -1087,5 +1087,5 @@ class BPWidget {
         }
         this.fastReplot(this.zs, this.plotDims().N, this.cpi, th);
     }
-    
+
 }

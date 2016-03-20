@@ -135,7 +135,7 @@ function zeroFromClick(canvas, e) {
     return c(x, y);
 }
 
-function resizeCW(cw, pd) {
+function resizeCW(cw: JQuery, pd: PlotDimensions) {
     $(cw).find(".circle")
         .css("width", (pd.graphN - 2) + "px")
         .css("height", (pd.graphN - 2) + "px");
@@ -253,14 +253,15 @@ function rgbToHex(rgb: number[]) {
 // 	}
 // }
 
-function closestToPoint(ints, cent) {
+function closestToPoint(ints: C[], cent: C) {
     // Find the point that's closest to the center of the major axis.
     var closesttocent = ints.slice();
     closesttocent.sort(function(a, b) { return a.sub(cent).abs().x - b.sub(cent).abs().x; })
     return closesttocent[0];
 }
 
-function drawEllipse(ctx, cent, majorAxisVector, minorAxisVector, strokeStyle, odd? ) {
+function drawEllipse(ctx: CanvasRenderingContext2D, cent: C, 
+    majorAxisVector: C, minorAxisVector: C, strokeStyle: string, odd?: number ) {
     if (odd == undefined) { odd = 0; }
     ctx.beginPath();
     ctx.strokeStyle = strokeStyle;
@@ -283,7 +284,7 @@ function drawEllipse(ctx, cent, majorAxisVector, minorAxisVector, strokeStyle, o
     ctx.stroke();
 }
 
-function spacedAngles(n) {
+function spacedAngles(n: number): number[] {
     var delta = Math.PI * 2.0 / n;
     var ts = [];
     for (var i = 0; i < n; i++) {
@@ -292,21 +293,17 @@ function spacedAngles(n) {
     return ts;
 }
 
-interface CanvasRenderingContext2D {
-    clear(preserveTransform): void;    
-}
+function clearCanvasInner(cxt: CanvasRenderingContext2D, preserveTransform: boolean) {
+    if (preserveTransform) {
+        cxt.save();
+        cxt.setTransform(1, 0, 0, 1, 0, 0);
+    }
 
-function clearCanvasInner(cxt, preserveTransform) {
-        if (preserveTransform) {
-            cxt.save();
-            cxt.setTransform(1, 0, 0, 1, 0, 0);
-        }
+    cxt.clearRect(0, 0, cxt.canvas.width, cxt.canvas.height);
 
-        cxt.clearRect(0, 0, cxt.canvas.width, cxt.canvas.height);
-
-        if (preserveTransform) {
-            cxt.restore();
-        }
+    if (preserveTransform) {
+        cxt.restore();
+    }
 }
 
 function clearCanvas(selector: JQuery) {
@@ -317,7 +314,7 @@ function clearCanvas(selector: JQuery) {
     }    
 }
 
-function showClick(z, that) {
+function showClick(z: C, that: any) {
     var val = bpeval(that.zs, c(z.x, z.y));
     that.point.text(dcomplex(z));
     that.dest.text(dcomplex(val)); //  + " " + getangleindex(val.angle(), that.cpi.cvangles));
@@ -337,7 +334,7 @@ function mapCVs(cpi: CPInfo) {
         });
 }
 
-function mapZinCVs(z, cpi) {
+function mapZinCVs(z: C, cpi: CPInfo) : C{
     var cvs = cpi.cvs;
     var cvnorms = $.map(cvs, function(e, i) { return e.abs().x; });
     var maxcvabs = Math.max.apply(null, cvnorms);
