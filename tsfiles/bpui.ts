@@ -2,10 +2,10 @@
 /// <reference path="polynomials.ts" />
 /// <reference path="blaschke.ts" />
 /// <reference path="jquery.d.ts" />
-/// <reference path="hsvToRgb.ts" />
+/// <reference path="hsvToRGB.ts" />
 /// <reference path="bpuiutils.ts" />
 /// <reference path="interpolation2.ts" />
-/// <reference path="jquery-ui-1.11.1/jqueryui.d.ts" />
+/// <reference path="jqueryui.d.ts" />
 /// <reference path="bpgraphics.ts" />
 
 "use strict";
