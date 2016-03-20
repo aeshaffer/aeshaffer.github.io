@@ -1,4 +1,4 @@
-importScripts('numeric-1.2.3.js', 'polynomials.js', 'blaschke.js'); 
+importScripts('../numeric-1.2.3.js', '../tsjs/polynomials.js', '../tsjs/blaschke.js'); 
 
 function rowcallback(i) {
     var endDT = (new Date()).getTime();

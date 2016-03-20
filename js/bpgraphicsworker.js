@@ -1,5 +1,5 @@
-importScripts('hsvToRGB.js', 'numeric-1.2.3.js', 'polynomials.js', 'blaschke.js', 
-	      'bpgraphics.js'); 
+importScripts('../tsjs/hsvToRGB.js', '../numeric-1.2.3.js', '../tsjs/polynomials.js', '../tsjs/blaschke.js', 
+	      '../tsjs/bpgraphics.js'); 
 
 function wonkify(idata) {
     var N = Math.sqrt(idata.length);

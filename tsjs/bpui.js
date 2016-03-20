@@ -188,9 +188,9 @@ var BPWidget = (function () {
         this.cpi = new CPInfo();
         this.bpzs = [];
         try {
-            this.worker = new Worker("bpworker.js");
-            this.rainbowworker = new Worker("bpgraphicsworker.js");
-            this.regionsworker = new Worker("bpgraphicsworker.js");
+            this.worker = new Worker("../js/bpworker.js");
+            this.rainbowworker = new Worker("../js/bpgraphicsworker.js");
+            this.regionsworker = new Worker("../js/bpgraphicsworker.js");
         }
         catch (seex) {
             this.worker = null;
