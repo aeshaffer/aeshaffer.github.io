@@ -166,7 +166,7 @@ function bpden(as: BPZeroes): polynomial {
 }
 
 // Gets the numerator of B'.
-function getBPprime(as: BPZeroes): polynomial {
+function getBPrimeNumerator(as: BPZeroes): polynomial {
     var num = bpnum(as);
     var nump = dcoeffs(num);
     var nonzeroas = as.filter(function(z) { return z.abs().x > .0001; });
@@ -181,7 +181,7 @@ class NumDen {
 }
 
 function getFullBPprime(as: BPZeroes): NumDen {
-    var num = getBPprime(as);
+    var num = getBPrimeNumerator(as);
     var nonzeroas = as.filter(function(z) { return z.abs().x > .0001; });
     var den = bpden(nonzeroas);
     var den2 = polymult(den, den);
@@ -419,7 +419,7 @@ class CPInfo {
 
 function cpinfo(zs: BPZeroes): CPInfo {
 
-    var bpp = getBPprime(zs);
+    var bpp = getBPrimeNumerator(zs);
     // FIXME: For some reason, for a large number
     // of zeroes, I get mostly derivative zeroes
     // outside the circle.  Dunno why, perhaps
