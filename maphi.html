@@ -1,21 +1,33 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
+
 <head>
-  <link rel="stylesheet" type="text/css" href="blaschke.css" />
-  <script type="text/javascript" src="./numeric-1.2.3.js" ></script>
-  <script type="text/javascript" src="./jquery-2.1.1.js"></script>
-  <script type="text/javascript" src="./jquery-ui-1.11.1/jquery-ui.js"></script>
-  <script type="text/javascript" src="./tsjs/polynomials.js" ></script>
-  <script type="text/javascript" src="maphi.js"></script>
-  <title>Parabolic Disc Automorphism Demo</title>
-  <meta charset="utf-8" />
-  <script type="text/javascript">
-  
-  </script>
+    <link rel="stylesheet" type="text/css" href="blaschke.css" />
+    <script type="text/javascript" src="./numeric-1.2.3.js"></script>
+    <script type="text/javascript" src="./jquery-2.1.1.js"></script>
+    <script type="text/javascript" src="./jquery-ui-1.11.1/jquery-ui.js"></script>
+    <script type="text/javascript" src="./tsjs/polynomials.js"></script>
+    <script type="text/javascript" src="maphi.js"></script>
+    <title>Parabolic Disc Automorphism Demo</title>
+    <meta charset="utf-8" />
+    <script type="text/javascript">
+        $(function() {
+            $("#animatePhiButton").click(startPhi);
+            $("#animateTrButton").click(startTr);
+        });
+    </script>
 </head>
+
 <body>
-     <span id="sspan"></span><br />
-        <canvas id="graphicscanvas" width="400" height="400"></canvas>
-         
-    </body>
-    </html>
+    <button id="animatePhiButton">Animate Phi</button><br />
+    <button id="animateTrButton">Animate Tr</button><br />
+    
+    <span id="timespan"></span>
+    <br />
+    <span id="sspan"></span>
+    <br />
+    <canvas id="graphicscanvas" width="400" height="400"></canvas>
+
+</body>
+
+</html>

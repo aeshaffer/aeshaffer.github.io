@@ -26,7 +26,7 @@ window.requestAnimFrame = (function(callback) {
             window.setTimeout(callback, 1000 / 60);
         };
 })();
-function animate(canvas, context, startTime) {
+function animatePhi(canvas, context, startTime) {
     // update
     var time = (new Date()).getTime() - startTime;
 
@@ -39,18 +39,40 @@ function animate(canvas, context, startTime) {
     var maxS = 5;
 
     var s = minS + (maxS - minS) * time / (speed / 2);
-    $("#sspan").text("Time: " + time + " S: " + s.toFixed(2));
+    $("#timespan").text("Time: " + time);
+    $("#sspan").text(" S: " + s.toFixed(2));
     if (s == 0) { s = .001; }
     phiS = getPhi(s);
 
     reset(-2, 2, -2, 2);
-    plotIterates();
+    plotIterates(phiS);
 
     // request new frame
     requestAnimFrame(function() {
-        animate(canvas, context, startTime);
+        animatePhi(canvas, context, startTime);
     });
 }
+
+function animateTr(canvas, context, startTime) {
+    // update
+    var time = (new Date()).getTime() - startTime;
+    var speed = 10000;
+    time = time % speed;
+    if (time >= speed / 2) { time = speed - time; }
+    var r = -1 + 2 * time / (speed / 2);
+    $("#timespan").text("Time: " + time);
+    $("#sspan").text(" r: " + r.toFixed(2));
+    Tr = getTr(r);
+
+    reset(-2, 2, -2, 2);
+    plotIterates(Tr);
+
+    // request new frame
+    requestAnimFrame(function() {
+        animateTr(canvas, context, startTime);
+    });
+}
+
 function getPhi(s) {
     return function(z) {
         var TwoIOverS = c(0, 2).div(s);
@@ -60,8 +82,18 @@ function getPhi(s) {
     }
 }
 
+function getTr(r) {
+    return function(z) {
+        var num = z.add(r);
+        var den = c(1,0).add(z.mul(r));
+        return num.div(den);
+    }
+}
+
 
 var phiS = getPhi(-1);
+
+var Tr = getTr(-1);
 
 function axes() {
     ctx.clearRect(minX, minY, maxX - minX, maxY - minY);
@@ -78,13 +110,13 @@ function axes() {
 
 }
 
-function pathZ(z0) {
+function pathZ(f,z0) {
     var z = z0;
     var points = new Array();
     var numPts = 50;
     for (var i = 0; i < numPts; i++) {
         points.push(z);
-        z = phiS(z);
+        z = f(z);
     }
     ctx.beginPath();
     ctx.moveTo(points[0].x, points[0].y);
@@ -93,20 +125,29 @@ function pathZ(z0) {
     }
     ctx.stroke();
 }
-function plotIterates() {
+function plotIterates(f) {
     var z = c(-1, 0);
     var N = 50;
     var t = Math.PI * 2 / N;
     for (var n = 0; n < N; n++) {
-        pathZ(rt2c(1, n * t));
+        pathZ(f,rt2c(1, n * t));
     }
 }
 $(function() {
     cvs = document.getElementById("graphicscanvas");
     ctx = cvs.getContext('2d');
     reset(-2, 2, -2, 2);
+    
+});
+function startTr() {
     setTimeout(function() {
         var startTime = (new Date()).getTime();
-        animate(cvs, ctx, startTime);
+        animateTr(cvs, ctx, startTime);
     }, 1000);
-})
+}
+function startPhi() {
+    setTimeout(function() {
+        var startTime = (new Date()).getTime();
+        animatePhi(cvs, ctx, startTime);
+    }, 1000);
+}
