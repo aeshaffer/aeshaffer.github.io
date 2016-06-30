@@ -4,7 +4,10 @@
 var cvs;
 var ctx;
 var minX, maxX, minY, maxY;
-function reset(inminX, inmaxX, inminY, inmaxY) {
+function reset() {
+    resetInner(-2,2,-2,2);
+}
+function resetInner(inminX, inmaxX, inminY, inmaxY) {
     minX = inminX; minY = inminY;
     maxX = inmaxX; maxY = inmaxY;
     var h = $(window).height() - $(cvs).offset().top - 50;
@@ -26,7 +29,10 @@ window.requestAnimFrame = (function(callback) {
             window.setTimeout(callback, 1000 / 60);
         };
 })();
-function animatePhi(canvas, context, startTime) {
+
+var animationFunction;
+
+function animateF(canvas, context, startTime) {
     // update
     var time = (new Date()).getTime() - startTime;
 
@@ -35,65 +41,74 @@ function animatePhi(canvas, context, startTime) {
     time = time % speed;
     if (time >= speed / 2) { time = speed - time; }
 
-    var minS = -5;
-    var maxS = 5;
+    var f;
+    
+    var animate = $("#animate").is(":checked");
+    var animationFunction = $("#animationFunction").val();
+    if(animationFunction == "phi" || animationFunction == "phirecip") {
+        var s;
+        if(animate) {
+            var minS = -5;
+            var maxS = 5;
 
-    var s = minS + (maxS - minS) * time / (speed / 2);
-    $("#timespan").text("Time: " + time);
-    $("#sspan").text(" S: " + s.toFixed(2));
-    if (s == 0) { s = .001; }
-    phiS = getPhi(s);
-
+            s = minS + (maxS - minS) * time / (speed / 2);
+            $("#timespan").text("Time: " + time);
+            $("#param").val(s.toFixed(2));
+            if (s == 0) { s = .001; }
+        } else {
+            s = parseFloat($("#param").val());
+        }
+        f = getPhi(s, animationFunction == "phirecip");
+    } else if(animationFunction == "Tr" || animationFunction == "Trrecip") {        
+        var r;
+        if(animate) {
+            r = -1 + 2 * time / (speed / 2);            
+            $("#timespan").text("Time: " + time);
+            $("#param").val(r.toFixed(2));
+        } else {
+            r = parseFloat($("#param").val());
+        }
+        f = getTr(r, animationFunction == "Trrecip");
+    } else {
+        alert(animationFunction);
+        return;
+    }
     reset(-2, 2, -2, 2);
-    plotIterates(phiS);
+    plotIterates(f);
 
     // request new frame
-    requestAnimFrame(function() {
-        animatePhi(canvas, context, startTime);
-    });
+    if(animate) {
+        requestAnimFrame(function() {
+            animateF(canvas, context, startTime);
+        });
+    }
 }
 
-function animateTr(canvas, context, startTime) {
-    // update
-    var time = (new Date()).getTime() - startTime;
-    var speed = 10000;
-    time = time % speed;
-    if (time >= speed / 2) { time = speed - time; }
-    var r = -1 + 2 * time / (speed / 2);
-    $("#timespan").text("Time: " + time);
-    $("#sspan").text(" r: " + r.toFixed(2));
-    Tr = getTr(r);
-
-    reset(-2, 2, -2, 2);
-    plotIterates(Tr);
-
-    // request new frame
-    requestAnimFrame(function() {
-        animateTr(canvas, context, startTime);
-    });
-}
-
-function getPhi(s) {
+function getPhi(s, recip) {
     return function(z) {
         var TwoIOverS = c(0, 2).div(s);
         var num = c(1, 0).sub(TwoIOverS).mul(z).sub(1);
         var den = z.sub(c(1, 0).add(TwoIOverS));
-        return num.div(den);
+        return recip ? den.div(num) : num.div(den);
     }
 }
 
-function getTr(r) {
+function getPhiInv(s, recip) {
+    return function(z) {
+        var TwoIOverS = c(0, 2).div(s);
+        var num = c(-1, 0).add(TwoIOverS.add(1).mul(z));
+        var den = z.sub(c(1, 0).add(TwoIOverS));
+        return recip ? den.div(num) : num.div(den);
+    }
+}
+
+function getTr(r, recip) {
     return function(z) {
         var num = z.add(r);
         var den = c(1,0).add(z.mul(r));
-        return num.div(den);
+        return recip ? den.div(num) : num.div(den);
     }
 }
-
-
-var phiS = getPhi(-1);
-
-var Tr = getTr(-1);
 
 function axes() {
     ctx.clearRect(minX, minY, maxX - minX, maxY - minY);
@@ -113,7 +128,7 @@ function axes() {
 function pathZ(f,z0) {
     var z = z0;
     var points = new Array();
-    var numPts = 50;
+    var numPts = 10;
     for (var i = 0; i < numPts; i++) {
         points.push(z);
         z = f(z);
@@ -121,16 +136,23 @@ function pathZ(f,z0) {
     ctx.beginPath();
     ctx.moveTo(points[0].x, points[0].y);
     for (var i = 1; i < numPts; i++) {
-        ctx.lineTo(points[i].x, points[i].y)
+        var prevPt = points[i-1];
+        var currentPt = points[i];
+        var prevToCurrent = currentPt.sub(prevPt);
+        var bigDelta = prevToCurrent.div(.2*prevToCurrent.abs().x);
+        var prevMinusDelta = prevPt.sub(bigDelta)
+        var currentPlusDelta = currentPt.add(bigDelta);
+        ctx.lineTo(prevMinusDelta.x, prevMinusDelta.y);
+        ctx.lineTo(currentPlusDelta.x, currentPlusDelta.y);
+        ctx.moveTo(points[i].x, points[i].y);
     }
     ctx.stroke();
 }
 function plotIterates(f) {
-    var z = c(-1, 0);
     var N = 50;
     var t = Math.PI * 2 / N;
     for (var n = 0; n < N; n++) {
-        pathZ(f,rt2c(1, n * t));
+        pathZ(f,rt2c(1, n * t + .123));
     }
 }
 $(function() {
@@ -139,15 +161,9 @@ $(function() {
     reset(-2, 2, -2, 2);
     
 });
-function startTr() {
+function start() {
     setTimeout(function() {
         var startTime = (new Date()).getTime();
-        animateTr(cvs, ctx, startTime);
-    }, 1000);
-}
-function startPhi() {
-    setTimeout(function() {
-        var startTime = (new Date()).getTime();
-        animatePhi(cvs, ctx, startTime);
+        animateF(cvs, ctx, startTime);
     }, 1000);
 }

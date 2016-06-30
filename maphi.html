@@ -12,19 +12,23 @@
     <meta charset="utf-8" />
     <script type="text/javascript">
         $(function() {
-            $("#animatePhiButton").click(startPhi);
-            $("#animateTrButton").click(startTr);
+            $("#animateButton").click(start);
         });
     </script>
 </head>
 
 <body>
-    <button id="animatePhiButton">Animate Phi</button><br />
-    <button id="animateTrButton">Animate Tr</button><br />
-    
+    <select id="animationFunction">
+        <option value="phi">Phi</option>
+        <option value="Tr">Tr</option>
+        <option value="phirecip">1/Phi</option>
+        <option value="Trrecip">1/Tr</option>
+    </select>   
+    <button id="animateButton">Go</button><br />
+    Animate: <input type="checkbox" id="animate"></input><br/>
     <span id="timespan"></span>
     <br />
-    <span id="sspan"></span>
+    Param: <input id="param"></input>
     <br />
     <canvas id="graphicscanvas" width="400" height="400"></canvas>
 
