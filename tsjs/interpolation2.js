@@ -24,9 +24,11 @@ function abpolynomial(inalphas, inbetas) {
     var betac = ni.mul(beta).div(2).mul(-1).exp();
     var p = polymult([alphac], apoly);
     var q = polymult([betac], bpoly);
-    var retval = { p: p, q: q,
+    var retval = {
+        p: p, q: q,
         phi: flipab ? function (z) { return z.mul(-1); } : function (z) { return z; },
-        check: 0 };
+        check: 0
+    };
     retval.check = randalphasbetas(100).alphas.map(function (a) { return pqeval(retval, rt2c(1, a)); }).map(function (z) { return z.abs().x; }).sum();
     return retval;
 }

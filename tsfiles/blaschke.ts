@@ -61,8 +61,12 @@ function bpgridevalArrayInner(bpe: BPF, N: number, as: BPZeroes, rowcallback: (n
     return retval;
 }
 
+function zString(z: C): string {
+    return "z="+z.x+","+(z.y == undefined ? 0: z.y);
+}
+
 function zsString(zs: Array<C>) : string {
-    return zs.map(function(z) { return "z="+z.x+","+(z.y == undefined ? 0: z.y); }).join("\n&");
+    return zs.map(zString).join("\n&");
 }
 
 

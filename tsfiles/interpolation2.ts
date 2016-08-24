@@ -3,7 +3,7 @@
 /// <reference path="blaschke.ts" />
 /// <reference path="mobius.ts" />
 
-function o(a,b) { return a-b; }
+function o(a, b) { return a - b; }
 
 function abpolynomial(inalphas, inbetas) {
     var alphas = inalphas.map(normalizeangle);
@@ -11,8 +11,8 @@ function abpolynomial(inalphas, inbetas) {
     alphas.sort(o);
     betas.sort(o);
     var flipab = !(alphas[0] < betas[0]);
-    if(flipab) {
-	var temp = alphas; alphas = betas; betas = temp;
+    if (flipab) {
+        var temp = alphas; alphas = betas; betas = temp;
     }
     var alpha = alphas.sum();
     var beta = betas.sum();
@@ -26,11 +26,13 @@ function abpolynomial(inalphas, inbetas) {
     var p = polymult([alphac], apoly);
     var q = polymult([betac], bpoly);
 
-    var retval = {p: p, q: q, 
-		  phi : flipab ? function(z) { return z.mul(-1);} : function(z) { return z; }, 
-		  check: 0};
+    var retval = {
+        p: p, q: q,
+        phi: flipab ? function (z) { return z.mul(-1); } : function (z) { return z; },
+        check: 0
+    };
 
-    retval.check = randalphasbetas(100).alphas.map(function(a) { return pqeval(retval, rt2c(1, a)); }).map(function(z) { return z.abs().x;}).sum();
+    retval.check = randalphasbetas(100).alphas.map(function (a) { return pqeval(retval, rt2c(1, a)); }).map(function (z) { return z.abs().x; }).sum();
 
     return retval;
 }
@@ -43,16 +45,16 @@ function pqeval(pq, z) {
 }
 
 function randalphasbetas(N) {
-    var arr = []; 
-    for(var i = 0; i < 2*N;i++) { arr.push(Math.random()*2*pi);}
-    arr.sort(function(a,b) { return a-b;})
+    var arr = [];
+    for (var i = 0; i < 2 * N; i++) { arr.push(Math.random() * 2 * pi); }
+    arr.sort(function (a, b) { return a - b; })
     var alphas = [];
     var betas = []
-    for(i = 0; i < N; i++) {
-	alphas[i] = arr[2*i];
-	betas[i] = arr[2*i+1];
+    for (i = 0; i < N; i++) {
+        alphas[i] = arr[2 * i];
+        betas[i] = arr[2 * i + 1];
     }
-    return {alphas: alphas, betas: betas};
+    return { alphas: alphas, betas: betas };
 }
 
 function pqpreimages(pq, c) {
@@ -70,12 +72,12 @@ function pqzeroes(pq) {
 }
 
 function test(ab, pq) {
-    var zeroes = pqzeroes(pq);    
+    var zeroes = pqzeroes(pq);
     function ev(t) {
-	return dcp(pqeval(pq, rt2c(1, t)));
+        return dcp(pqeval(pq, rt2c(1, t)));
     }
     function evbp(t) {
-	return dcp(bpeval(zeroes, rt2c(1, t)));
+        return dcp(bpeval(zeroes, rt2c(1, t)));
     }
     // print(ab.alphas.map(ev));
     // print(ab.alphas.map(evbp));
@@ -92,15 +94,15 @@ function spacedpreimages(b, z, N) {
     var spacedthetas2 = [];
     // Get pithetas[0,N,2N,...]
     // and pithetas[1,N+1,2N+1, ...]
-    for(var i = 0; i < b.length; i += N) {
-	spacedthetas.push(pithetas[i]);
-	spacedthetas2.push(pithetas[i+1]);
+    for (var i = 0; i < b.length; i += N) {
+        spacedthetas.push(pithetas[i]);
+        spacedthetas2.push(pithetas[i + 1]);
     }
     return [spacedthetas, spacedthetas2];
 }
 
 function piangles(b, t) {
-    return preimage(b, rt2c(1,t)).map(function(z) { return normalizeangle(z.angle()); });
+    return preimage(b, rt2c(1, t)).map(function (z) { return normalizeangle(z.angle()); });
 }
 
 function bppqcompare(b1) {
@@ -109,8 +111,8 @@ function bppqcompare(b1) {
     var pq1 = abpolynomial(b1onethetas, b1nonethetas);
     var pq1zeroes = pqzeroes(pq1);
     console.log(pq1zeroes.map(dcp));
-    console.log(b1onethetas.map(function(t) { return pqeval(pq1, rt2c(1, t));}).map(dcp));
-    console.log(b1nonethetas.map(function(t) { return pqeval(pq1, rt2c(1, t));}).map(dcp));
+    console.log(b1onethetas.map(function (t) { return pqeval(pq1, rt2c(1, t)); }).map(dcp));
+    console.log(b1nonethetas.map(function (t) { return pqeval(pq1, rt2c(1, t)); }).map(dcp));
 }
 
 // function comparepes(bp, pq, z) {
@@ -123,7 +125,7 @@ function bppqcompare(b1) {
 function algorithmtest0(b1, b2) {
     var b3 = bpcompose(b1, b2);
     var N = b1.length;
-    var retval =  algorithmtest(b3, N);
+    var retval = algorithmtest(b3, N);
 
     var Binvs = retval.Binvs;
     var w0 = retval.w0;
@@ -132,13 +134,13 @@ function algorithmtest0(b1, b2) {
     var z1 = t2c(Binvs[0][0]);
     var z2 = t2c(Binvs[1][0]);
     var cz1 = bpeval(b2, z1);
-    var cz2 = bpeval(b2, z2);    
+    var cz2 = bpeval(b2, z2);
 
     var origpqzeroes = pqzeroes(pq);
-    Binvs[0].map(function(t) { return pqeval(pq, t2c(t));}).map(dcp);
-    Binvs[1].map(function(t) { return pqeval(pq, t2c(t));}).map(dcp);
-    Binvs[0].map(function(t) { return bpeval(b2, t2c(t));}).map(dcp);
-    Binvs[1].map(function(t) { return bpeval(b2, t2c(t));}).map(dcp);
+    Binvs[0].map(function (t) { return pqeval(pq, t2c(t)); }).map(dcp);
+    Binvs[1].map(function (t) { return pqeval(pq, t2c(t)); }).map(dcp);
+    Binvs[0].map(function (t) { return bpeval(b2, t2c(t)); }).map(dcp);
+    Binvs[1].map(function (t) { return bpeval(b2, t2c(t)); }).map(dcp);
 
     var wz1 = pqeval(pq, z1);
     var wz2 = pqeval(pq, z2);
@@ -152,21 +154,21 @@ function algorithmtest0(b1, b2) {
 }
 
 function hextest() {
-    var delta = 2*Math.PI/6;
-    var alphas = [0*delta, 1*delta, 2*delta, 3*delta, 4*delta, 5*delta];
-    var betas = alphas.map(function(t) { return t + delta/2; });
+    var delta = 2 * Math.PI / 6;
+    var alphas = [0 * delta, 1 * delta, 2 * delta, 3 * delta, 4 * delta, 5 * delta];
+    var betas = alphas.map(function (t) { return t + delta / 2; });
     var pq = interpolate([alphas, betas]);
 }
- 
+
 function algorithmtest(b3, N) {
     var Binvs = spacedpreimages(b3, nnone, N);
- 
-/*
-    piangles(b3, nnone.angle());
-    Binvs[0].map(function(t) { return bpeval(b3, t2c(t));}).map(dcp);
-    Binvs[1].map(function(t) { return bpeval(b3, t2c(t));}).map(dcp);
-*/
-    
+
+    /*
+        piangles(b3, nnone.angle());
+        Binvs[0].map(function(t) { return bpeval(b3, t2c(t));}).map(dcp);
+        Binvs[1].map(function(t) { return bpeval(b3, t2c(t));}).map(dcp);
+    */
+
     // Identifies the two sets of points, but not to the 
     // correct angle.
     return interpolate(Binvs);
@@ -183,16 +185,16 @@ class interpolateOutput {
     pqzeroes: any;
 }
 
-function interpolate(idpoints) : interpolateOutput {
+function interpolate(idpoints): interpolateOutput {
     var pq = abpolynomial(idpoints[0], idpoints[1]);
     var pqzeroes = pqpreimages(pq, nzero);
     var w0 = pqeval(pq, nzero);
     var innerzeroes = pqpreimages(pq, w0);
 
-    return {zeroes: innerzeroes, Binvs : idpoints, pq: pq, w0: w0, pqzeroes: pqzeroes};
+    return { zeroes: innerzeroes, Binvs: idpoints, pq: pq, w0: w0, pqzeroes: pqzeroes };
 }
-    
-    //var onethetas = spacedpreimages(b3, none, b1.length);
+
+//var onethetas = spacedpreimages(b3, none, b1.length);
 /*
     console.log(nonethetas);
     console.log(onethetas);

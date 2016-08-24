@@ -56,8 +56,11 @@ function bpgridevalArrayInner(bpe, N, as, rowcallback) {
     var retval = { realparts: realparts, imagparts: imagparts /*, N: N */ };
     return retval;
 }
+function zString(z) {
+    return "z=" + z.x + "," + (z.y == undefined ? 0 : z.y);
+}
 function zsString(zs) {
-    return zs.map(function (z) { return "z=" + z.x + "," + (z.y == undefined ? 0 : z.y); }).join("\n&");
+    return zs.map(zString).join("\n&");
 }
 /*
 function lt(a) {
@@ -145,7 +148,7 @@ function bpden(as) {
     return den;
 }
 // Gets the numerator of B'.
-function getBPprime(as) {
+function getBPrimeNumerator(as) {
     var num = bpnum(as);
     var nump = dcoeffs(num);
     var nonzeroas = as.filter(function (z) { return z.abs().x > .0001; });
@@ -159,7 +162,7 @@ var NumDen = (function () {
     return NumDen;
 }());
 function getFullBPprime(as) {
-    var num = getBPprime(as);
+    var num = getBPrimeNumerator(as);
     var nonzeroas = as.filter(function (z) { return z.abs().x > .0001; });
     var den = bpden(nonzeroas);
     var den2 = polymult(den, den);
@@ -370,7 +373,7 @@ var CPInfo = (function () {
     return CPInfo;
 }());
 function cpinfo(zs) {
-    var bpp = getBPprime(zs);
+    var bpp = getBPrimeNumerator(zs);
     // FIXME: For some reason, for a large number
     // of zeroes, I get mostly derivative zeroes
     // outside the circle.  Dunno why, perhaps
