@@ -3,12 +3,23 @@
 /// <reference path="blaschke.ts" />
 /// <reference path="mobius.ts" />
 function o(a, b) { return a - b; }
+var alphasbetas = (function () {
+    function alphasbetas() {
+    }
+    return alphasbetas;
+}());
+var pqPhiCheck = (function () {
+    function pqPhiCheck() {
+    }
+    return pqPhiCheck;
+}());
 function abpolynomial(inalphas, inbetas) {
     var alphas = inalphas.map(normalizeangle);
     var betas = inbetas.map(normalizeangle);
     alphas.sort(o);
     betas.sort(o);
     var flipab = !(alphas[0] < betas[0]);
+    // Flip so that alphas[0] comes first.
     if (flipab) {
         var temp = alphas;
         alphas = betas;
@@ -16,10 +27,13 @@ function abpolynomial(inalphas, inbetas) {
     }
     var alpha = alphas.sum();
     var beta = betas.sum();
+    // Get Zs for the given thetas.
     var azeroes = alphas.map(t2c);
     var bzeroes = betas.map(t2c);
+    // Get a polynomial with these zeroes
     var apoly = coeffs(azeroes);
     var bpoly = coeffs(bzeroes);
+    // multiply through by exp(i*-alpha/2)
     var alphac = ni.mul(alpha).div(2).mul(-1).exp();
     var betac = ni.mul(beta).div(2).mul(-1).exp();
     var p = polymult([alphac], apoly);
@@ -29,15 +43,13 @@ function abpolynomial(inalphas, inbetas) {
         phi: flipab ? function (z) { return z.mul(-1); } : function (z) { return z; },
         check: 0
     };
+    // retval.check should be close to 100 - we're making sure that for 100
+    // random angles, pqeval for a point at that angle is of norm 1.
     retval.check = randalphasbetas(100).alphas.map(function (a) { return pqeval(retval, rt2c(1, a)); }).map(function (z) { return z.abs().x; }).sum();
     return retval;
 }
-function pqeval(pq, z) {
-    var pe = peval(pq.p, z);
-    var qe = peval(pq.q, z);
-    var retval = qe.sub(ni.mul(pe)).div(qe.add(ni.mul(pe)));
-    return pq.phi(retval);
-}
+// Generate a list of random angles, and split it into two
+// interspersed arrays.
 function randalphasbetas(N) {
     var arr = [];
     for (var i = 0; i < 2 * N; i++) {
@@ -52,13 +64,25 @@ function randalphasbetas(N) {
     }
     return { alphas: alphas, betas: betas };
 }
+function pqeval(pq, z) {
+    var pe = peval(pq.p, z);
+    var qe = peval(pq.q, z);
+    // evaluate (qe - i*pe)/(qe + i*pe) 
+    var num = qe.sub(ni.mul(pe));
+    var den = qe.add(ni.mul(pe));
+    var retval = num.div(den);
+    // Flip the sign if necessary.
+    return pq.phi(retval);
+}
+// See PQEval - Find points where pqeval equals c. 
 function pqpreimages(pq, c) {
     var q = pq.q, ip = polymult([ni], pq.p);
-    var num = polysub(q, ip);
-    var den = polyadd(q, ip);
+    var num = polysub(q, ip); // q-i*pe
+    var den = polyadd(q, ip); // q+i+pe
     var poly = polysub(num, polymult([c], den));
     return polyroots(poly);
 }
+// Find places where the numerator of (q-i*pe)/(q+i*pe) equals zero.
 function pqzeroes(pq) {
     var q = pq.q, ip = polymult([ni], pq.p);
     var num = polysub(q, ip);
@@ -92,8 +116,10 @@ function spacedpreimages(b, z, N) {
     }
     return [spacedthetas, spacedthetas2];
 }
-function piangles(b, t) {
-    return preimage(b, rt2c(1, t)).map(function (z) { return normalizeangle(z.angle()); });
+// Find the angles where the blaschke product
+// with zeroes zs equals exp(i*t)
+function piangles(zs, t) {
+    return preimage(zs, rt2c(1, t)).map(function (z) { return normalizeangle(z.angle()); });
 }
 function bppqcompare(b1) {
     var b1onethetas = piangles(b1, 0);
