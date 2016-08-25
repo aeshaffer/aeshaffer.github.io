@@ -1092,3 +1092,36 @@ class BPWidget {
     }
 
 }
+
+class EasyResizeWidget extends BPWidget {
+    setAllDims : Function;
+    constructor(obj) {
+        super(obj, false);
+        this.plotDims = function() {
+            return { N: 150, zoom: 1, windowN: 300, graphN: 300 };
+        }
+        this.resizeCanvases = function() {
+            resize(this.rainbow, this.plotDims());
+            resize(this.rblines, this.plotDims());
+            resize(this.regions, this.plotDims());
+        }       
+        var that = this;
+        this.zsstring.change(function() {
+            that.zs = parseZsString(that.zsstring.val());
+            that.rescatter();
+        });
+        var setdims = function(i, e) { 
+            e.width = that.plotDims().windowN; 
+            e.height = e.width; 
+        };
+        this.setAllDims = function() {
+            that.rainbow.each(setdims);
+            that.regions.each(setdims);
+            that.regions.each(setdims);
+            that.rblines.each(setdims);
+            $("#overlay").each(setdims);
+            $("#inneroverlay").each(setdims);            
+        }
+        this.setAllDims();
+    }
+}

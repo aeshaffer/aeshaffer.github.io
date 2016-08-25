@@ -38,4 +38,9 @@ function hsvToRgb(h, s, v) {
     }
     return [r * 255, g * 255, b * 255];
 }
+function hsvToRgbString(h, s, v) {
+    var rgb = hsvToRgb(h, s, v);
+    var rgbstring = "#" + H(rgb[0]) + H(rgb[1]) + H(rgb[2]);
+    return rgbstring;
+}
 //# sourceMappingURL=hsvToRGB.js.map

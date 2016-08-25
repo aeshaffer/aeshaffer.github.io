@@ -21,7 +21,15 @@ function finishCanvas(idata0, canvas, cpi) {
     for (var i = 0; i < idata0.length; i++) {
         idata1.data[i] = idata0[i];
     }
-    rainbowctx.putImageData(idata1, 0, 0);
+    var newCanvas = new JQuerySingletonWrapper($("<canvas>")
+        .attr("width", N)
+        .attr("height", N));
+    newCanvas.element.getContext("2d").putImageData(idata1, 0, 0);
+    rainbowctx.save();
+    rainbowctx.scale(canvas.width / N, canvas.height / N);
+    rainbowctx.drawImage(newCanvas.element, 0, 0);
+    rainbowctx.restore();
+    // rainbowctx.putImageData(idata1, 0, 0);
     // scatter(rainbowctx, cpi.cps, "#888888", N);
     // scatter(rainbowctx, zs, "#ffffff", N);
 }

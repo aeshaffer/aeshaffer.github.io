@@ -113,7 +113,7 @@ function c2xyArray(z) {
     return [z.x, z.y];
 }
 // Theta to exp[i*t]
-function t2c(t) { return rt2c(1, t); }
+function t2c(t) { return fixy(rt2c(1, t)); }
 function ttcp(t) {
     return c(numeric.cos(t), numeric.sin(t));
 }

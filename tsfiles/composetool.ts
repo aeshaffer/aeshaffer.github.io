@@ -58,8 +58,8 @@ function replot() {
     outerwidget.replotMe();
     innerwidget.replotMe();
     composewidget.replotMe();
-    var innerdata = innerwidget.regions[0].getContext('2d').getImageData(0, 0, 300, 300);
-    var image = composewidget.regions[0].getContext('2d').getImageData(0, 0, 300, 300);
+    var innerdata = innerwidget.regions.element.getContext('2d').getImageData(0, 0, 300, 300);
+    var image = composewidget.regions.element.getContext('2d').getImageData(0, 0, 300, 300);
 
     var overlay = <HTMLCanvasElement>$("#overlay")[0];
     overlay.getContext('2d').putImageData(image, 0, 0);
@@ -108,24 +108,13 @@ function redisplay() {
     }
 }
 
-class ComposeWidget extends BPWidget {
+class ComposeWidget extends EasyResizeWidget {
+    setAllDims : Function;
     constructor(obj) {
-        super(obj, false);
-        var setdims = function(i, e) { e.width = 300; e.height = 300; };
-        this.rainbow.each(setdims);
-        this.regions.each(setdims);
-        this.regions.each(setdims);
-        this.rblines.each(setdims);
-        $("#overlay").each(setdims);
-        $("#inneroverlay").each(setdims);
+        super(obj);
         this.plotDims = function() {
             return { N: 150, zoom: 1, windowN: 300, graphN: 300 };
-        }
-        this.resizeCanvases = function() {
-            resize(this.rainbow, this.plotDims());
-            resize(this.rblines, this.plotDims());
-            resize(this.regions, this.plotDims());
-        }
+        }       
         this.updatezero = function(zdiv) {
             BPWidget.prototype.updatezero.call(this, zdiv);
             redisplay();
@@ -133,11 +122,7 @@ class ComposeWidget extends BPWidget {
         this.addZero = function(z) {
             BPWidget.prototype.addZero.call(this, z);
             redisplay();
-        }
-        var that = this;
-        this.zsstring.change(function() {
-            that.zs = parseZsString(that.zsstring.val());
-            that.rescatter();
-        });
+        }       
+        this.setAllDims();
     }
 }

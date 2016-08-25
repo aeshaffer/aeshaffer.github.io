@@ -8,6 +8,11 @@
 /// <reference path="jqueryui.d.ts" />
 /// <reference path="bpgraphics.ts" />
 "use strict";
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 var JQuerySingletonWrapper = (function () {
     function JQuerySingletonWrapper() {
         var args = [];
@@ -987,4 +992,37 @@ var BPWidget = (function () {
     };
     return BPWidget;
 }());
+var EasyResizeWidget = (function (_super) {
+    __extends(EasyResizeWidget, _super);
+    function EasyResizeWidget(obj) {
+        _super.call(this, obj, false);
+        this.plotDims = function () {
+            return { N: 150, zoom: 1, windowN: 300, graphN: 300 };
+        };
+        this.resizeCanvases = function () {
+            resize(this.rainbow, this.plotDims());
+            resize(this.rblines, this.plotDims());
+            resize(this.regions, this.plotDims());
+        };
+        var that = this;
+        this.zsstring.change(function () {
+            that.zs = parseZsString(that.zsstring.val());
+            that.rescatter();
+        });
+        var setdims = function (i, e) {
+            e.width = that.plotDims().windowN;
+            e.height = e.width;
+        };
+        this.setAllDims = function () {
+            that.rainbow.each(setdims);
+            that.regions.each(setdims);
+            that.regions.each(setdims);
+            that.rblines.each(setdims);
+            $("#overlay").each(setdims);
+            $("#inneroverlay").each(setdims);
+        };
+        this.setAllDims();
+    }
+    return EasyResizeWidget;
+}(BPWidget));
 //# sourceMappingURL=bpui.js.map

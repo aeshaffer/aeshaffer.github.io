@@ -58,8 +58,8 @@ function replot() {
     outerwidget.replotMe();
     innerwidget.replotMe();
     composewidget.replotMe();
-    var innerdata = innerwidget.regions[0].getContext('2d').getImageData(0, 0, 300, 300);
-    var image = composewidget.regions[0].getContext('2d').getImageData(0, 0, 300, 300);
+    var innerdata = innerwidget.regions.element.getContext('2d').getImageData(0, 0, 300, 300);
+    var image = composewidget.regions.element.getContext('2d').getImageData(0, 0, 300, 300);
     var overlay = $("#overlay")[0];
     overlay.getContext('2d').putImageData(image, 0, 0);
     var inneroverlay = $("#inneroverlay")[0];
@@ -105,21 +105,9 @@ function redisplay() {
 var ComposeWidget = (function (_super) {
     __extends(ComposeWidget, _super);
     function ComposeWidget(obj) {
-        _super.call(this, obj, false);
-        var setdims = function (i, e) { e.width = 300; e.height = 300; };
-        this.rainbow.each(setdims);
-        this.regions.each(setdims);
-        this.regions.each(setdims);
-        this.rblines.each(setdims);
-        $("#overlay").each(setdims);
-        $("#inneroverlay").each(setdims);
+        _super.call(this, obj);
         this.plotDims = function () {
             return { N: 150, zoom: 1, windowN: 300, graphN: 300 };
-        };
-        this.resizeCanvases = function () {
-            resize(this.rainbow, this.plotDims());
-            resize(this.rblines, this.plotDims());
-            resize(this.regions, this.plotDims());
         };
         this.updatezero = function (zdiv) {
             BPWidget.prototype.updatezero.call(this, zdiv);
@@ -129,12 +117,8 @@ var ComposeWidget = (function (_super) {
             BPWidget.prototype.addZero.call(this, z);
             redisplay();
         };
-        var that = this;
-        this.zsstring.change(function () {
-            that.zs = parseZsString(that.zsstring.val());
-            that.rescatter();
-        });
+        this.setAllDims();
     }
     return ComposeWidget;
-}(BPWidget));
+}(EasyResizeWidget));
 //# sourceMappingURL=composetool.js.map

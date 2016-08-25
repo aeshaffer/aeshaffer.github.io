@@ -22,9 +22,21 @@ function finishCanvas(idata0, canvas, cpi) {
     var rainbowctx = canvas.getContext("2d");
     var idata1 = rainbowctx.createImageData(N, N);
     for(var i = 0; i < idata0.length; i++) {
-	idata1.data[i] = idata0[i];
+	    idata1.data[i] = idata0[i];
     }
-    rainbowctx.putImageData(idata1, 0, 0);
+
+    var newCanvas = new JQuerySingletonWrapper<HTMLCanvasElement>($("<canvas>")
+        .attr("width", N)
+        .attr("height", N));
+
+    newCanvas.element.getContext("2d").putImageData(idata1, 0, 0);
+
+    rainbowctx.save();
+    rainbowctx.scale(canvas.width/N, canvas.height/N);
+    rainbowctx.drawImage(newCanvas.element, 0, 0);
+    rainbowctx.restore();
+
+    // rainbowctx.putImageData(idata1, 0, 0);
     // scatter(rainbowctx, cpi.cps, "#888888", N);
     // scatter(rainbowctx, zs, "#ffffff", N);
 }
@@ -110,7 +122,7 @@ function setRGB(idata, rgb, N, row, col) {
     setRGBInner(idata, rgb, addr);
 }
 
-function anglehue(bpz) {
+function anglehue(bpz: C) {
     var t = bpz.angle();
     return tanglehue(t);
 }
