@@ -4,6 +4,11 @@
 /// <reference path="jquery.d.ts" />
 /// <reference path="hsvToRGB.ts" />
 // From http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values
+var PlotDimensions = (function () {
+    function PlotDimensions() {
+    }
+    return PlotDimensions;
+}());
 function getQSMap(s) {
     if (s == "")
         return {};

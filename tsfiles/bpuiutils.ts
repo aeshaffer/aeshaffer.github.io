@@ -6,6 +6,13 @@
 
 // From http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values
 
+class PlotDimensions {
+    N: number;
+    zoom: number;
+    windowN: number;
+    graphN: number;
+}
+
 function getQSMap(s: string) {
     if (s == "") return {};
     var a = s.split("&");

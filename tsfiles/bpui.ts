@@ -40,13 +40,6 @@ class JQuerySingletonWrapper<T extends HTMLElement> {
     each(...args: any[]) { return this.inner.each.apply(this.inner, args); }
 }
 
-class PlotDimensions {
-    N: number;
-    zoom: number;
-    windowN: number;
-    graphN: number;
-}
-
 class BPWidget {
 
     container: JQuery; //

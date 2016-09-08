@@ -128,11 +128,6 @@ var JQuerySingletonWrapper = (function () {
     };
     return JQuerySingletonWrapper;
 }());
-var PlotDimensions = (function () {
-    function PlotDimensions() {
-    }
-    return PlotDimensions;
-}());
 var BPWidget = (function () {
     function BPWidget(obj, allElements) {
         function g(sel) {
