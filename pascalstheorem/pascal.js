@@ -33,12 +33,13 @@ $(function () {
     $(".cpt").draggable();
     var r = { minX: -1, maxX: 1, minY: -1, maxY: 1 };
     resetInner(r, 50, ctx, cvs);
-    $("#pointA").css(cToPosition(-0.2732, 0.4673));
-    $("#pointD").css(cToPosition(-0.3982, 0.06609));
-    $("#pointB").css(cToPosition(-0.1439, -0.03743));
-    $("#pointE").css(cToPosition(-0.059, 0.4947));
-    $("#pointC").css(cToPosition(0.1884, 0.4344));
-    $("#pointF").css(cToPosition(0.1668, 0));
+    // Nudge this so that the ellipse fitting works?
+    $("#pointA").css(cToPosition(-0.7, 0.401));
+    $("#pointD").css(cToPosition(-0.6, 0.0));
+    $("#pointB").css(cToPosition(0, -0.6));
+    $("#pointE").css(cToPosition(0, 0.7));
+    $("#pointC").css(cToPosition(0.5, 0.4));
+    $("#pointF").css(cToPosition(0.5, 0));
     window.requestAnimationFrame(drawAndRAF);
     function drawAndRAF() {
         draw();
@@ -99,6 +100,7 @@ $(function () {
         var ABDE = lineLineIntersectionZZ(A, B, D, E);
         var AFCD = lineLineIntersectionZZ(A, F, C, D);
         var EFCB = lineLineIntersectionZZ(E, F, C, B);
+        ctx.lineWidth = ctx.lineWidth / 2;
         l(ABDE, AFCD, "orange");
         l(ABDE, EFCB, "orange");
         l(AFCD, EFCB, "orange");
