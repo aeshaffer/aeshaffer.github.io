@@ -169,7 +169,7 @@ function fillTable(alphasbetas: number[], bpf: BPF) {
 		tr.append($("<td>").text(theta));
 		tr.append($("<td>").text(dc(z)));
 		tr.append($("<td>").text(dc(value)));
-		tr.append($("<td>").text(value.angle().toString(10)).css("background-color", rgb);
+		tr.append($("<td>").text(value.angle().toString(10)).css("background-color", rgb));
 		if (even) { tr.addClass("even"); }
 		else { tr.addClass("odd"); }
 		$("#valuestable tbody").append(tr);

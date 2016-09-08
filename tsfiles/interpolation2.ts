@@ -133,7 +133,9 @@ function piangles(zs: C[], t: number): number[] {
     return preimage(zs, rt2c(1, t)).map(function (z) { return normalizeangle(z.angle()); });
 }
 
-function bppqcompare(b1) {
+// Find the places that b1 maps to +1 and -1
+// And see what PQ evaluates to at those angles.
+function bppqcompare(b1: C[]) {
     var b1onethetas = piangles(b1, 0);
     var b1nonethetas = piangles(b1, pi);
     var pq1 = abpolynomial(b1onethetas, b1nonethetas);
@@ -215,9 +217,11 @@ class interpolateOutput {
 
 function interpolate(idpoints): interpolateOutput {
     var pq = abpolynomial(idpoints[0], idpoints[1]);
-    var pqzeroes = pqpreimages(pq, nzero);
     var w0 = pqeval(pq, nzero);
+    // Find the points that PQ maps to PQ(0).
     var innerzeroes = pqpreimages(pq, w0);
+
+    var pqzeroes = pqpreimages(pq, nzero);
 
     return { zeroes: innerzeroes, Binvs: idpoints, pq: pq, w0: w0, pqzeroes: pqzeroes };
 }

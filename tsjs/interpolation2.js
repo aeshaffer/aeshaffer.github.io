@@ -121,6 +121,8 @@ function spacedpreimages(b, z, N) {
 function piangles(zs, t) {
     return preimage(zs, rt2c(1, t)).map(function (z) { return normalizeangle(z.angle()); });
 }
+// Find the places that b1 maps to +1 and -1
+// And see what PQ evaluates to at those angles.
 function bppqcompare(b1) {
     var b1onethetas = piangles(b1, 0);
     var b1nonethetas = piangles(b1, pi);
@@ -185,9 +187,10 @@ var interpolateOutput = (function () {
 }());
 function interpolate(idpoints) {
     var pq = abpolynomial(idpoints[0], idpoints[1]);
-    var pqzeroes = pqpreimages(pq, nzero);
     var w0 = pqeval(pq, nzero);
+    // Find the points that PQ maps to PQ(0).
     var innerzeroes = pqpreimages(pq, w0);
+    var pqzeroes = pqpreimages(pq, nzero);
     return { zeroes: innerzeroes, Binvs: idpoints, pq: pq, w0: w0, pqzeroes: pqzeroes };
 }
 //var onethetas = spacedpreimages(b3, none, b1.length);

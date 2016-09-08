@@ -1,5 +1,6 @@
 /// <reference path="../numeric-1.2.3.js" />
-/// <reference path="../polynomials.js" />
+/// <reference path="../tsjs/polynomials.js" />
+/// <reference path="../tsjs/ellipseutils.js" />
 
 "use strict";
 
@@ -26,50 +27,12 @@ var minX, maxX, minY, maxY;
 function reset(inminX, inmaxX, inminY, inmaxY) {
     minX = inminX; minY = inminY;
     maxX = inmaxX; maxY = inmaxY;
-    var h = $(window).height() - $(cvs).offset().top - 50;
-    $(cvs).height(h).attr("height", h).width(h).attr("width", h);
-
-    ctx.resetTransform();
-    ctx.transform(cvs.width / 2, 0, 0, -cvs.width / 2, cvs.width / 2, cvs.width / 2);
-    ctx.scale(2/(maxX - minX), 2/(maxY - minY));
-    ctx.translate(-(maxX + minX)/2, -(maxY + minY)/2);
-    ctx.lineWidth = 1.0 / cvs.width * (maxX - minX);
-    axes();
+    var fudgefactor = 50;
+    resetInner({minX, maxX, minY, maxY}, fudgefactor, ctx, cvs);
 }
 
-function axes() {
-    ctx.clearRect(minX, minY, maxX -minX, maxY - minY);
-    ctx.fillStyle = "#ff0000";
-
-    ctx.beginPath();
-    ctx.moveTo(minX, 0);
-    ctx.lineTo(maxX, 0);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(0, minY);
-    ctx.lineTo(0, maxY);
-    ctx.stroke();
-
-}
-
-function lineCircleIntersection(lp, ld, cc, r) {
-    var poly = [lp.sub(cc), ld];
-    var polyconj = poly.map(function(f) { return f.conj(); });
-    var poly2 = polysub(polymult(poly, polyconj), [rt2c(r*r, 0)]);
-    var roots = polyroots(poly2);
-    return roots.map(function(r) { return peval(poly, r.x).add(cc); }); 
-}
-
-function lineLineIntersectionZD(z0, d0, z1, d1) {
-    var A = [[d0.x, -d1.x], 
-             [d0.y, -d1.y]];
-    var v = [z1.sub(z0).x, z1.sub(z0).y];         
-    var rt = numeric.solve(A, v);
-    return z0.add(d0.mul(rt[0]));
-}
-
-function lineLineIntersectionZZ(z00, z01, z10, z11) {
-    return lineLineIntersectionZD(z00, z00.sub(z01), z10, z10.sub(z11));
+function axes2() {
+    axes({minX, maxX, minY, maxY}, ctx);
 }
 
 var f1 = {}, f2 = {}, numfolds, sigma;
@@ -159,7 +122,7 @@ repositionDivs();
             $("#params").removeClass("errorParams");
         }
 
-        axes();
+        axes2();
 
         var f1c = c(f1.x, f1.y);
         var f2c = c(f2.x, f2.y);
