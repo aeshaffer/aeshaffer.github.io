@@ -239,8 +239,19 @@ function drawEllipse(ctx, cent, majorAxisVector, minorAxisVector, strokeStyle, o
     if (odd == undefined) {
         odd = 0;
     }
+    /*
     ctx.beginPath();
+    ctx.moveTo(cent.add(minorAxisVector).x, cent.add(minorAxisVector).y);
+    ctx.lineTo(cent.sub(minorAxisVector).x, cent.sub(minorAxisVector).y);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(cent.add(majorAxisVector).x, cent.add(majorAxisVector).y);
+    ctx.lineTo(cent.sub(majorAxisVector).x, cent.sub(majorAxisVector).y);
+    ctx.stroke();
+    */
     ctx.strokeStyle = strokeStyle;
+    ctx.beginPath();
     ctx.moveTo(cent.add(minorAxisVector).x, cent.add(minorAxisVector).y);
     for (var t0 = 0; t0 <= 128; t0++) {
         var t = Math.PI * 2.0 / 128 * t0;

@@ -34,7 +34,7 @@ function resetInner(r, fudgefactor, ctx2, cvs2) {
 }
 function axes(r, ctx2) {
     ctx2.clearRect(r.minX, r.minY, r.maxX - r.minX, r.maxY - r.minY);
-    ctx2.fillStyle = "#ff0000";
+    ctx2.strokeStyle = "lightgray";
     ctx2.beginPath();
     ctx2.moveTo(r.minX, 0);
     ctx2.lineTo(r.maxX, 0);
@@ -43,5 +43,51 @@ function axes(r, ctx2) {
     ctx2.moveTo(0, r.minY);
     ctx2.lineTo(0, r.maxY);
     ctx2.stroke();
+}
+function drawDecoratedEllipse(ctx, cent, majorAxisVector, minorAxisVector) {
+    if (majorAxisVector.abs().x < minorAxisVector.abs().x) {
+        this.drawDecoratedEllipse(ctx, cent, minorAxisVector, majorAxisVector);
+        return;
+    }
+    var min0 = fixy(cent.add(minorAxisVector));
+    var min1 = fixy(cent.sub(minorAxisVector));
+    var maj0 = fixy(cent.add(majorAxisVector));
+    var maj1 = fixy(cent.sub(majorAxisVector));
+    drawEllipse(ctx, cent, majorAxisVector, minorAxisVector, "#ff0");
+    drawEllipse(ctx, cent, majorAxisVector, minorAxisVector, "#00f", 1);
+    var d = Math.sqrt(majorAxisVector.abs().x * majorAxisVector.abs().x - minorAxisVector.abs().x * minorAxisVector.abs().x);
+    var focusvector = majorAxisVector.div(majorAxisVector.abs().x).mul(d);
+    var f1 = cent.sub(focusvector);
+    var f2 = cent.add(focusvector);
+    var majorUnitVector = majorAxisVector.div(majorAxisVector.abs());
+    var minorUnitVector = minorAxisVector.div(minorAxisVector.abs());
+    function drawCircle(p) {
+        // Draw Center
+        ctx.beginPath();
+        ctx.strokeStyle = "#f00";
+        ctx.arc(p.x, fixy(p).y, .05, 0, 2.0 * Math.PI);
+        ctx.stroke();
+        var pPlusMinor = fixy(p.add(minorUnitVector.mul(.05)));
+        var pMinusMinor = fixy(p.sub(minorUnitVector.mul(.05)));
+        ctx.beginPath();
+        ctx.moveTo(pPlusMinor.x, pPlusMinor.y);
+        ctx.lineTo(pMinusMinor.x, pMinusMinor.y);
+        ctx.stroke();
+    }
+    function drawAxis(p0, p1) {
+        ctx.beginPath();
+        ctx.moveTo(p0.x, fixy(p0).y);
+        ctx.lineTo(p1.x, fixy(p1).y);
+        ctx.stroke();
+    }
+    // Draw Center, Foci
+    drawCircle(cent);
+    drawCircle(f1);
+    drawCircle(f2);
+    ctx.strokeStyle = "#00f";
+    // Draw Minor Axis
+    drawAxis(min0, min1);
+    // Draw Major Axis
+    drawAxis(maj0, maj1);
 }
 //# sourceMappingURL=ellipseutils.js.map

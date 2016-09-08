@@ -9,6 +9,21 @@ var arcys = [1.04312, 1.12758, 1.21515, 1.31683, 1.47263, 1.51821, 1.64427, 1.73
     1.75604, 1.86025, 1.88096, 1.94535, 2.00012, 2.03097, 2.01613, 2.09714,
     2.08792, 2.0529, 2.04301,
     2.00292, 1.94969, 1.91225, 1.82351, 1.75461, 1.69008, 1.62968];
+var ellipseInfo = (function () {
+    function ellipseInfo() {
+    }
+    return ellipseInfo;
+}());
+function fitellipseZS2(zs) {
+    var a = fitellipseZS(zs);
+    var cent = ellipse_center(a);
+    var axes = ellipse_axis_length(a);
+    var foci = ellipse_foci(a);
+    var angle = ellipse_angle_of_rotation(a);
+    var majorAxisVector = rt2c(axes[0], angle);
+    var minorAxisVector = rt2c(axes[1], angle + Math.PI / 2);
+    return { cent: cent, axes: axes, foci: foci, angle: angle, majorAxisVector: majorAxisVector, minorAxisVector: minorAxisVector };
+}
 function fitellipseZS(zs) {
     var xs = zs.map(function (z) { return z.x; });
     var ys = zs.map(function (z) { return fixy(z).y; });
