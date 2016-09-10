@@ -103,6 +103,9 @@ function cgrid(N) {
     }
     return retval;
 }
+function xy2c(xy) {
+    return new numeric.T(xy.x, fixy(xy).y);
+}
 function rt2c(r, t) {
     return ni.mul(t).exp().mul(r);
 }

@@ -19,21 +19,33 @@
             border-radius: 10px;
             position: absolute;
         }
-            #pointA, #pointD { background-color: blue;}
-            #pointB, #pointE { background-color: orange;}
-            #pointC, #pointF { background-color: red;}
-
-            .cpt span {
-                width: 100%;
-                position: absolute;
-                top: -200%;
-                left: 0px;
-            }
+        
+        #pointA,
+        #pointD {
+            background-color: blue;
+        }
+        
+        #pointB,
+        #pointE {
+            background-color: yellow;
+        }
+        
+        #pointC,
+        #pointF {
+            background-color: red;
+        }
+        
+        .cpt span {
+            width: 100%;
+            position: absolute;
+            top: -200%;
+            left: 0px;
+        }
     </style>
 </head>
 
 <body>
-    <div style="border: 1px solid black; position: relative;">
+    <div style="border: 1px solid black; position: relative; float: left;">
         <div id="pointA" class="cpt"><span>A</span></div>
         <div id="pointB" class="cpt"><span>B</span></div>
         <div id="pointC" class="cpt"><span>C</span></div>
@@ -41,6 +53,36 @@
         <div id="pointE" class="cpt"><span>E</span></div>
         <div id="pointF" class="cpt"><span>F</span></div>
         <canvas style="border: 1px solid green; float: left;" id="canvas" height="512" width="512"></canvas>
+    </div>
+    <div style="float: left;">
+        <button id="insideexample">Inside Example</button>
+        <button id="outsideexample">Outside Example</button>
+        <div>
+            <span id="fdistance"></span>
+        </div>
+        <table id="pointstable">
+            <thead>
+                <tr>
+                    <th>Pt.</th>
+                    <th>R</th>
+                    <th>Imag</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+        <table id="intersectionstable">
+            <thead>
+                <tr>
+                    <th>Intersection</th>
+                    <th>Real</th>
+                    <th>Imag</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+
     </div>
 </body>
 

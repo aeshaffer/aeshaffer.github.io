@@ -15,7 +15,7 @@ function lineCircleIntersection(lp, ld, cc, r) {
 function lineLineIntersectionZD(z0, d0, z1, d1) {
     var A = [[d0.x, -d1.x],
         [d0.y, -d1.y]];
-    var v = [z1.sub(z0).x, z1.sub(z0).y];
+    var v = [z1.sub(z0).x, fixy(z1.sub(z0)).y];
     var rt = numeric.solve(A, v);
     return z0.add(d0.mul(rt[0]));
 }

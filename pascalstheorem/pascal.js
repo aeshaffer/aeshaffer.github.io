@@ -27,43 +27,177 @@ function elementToC(elem) {
     var retval = positionToC(elem.position());
     return c(retval.x, retval.y);
 }
+var outsideExample = {
+    "A": xy2c({ x: 0.1, y: 0.0 }),
+    "B": xy2c({ x: 0.0, y: -0.1 }),
+    "C": xy2c({ x: -0.2, y: -0.0 }),
+    "D": xy2c({ x: -0.4, y: 0.2 }),
+    "E": xy2c({ x: -0.1, y: 0.3 }),
+    "F": xy2c({ x: 0.1, y: 0.1 })
+};
+var insideExample = {
+    "A": xy2c({ x: -0.7, y: 0.401 }),
+    "B": xy2c({ x: 0, y: -0.6 }),
+    "C": xy2c({ x: 0.5, y: 0.4 }),
+    "D": xy2c({ x: -0.6, y: 0 }),
+    "E": xy2c({ x: 0, y: 0.7 }),
+    "F": xy2c({ x: 0.5, y: 0 })
+};
+var ptLabels = ["A", "B", "C", "D", "E", "F"];
+var Example = (function () {
+    function Example() {
+    }
+    return Example;
+}());
+function loadExample(example) {
+    for (var _i = 0, ptLabels_1 = ptLabels; _i < ptLabels_1.length; _i++) {
+        var pt = ptLabels_1[_i];
+        $("#point" + pt).css(cToPosition2(example[pt]));
+    }
+    displayPoints();
+}
+var LeftMiddleRight;
+(function (LeftMiddleRight) {
+    LeftMiddleRight[LeftMiddleRight["Left"] = 0] = "Left";
+    LeftMiddleRight[LeftMiddleRight["Middle"] = 1] = "Middle";
+    LeftMiddleRight[LeftMiddleRight["Right"] = 2] = "Right";
+})(LeftMiddleRight || (LeftMiddleRight = {}));
+function leftCenterRight(l, r, intersection) {
+    // console.log(l, r, intersection);
+    // Move everything so that WLOG l is at zero.
+    var l1 = l.sub(l);
+    var r1 = r.sub(l);
+    var intersection1 = intersection.sub(l);
+    // Then rotate everything to be on the real axis.
+    var rot = r1.sub(l1);
+    var r2 = r1.div(rot); // = r1.abs()
+    var intersection2 = intersection1.div(rot);
+    // console.log(r2, intersection2);
+    if (intersection2.x < 0) {
+        return LeftMiddleRight.Left;
+    }
+    else if (intersection2.x > r.abs().x) {
+        return LeftMiddleRight.Right;
+    }
+    else {
+        return LeftMiddleRight.Middle;
+    }
+}
+function getLocations() {
+    var retval = new Example();
+    for (var _i = 0, ptLabels_2 = ptLabels; _i < ptLabels_2.length; _i++) {
+        var pt = ptLabels_2[_i];
+        var X = elementToC($("#point" + pt));
+        retval[pt] = X;
+    }
+    return retval;
+}
+function getIntersectionObjects() {
+    var l = getLocations();
+    var obj1 = { name: "ABDE", pair1: [l.A, l.B], pair2: [l.D, l.E], color: "red", intersection: null };
+    var obj2 = { name: "AFCD", pair1: [l.A, l.F], pair2: [l.C, l.D], color: "yellow", intersection: null };
+    var obj3 = { name: "EFCB", pair1: [l.E, l.F], pair2: [l.C, l.B], color: "blue", intersection: null };
+    var objs = [obj1, obj2, obj3];
+    var intersections = new Array();
+    for (var _i = 0, objs_1 = objs; _i < objs_1.length; _i++) {
+        var obj = objs_1[_i];
+        var intersection = lineLineIntersectionZZ(obj.pair1[0], obj.pair1[1], obj.pair2[0], obj.pair2[1]);
+        obj.intersection = intersection;
+    }
+    return objs;
+}
+var ei;
+function displayPoints() {
+    var locs = getLocations();
+    var objs = getIntersectionObjects();
+    var tbody = $("#pointstable tbody");
+    console.log("Displaying Points");
+    tbody.empty();
+    for (var _i = 0, ptLabels_3 = ptLabels; _i < ptLabels_3.length; _i++) {
+        var pt = ptLabels_3[_i];
+        console.log(pt);
+        var tr = $("<tr />");
+        tbody.append(tr);
+        var td0 = $("<td />").text(pt);
+        var td1 = $("<td />").text(locs[pt].x.toFixed(2));
+        var td2 = $("<td />").text(locs[pt].y.toFixed(2));
+        tr.append(td0);
+        tr.append(td1);
+        tr.append(td2);
+    }
+    var tbody2 = $("#intersectionstable tbody");
+    tbody2.empty();
+    for (var _a = 0, objs_2 = objs; _a < objs_2.length; _a++) {
+        var obj = objs_2[_a];
+        var tr = $("<tr />");
+        tbody2.append(tr);
+        tr.append($("<td />").text(obj.name));
+        tr.append($("<td />").text(obj.intersection.x.toFixed(4)));
+        tr.append($("<td />").text(obj.intersection.y.toFixed(4)));
+    }
+    var xys = $(".cpt").not("#pointF").map(function (i, e) {
+        return elementToC($(e));
+    });
+    try {
+        ei = fitellipseZS2(xys.get());
+        dragF(locs);
+    }
+    catch (ex) {
+        ei = null;
+        console.log(ex);
+        $("#fdistance").text("");
+    }
+}
+function dragF2() {
+    dragF(getLocations());
+}
+function dragF(locs) {
+    if (ei != null) {
+        var ept = ei.cent.add(ei.minorAxisVector);
+        function dist(z) { return z.sub(ei.foci[0]).abs().x + z.sub(ei.foci[1]).abs().x; }
+        var FDist = dist(locs.F);
+        var eptDist = dist(ept);
+        $("#fdistance").text(FDist.toFixed(4) + " vs. " + eptDist.toFixed(4) + " diff: " + (FDist - eptDist).toFixed(4));
+    }
+    else {
+        $("#fdistance").text("");
+    }
+}
 $(function () {
+    $("#insideexample").on("click", function () { loadExample(insideExample); });
+    $("#outsideexample").on("click", function () { loadExample(outsideExample); });
     cvs = document.getElementById("canvas");
     ctx = cvs.getContext("2d");
-    $(".cpt").draggable();
+    $(".cpt").not("#pointF").draggable({
+        stop: displayPoints
+    });
+    $("#pointF").draggable({
+        stop: displayPoints,
+        drag: dragF2
+    });
     var r = { minX: -1, maxX: 1, minY: -1, maxY: 1 };
     resetInner(r, 50, ctx, cvs);
     // Nudge this so that the ellipse fitting works?
-    $("#pointA").css(cToPosition(-0.7, 0.401));
-    $("#pointD").css(cToPosition(-0.6, 0.0));
-    $("#pointB").css(cToPosition(0, -0.6));
-    $("#pointE").css(cToPosition(0, 0.7));
-    $("#pointC").css(cToPosition(0.5, 0.4));
-    $("#pointF").css(cToPosition(0.5, 0));
+    loadExample(outsideExample);
+    displayPoints();
     window.requestAnimationFrame(drawAndRAF);
+    setInterval(draw, 1000);
     function drawAndRAF() {
         draw();
         requestAnimationFrame(drawAndRAF);
     }
     ;
     function draw() {
-        var xys = $(".cpt").not("#pointF").map(function (i, e) {
-            return elementToC($(e));
-        });
         axes(r, ctx);
         ctx.strokeStyle = "#ff0000";
-        try {
-            var a = fitellipseZS2(xys.get());
+        if (ei != null) {
             // ctx.beginPath();
             // ctx.moveTo(a.cent.add(a.minorAxisVector).x, a.cent.add(a.minorAxisVector).y);
             // ctx.lineTo(a.cent.sub(a.minorAxisVector).x, a.cent.sub(a.minorAxisVector).y);
             // ctx.stroke();
             // console.log(numeric.prettyPrint(a.foci));
             // console.log(a.axes);
-            drawEllipse(ctx, a.cent, a.majorAxisVector, a.minorAxisVector, "#000", 0);
-        }
-        catch (ex) {
-            console.log(ex);
+            drawEllipse(ctx, ei.cent, ei.majorAxisVector, ei.minorAxisVector, "#000", 0);
         }
         ctx.strokeStyle = "lightgray";
         for (var i = -10; i < 10; i++) {
@@ -83,27 +217,42 @@ $(function () {
             ctx.lineTo(P2.x, P2.y);
             ctx.stroke();
         }
-        var A = elementToC($("#pointA"));
-        var B = elementToC($("#pointB"));
-        var C = elementToC($("#pointC"));
-        var D = elementToC($("#pointD"));
-        var E = elementToC($("#pointE"));
-        var F = elementToC($("#pointF"));
         ctx.save();
         ctx.lineWidth = ctx.lineWidth * 4;
-        l(A, B, "red");
-        l(A, F, "yellow");
-        l(E, D, "red");
-        l(E, F, "blue");
-        l(C, D, "yellow");
-        l(C, B, "blue");
-        var ABDE = lineLineIntersectionZZ(A, B, D, E);
-        var AFCD = lineLineIntersectionZZ(A, F, C, D);
-        var EFCB = lineLineIntersectionZZ(E, F, C, B);
+        var objs = getIntersectionObjects();
+        for (var _i = 0, objs_3 = objs; _i < objs_3.length; _i++) {
+            var obj = objs_3[_i];
+            l(obj.pair1[0], obj.pair1[1], obj.color);
+            l(obj.pair2[0], obj.pair2[1], obj.color);
+            extendLine(obj.pair1, obj.intersection, l, obj.color);
+            extendLine(obj.pair2, obj.intersection, l, obj.color);
+        }
         ctx.lineWidth = ctx.lineWidth / 2;
-        l(ABDE, AFCD, "orange");
-        l(ABDE, EFCB, "orange");
-        l(AFCD, EFCB, "orange");
+        for (var i = 0; i < objs.length; i++) {
+            l(objs[i].intersection, objs[(i + 1) % objs.length].intersection, "orange");
+        }
+        ctx.restore();
+    }
+    function extendLine(pr, intersection, l, color) {
+        ctx.save();
+        ctx.setLineDash([2 * ctx.lineWidth, 2 * ctx.lineWidth]);
+        var lcr = leftCenterRight(pr[0], pr[1], intersection);
+        var pt2 = null;
+        switch (lcr) {
+            case LeftMiddleRight.Left:
+                pt2 = pr[0];
+                break;
+            case LeftMiddleRight.Right:
+                pt2 = pr[1];
+                break;
+            default:
+                pt2 = null;
+                break;
+        }
+        if (pt2 != null) {
+            l(pt2, intersection, color);
+        }
         ctx.restore();
     }
 });
+//# sourceMappingURL=pascal.js.map
