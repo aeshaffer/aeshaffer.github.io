@@ -172,11 +172,11 @@ $(function () {
     ctx = cvs.getContext("2d");
 
     $(".cpt").not("#pointF").draggable({
-        stop: displayPoints
+        drag: displayPoints
     });
     $("#pointF").draggable({
-        stop: displayPoints,
-        drag: dragF2
+        // stop: displayPoints,
+        drag: displayPoints
     });
     var r: ranges = { minX: -1, maxX: 1, minY: -1, maxY: 1 };
     resetInner(r, 50, ctx, cvs);
