@@ -219,9 +219,7 @@ $(function () {
                     return p0.sub(ei.cent).angle() - p1.sub(ei.cent).angle();
                 })
                 .map(function(lp) {                     
-                    // var eli = ellipseLineIntersection(ei, lp);
                     var tan = findTangent(ei, lp);                    
-                    //var tanvect = eli.sub(tan.tangentpoint);
                     return {lp, tan};
                 });
 
@@ -230,14 +228,65 @@ $(function () {
             for(var i = 0; i < data.length; i++) {
                 var d0 = data[i];
                 var d1 = data[(i+1) % data.length];
+                var eli0 = d0.tan.eli;
+                var tanvect0 = d0.tan.tanvect;
+                var eli1 = d1.tan.eli;        
+                var tanvect1 = d1.tan.tanvect;        
+
+                // Draw line from the control handle to the tangent point.
                 ctx.beginPath();
-                ctx.strokeStyle = "black";
-                //ctx.moveTo(ei.cent.x, ei.cent.y);
-                ctx.moveTo(d0.tan.eli.x, d0.tan.eli.y);
+                ctx.strokeStyle = "black";                
+                ctx.moveTo(eli0.x, eli0.y);
                 ctx.lineTo(d0.lp.x, d0.lp.y);
                 ctx.stroke();
                 var eli = d0.tan.eli;
-                // var tan = d0.tan.circleeli;
+                
+                // Draw lines from the tangent to the intersection, and then 
+                // to the next tangent.
+                var int = lineLineIntersectionZD(eli0, tanvect0, eli1, tanvect1);
+                ints[i] = int;
+                ctx.beginPath();
+                ctx.moveTo(eli0.x, eli0.y);
+                ctx.lineTo(int.x, int.y);
+                ctx.lineTo(eli1.x, eli1.y);
+                ctx.stroke();
+            }
+
+            // Draw the diagonals.
+            for(var i = 0; i < ints.length / 2; i++) {
+                var int0 = ints[i];
+                var int1 = ints[(i+3) % ints.length];
+                ctx.beginPath();
+                ctx.moveTo(int0.x, int0.y);
+                ctx.lineTo(int1.x, int1.y);
+                ctx.stroke();
+            }
+
+        }
+
+        ctx.strokeStyle = "lightgray";
+        for (var i = -10; i < 10; i++) {
+            ctx.beginPath();
+            ctx.moveTo(i / 10.0, .05);
+            ctx.lineTo(i / 10.0, -.05);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(.05, i / 10.0);
+            ctx.lineTo(-.05, i / 10.0);
+            ctx.stroke();
+        }
+        function l(P1: C, P2: C, strokeStyle: string) {
+            ctx.strokeStyle = strokeStyle;
+            ctx.beginPath();
+            ctx.moveTo(P1.x, P1.y);
+            ctx.lineTo(P2.x, P2.y);
+            ctx.stroke();
+        }
+    }
+});
+
+function junk() {
+    // var tan = d0.tan.circleeli;
                 // ctx.beginPath();
                 // ctx.strokeStyle = "black";
                 // ctx.arc(tan.x, tan.y, .1, 0, 2* Math.PI);
@@ -285,43 +334,4 @@ $(function () {
                 // ctx.lineTo(eli.x+tan.x, eli.y+tan.y);
                 // ctx.lineTo(eli.x-tan.x, eli.y-tan.y);
                 // ctx.stroke();
-                var int = lineLineIntersectionZD(d0.tan.eli, d0.tan.tanvect, d1.tan.eli, d1.tan.tanvect);
-                ints[i] = int;
-                ctx.beginPath();
-                ctx.moveTo(d0.tan.eli.x, d0.tan.eli.y);
-                ctx.lineTo(int.x, int.y);
-                ctx.lineTo(d1.tan.eli.x, d1.tan.eli.y);
-                ctx.stroke();
-            }
-
-            for(var i = 0; i < ints.length / 2; i++) {
-                var int0 = ints[i];
-                var int1 = ints[(i+3) % ints.length];
-                ctx.beginPath();
-                ctx.moveTo(int0.x, int0.y);
-                ctx.lineTo(int1.x, int1.y);
-                ctx.stroke();
-            }
-
-        }
-
-        ctx.strokeStyle = "lightgray";
-        for (var i = -10; i < 10; i++) {
-            ctx.beginPath();
-            ctx.moveTo(i / 10.0, .05);
-            ctx.lineTo(i / 10.0, -.05);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(.05, i / 10.0);
-            ctx.lineTo(-.05, i / 10.0);
-            ctx.stroke();
-        }
-        function l(P1: C, P2: C, strokeStyle: string) {
-            ctx.strokeStyle = strokeStyle;
-            ctx.beginPath();
-            ctx.moveTo(P1.x, P1.y);
-            ctx.lineTo(P2.x, P2.y);
-            ctx.stroke();
-        }
-    }
-});
+}
