@@ -16,13 +16,13 @@ class Example {
 }
 
 var example0x =
-    {
-        "A":{"x":-0.71,"y":-0.71},"B":{"x":-0.35301353013530135,"y":0.7146371463714637},
-        "C":{"x":0.3751537515375154,"y":0.7220172201722017},"D":{"x":0.5842558425584256,"y":0.2939729397293973},
-        "E":{"x":0.5571955719557196,"y":-0.16851168511685116},"F":{"x":0.013530135301353014,"y":-0.8769987699876999},
-        "F0":{"x":0.5,"y":0.5},"F1":{"x":-0.5,"y":-0.5},
-        "P":{"x":0,"y":0.5}
-    };
+    
+        {"A":{"x":-0.6744311193111932,"y":0.23616236162361623},"B":{"x":-0.039514145141451414,"y":0.6245771832718328},
+        "C":{"x":0.43876845018450183,"y":0.4666743542435424},"D":{"x":0.8940267527675276,"y":-0.03305658056580566},
+        "E":{"x":0.09278905289052891,"y":-0.6656672816728167},"F":{"x":-0.5441651291512916,"y":-0.4304274292742927},
+        "F0":{"x":0.7071033210332104,"y":0},"F1":{"x":-0.3086177736777368,"y":0.1008610086100861},
+        "P":{"x":0.3535516605166052,"y":0.353590098400984}}
+    ;
 
 var example0 = 
 {
@@ -130,7 +130,13 @@ function ellipseLineIntersection(ei: ellipseInfo, p: C): C {
     return deCanonicalize(ei, retval);
 }
 
-function findTangent(ei:ellipseInfo, p:C): any {
+class TangentsInfo {
+    tangentpoint: C;
+    tanvect: C;
+    eli: C;
+}
+
+function findTangent(ei:ellipseInfo, p:C): TangentsInfo {
     var eli = ellipseLineIntersection(ei, p);
     var eli2 = canonicalize(ei, eli);
     // var f0 = canonicalize(ei, ei.foci[0]);
@@ -146,11 +152,15 @@ function findTangent(ei:ellipseInfo, p:C): any {
     var circleeli2 = circleeli.mul(t2c(Math.PI/2));
     var ellipsec = circleeli.add(circleeli2);
     ellipsec.y = ellipsec.y / majoraxislength * minoraxislength;
-    return {circleeli: deCanonicalize(ei, circleeli),
-        circleeli2: deCanonicalize(ei, circleeli2),
-        endpoint1: deCanonicalize(ei, circleeli.add(circleeli2)),
-        endpoint2: deCanonicalize(ei, circleeli.sub(circleeli2)),
-        ellipsec: deCanonicalize(ei, ellipsec)
+    var tangentpoint = deCanonicalize(ei, ellipsec);
+    return {
+        // circleeli: deCanonicalize(ei, circleeli),
+        // circleeli2: deCanonicalize(ei, circleeli2),
+        // endpoint1: deCanonicalize(ei, circleeli.add(circleeli2)),
+        // endpoint2: deCanonicalize(ei, circleeli.sub(circleeli2)),
+        tangentpoint,
+        eli,
+        tanvect : eli.sub(tangentpoint)
     };
     // var verticalscale = majoraxislength/minoraxislength;
     // eli2.y = eli2.y * verticalscale;
@@ -175,6 +185,8 @@ $(function () {
     var r: ranges = { minX: -1, maxX: 1, minY: -1, maxY: 1 };
     resetInner(r, 50, ctx, cvs);
     // Nudge this so that the ellipse fitting works?
+
+    loadExample(example0);
 
     window.requestAnimationFrame(drawAndRAF);
 
@@ -203,27 +215,28 @@ $(function () {
 
             var data = ptLabels
                 .map(function(pt) { return locs[pt];})           
-                // .sort(function(p0:C, p1:C) {
-                //     return p0.sub(ei.cent).angle() - p1.sub(ei.cent).angle();
-                // })
+                .sort(function(p0:C, p1:C) {
+                    return p0.sub(ei.cent).angle() - p1.sub(ei.cent).angle();
+                })
                 .map(function(lp) {                     
-                    var eli = ellipseLineIntersection(ei, lp);
-                    var tan = findTangent(ei, lp);
-                    return {lp, eli, tan};
+                    // var eli = ellipseLineIntersection(ei, lp);
+                    var tan = findTangent(ei, lp);                    
+                    //var tanvect = eli.sub(tan.tangentpoint);
+                    return {lp, tan};
                 });
 
             var ints = new Array<C>();
 
-            for(var i = 0; i < 1; i++) {
+            for(var i = 0; i < data.length; i++) {
                 var d0 = data[i];
                 var d1 = data[(i+1) % data.length];
                 ctx.beginPath();
-                ctx.strokeStyle = "lightgray";
+                ctx.strokeStyle = "black";
                 //ctx.moveTo(ei.cent.x, ei.cent.y);
-                ctx.moveTo(d0.eli.x, d0.eli.y);
+                ctx.moveTo(d0.tan.eli.x, d0.tan.eli.y);
                 ctx.lineTo(d0.lp.x, d0.lp.y);
                 ctx.stroke();
-                var eli = d0.eli;
+                var eli = d0.tan.eli;
                 // var tan = d0.tan.circleeli;
                 // ctx.beginPath();
                 // ctx.strokeStyle = "black";
@@ -238,23 +251,25 @@ $(function () {
                 // ctx.moveTo(d0.tan.endpoint1.x, d0.tan.endpoint1.y);
                 // ctx.lineTo(d0.tan.endpoint2.x, d0.tan.endpoint2.y);
                 // ctx.stroke();
-                var tan = d0.tan.ellipsec;
-                ctx.beginPath();
-                var vect = eli.sub(tan);
-                var left = eli.add(vect);
-                var right = eli.sub(vect);
-                ctx.moveTo(left.x, left.y);
-                ctx.lineTo(right.x, right.y);
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.strokeStyle = "black";
-                ctx.arc(tan.x, tan.y, .05, 0, 2* Math.PI);
-                ctx.stroke();
 
-                ctx.beginPath();
-                ctx.strokeStyle = "black";
-                ctx.arc(eli.x, eli.y, .05, 0, 2* Math.PI);
-                ctx.stroke();
+                // var tan = d0.tan.ellipsec;
+                // ctx.beginPath();
+                // var vect = eli.sub(tan);
+                // var left = eli.add(vect);
+                // var right = eli.sub(vect);
+                // ctx.moveTo(left.x, left.y);
+                // ctx.lineTo(right.x, right.y);
+                // ctx.stroke();
+
+                // ctx.beginPath();
+                // ctx.strokeStyle = "black";
+                // ctx.arc(tan.x, tan.y, .05, 0, 2* Math.PI);
+                // ctx.stroke();
+
+                // ctx.beginPath();
+                // ctx.strokeStyle = "black";
+                // ctx.arc(eli.x, eli.y, .05, 0, 2* Math.PI);
+                // ctx.stroke();
 
 
                 // ctx.moveTo(eli.x, eli.y);
@@ -270,13 +285,13 @@ $(function () {
                 // ctx.lineTo(eli.x+tan.x, eli.y+tan.y);
                 // ctx.lineTo(eli.x-tan.x, eli.y-tan.y);
                 // ctx.stroke();
-                // var int = lineLineIntersectionZD(d0.eli, d0.tan, d1.eli, d1.tan);
-                // ints[i] = int;
-                // ctx.beginPath();
-                // ctx.moveTo(d0.eli.x, d0.eli.y);
-                // ctx.lineTo(int.x, int.y);
-                // ctx.lineTo(d1.eli.x, d1.eli.y);
-                // ctx.stroke();
+                var int = lineLineIntersectionZD(d0.tan.eli, d0.tan.tanvect, d1.tan.eli, d1.tan.tanvect);
+                ints[i] = int;
+                ctx.beginPath();
+                ctx.moveTo(d0.tan.eli.x, d0.tan.eli.y);
+                ctx.lineTo(int.x, int.y);
+                ctx.lineTo(d1.tan.eli.x, d1.tan.eli.y);
+                ctx.stroke();
             }
 
             for(var i = 0; i < ints.length / 2; i++) {
