@@ -258,16 +258,33 @@ $(function () {
                 ctx.stroke();
             }
 
+            var center = lineLineIntersectionZZ(ints[0], ints[3], ints[1], ints[4]);
+            ctx.strokeStyle = "green";
+            ctx.beginPath();
+            ctx.arc(center.x, center.y, .01, 0, 2*Math.PI);
+            ctx.stroke();
+
             // Draw the diagonals.
-            for(var i = 0; i < ints.length / 2; i++) {
+            for(var i = 0; i < ints.length; i++) {
                 var int0 = ints[i];
-                var int1 = ints[(i+3) % ints.length];
                 ctx.strokeStyle = "orange";
                 ctx.beginPath();
                 ctx.moveTo(int0.x, int0.y);
-                ctx.lineTo(int1.x, int1.y);
+                ctx.lineTo(center.x, center.y);
                 ctx.stroke();
             }
+
+
+            // Draw the diagonals.
+            // for(var i = 0; i < ints.length / 2; i++) {
+            //     var int0 = ints[i];
+            //     var int1 = ints[(i+3) % ints.length];
+            //     ctx.strokeStyle = "orange";
+            //     ctx.beginPath();
+            //     ctx.moveTo(int0.x, int0.y);
+            //     ctx.lineTo(int1.x, int1.y);
+            //     ctx.stroke();
+            // }
 
         }
 
