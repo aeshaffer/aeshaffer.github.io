@@ -199,6 +199,8 @@ $(function () {
 
     function draw() {
         
+        var doSort = $("#angleSort").is(":checked");
+
         axes(r, ctx);
         ctx.strokeStyle = "#ff0000";
 
@@ -213,11 +215,15 @@ $(function () {
             //drawEllipse(ctx, ei.cent, ei.majorAxisVector, ei.majorAxisVector.mul(t2c(Math.PI/2)), "#000", 0);
             var locs = getLocations();
 
-            var data = ptLabels
-                .map(function(pt) { return locs[pt];})           
-                .sort(function(p0:C, p1:C) {
+            var data0 = ptLabels
+                .map(function(pt) { return locs[pt];});
+            if(doSort) {
+                data0 = data0.sort(function(p0:C, p1:C) {
                     return p0.sub(ei.cent).angle() - p1.sub(ei.cent).angle();
                 })
+            }     
+
+            var data = data0
                 .map(function(lp) {                     
                     var tan = findTangent(ei, lp);                    
                     return {lp, tan};
@@ -256,6 +262,7 @@ $(function () {
             for(var i = 0; i < ints.length / 2; i++) {
                 var int0 = ints[i];
                 var int1 = ints[(i+3) % ints.length];
+                ctx.strokeStyle = "orange";
                 ctx.beginPath();
                 ctx.moveTo(int0.x, int0.y);
                 ctx.lineTo(int1.x, int1.y);
