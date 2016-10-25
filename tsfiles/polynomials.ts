@@ -302,6 +302,19 @@ function product(zs: Array<numeric.T>): C {
         .reduce(function (z1, z2) { return z1.mul(z2); }, none);
 }
 
+// function polyrootsX(incs: polynomial): Array<numeric.T> {
+//     var rps = new Float64Array(incs.map(fixy).map(z => z.x));
+//     var ips = new Float64Array(incs.map(fixy).map(z => z.y));
+//     var roots = cpolyX(rps, ips);
+//     var rootrps = roots[0];
+//     var rootips = roots[1];
+//     var retval = new Array<numeric.T>(rootips.length);
+//     for(var i = 0; i < rootrps.length; i++) {
+//         retval[i] = c(rootrps[i], rootips[i]);
+//     }
+//     return retval;
+// }
+
 function polyroots(incs: polynomial): Array<numeric.T> {
     if (incs.length == 0) {
         return undefined;
@@ -312,7 +325,7 @@ function polyroots(incs: polynomial): Array<numeric.T> {
     }
     var deg = cs.length - 1;
     var leading = cs[cs.length - 1];
-    cs = polymult(cs, [none.div(leading)]);
+    cs = polymult(cs, [none.div(leading)]).map(fixy);
     var f = function (z: C) { return peval(cs, z); }
     var roots = new Array<numeric.T>();
     for (var i = 0; i < deg; i++) {
@@ -331,10 +344,10 @@ function polyroots(incs: polynomial): Array<numeric.T> {
         var newroots = new Array();
 
         if (console != undefined && console.log != undefined) {
-            /*
-                    console.log("");
-                    console.log("Roots: " + printzs(roots));
-            */
+            
+                    // console.log("");
+                    // console.log("Roots: " + printzs(roots));
+            
         }
 
         for (var i = 0; i < roots.length; i++) {
@@ -342,7 +355,11 @@ function polyroots(incs: polynomial): Array<numeric.T> {
             var x = f(p);
             for (var j = 0; j < roots.length; j++) {
                 if (i != j) {
-                    x = x.div(p.sub(roots[j]));
+                    var x2 = x.div(p.sub(roots[j]));
+                    if(isNaN(x2.x) || isNaN(x2.y)) {
+                        throw "";
+                    }
+                    x = x2;
                 }
             }
             /*
@@ -351,6 +368,10 @@ function polyroots(incs: polynomial): Array<numeric.T> {
                     }
             */
             roots[i] = p.sub(x);
+            // All of our zeroes are in the disk - keep things from going crazy.
+            // if(roots[i].abs().x > 2) {
+            //     roots[i] = roots[i].div(roots[i].abs());
+            // }
         }
 
         // roots = newroots;

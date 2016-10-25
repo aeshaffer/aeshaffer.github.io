@@ -470,21 +470,25 @@ class BPWidget {
     };
 
     getSkips() {
-        var skips0 = this.skippoints.val().split(",");
+        var skips0 : string[] = this.skippoints.val().split(",");
         var skips = skips0.map(function(skip) { return parseInt(skip); });
-        this.skippoints.css("background-color", "");
-        this.skippoints.attr("title", "");
-        for (var i = 0; i < skips.length; i++) {
-            var skip = skips[i];
-            /*
-                if(this.zs.length % skip != 0) {
-                    this.skippoints.css("background-color", "red");
-                    this.skippoints.attr("title", "Cannot skip "+this.zs.length+" points by " + skip + ".");
-                    return null;
-                }
-            */
+        if(!skips.every(n => !isNaN(n))) {
+            return null;
+        } else {
+            this.skippoints.css("background-color", "");
+            this.skippoints.attr("title", "");
+            for (var i = 0; i < skips.length; i++) {
+                var skip = skips[i];
+                /*
+                    if(this.zs.length % skip != 0) {
+                        this.skippoints.css("background-color", "red");
+                        this.skippoints.attr("title", "Cannot skip "+this.zs.length+" points by " + skip + ".");
+                        return null;
+                    }
+                */
+            }
+            return skips;            
         }
-        return skips;
     }
 
     drawPILines(t) {
@@ -500,7 +504,7 @@ class BPWidget {
     };
 
 
-    drawPILinesInner(lines, piangles, skip, timepct?) {
+    drawPILinesInner(lines: HTMLCanvasElement, piangles: number[], skip: number, timepct?: number) {
 
         var N = this.plotDims().windowN;
         var ctx = setupCTX(lines, N);
@@ -509,6 +513,8 @@ class BPWidget {
 
         var skippedangleses = getSkippedAngles(piangles, skip);
         var numPolys = skippedangleses.length;
+
+        if(timepct == undefined) {timepct = 1;}
 
         for (var j = 0; j < numPolys; j++) {
             var drawnLength = 0;

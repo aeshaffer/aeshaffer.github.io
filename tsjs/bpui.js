@@ -473,12 +473,17 @@ var BPWidget = (function () {
     BPWidget.prototype.getSkips = function () {
         var skips0 = this.skippoints.val().split(",");
         var skips = skips0.map(function (skip) { return parseInt(skip); });
-        this.skippoints.css("background-color", "");
-        this.skippoints.attr("title", "");
-        for (var i = 0; i < skips.length; i++) {
-            var skip = skips[i];
+        if (!skips.every(function (n) { return !isNaN(n); })) {
+            return null;
         }
-        return skips;
+        else {
+            this.skippoints.css("background-color", "");
+            this.skippoints.attr("title", "");
+            for (var i = 0; i < skips.length; i++) {
+                var skip = skips[i];
+            }
+            return skips;
+        }
     };
     BPWidget.prototype.drawPILines = function (t) {
         var skips = this.getSkips();
@@ -498,6 +503,9 @@ var BPWidget = (function () {
         var frontier = [];
         var skippedangleses = getSkippedAngles(piangles, skip);
         var numPolys = skippedangleses.length;
+        if (timepct == undefined) {
+            timepct = 1;
+        }
         for (var j = 0; j < numPolys; j++) {
             var drawnLength = 0;
             var skippedangles = skippedangleses[j];

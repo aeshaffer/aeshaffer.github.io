@@ -258,6 +258,18 @@ function product(zs) {
     return zs.filter(function (z) { return z != undefined; })
         .reduce(function (z1, z2) { return z1.mul(z2); }, none);
 }
+// function polyrootsX(incs: polynomial): Array<numeric.T> {
+//     var rps = new Float64Array(incs.map(fixy).map(z => z.x));
+//     var ips = new Float64Array(incs.map(fixy).map(z => z.y));
+//     var roots = cpolyX(rps, ips);
+//     var rootrps = roots[0];
+//     var rootips = roots[1];
+//     var retval = new Array<numeric.T>(rootips.length);
+//     for(var i = 0; i < rootrps.length; i++) {
+//         retval[i] = c(rootrps[i], rootips[i]);
+//     }
+//     return retval;
+// }
 function polyroots(incs) {
     if (incs.length == 0) {
         return undefined;
@@ -268,7 +280,7 @@ function polyroots(incs) {
     }
     var deg = cs.length - 1;
     var leading = cs[cs.length - 1];
-    cs = polymult(cs, [none.div(leading)]);
+    cs = polymult(cs, [none.div(leading)]).map(fixy);
     var f = function (z) { return peval(cs, z); };
     var roots = new Array();
     for (var i = 0; i < deg; i++) {
@@ -290,7 +302,11 @@ function polyroots(incs) {
             var x = f(p);
             for (var j = 0; j < roots.length; j++) {
                 if (i != j) {
-                    x = x.div(p.sub(roots[j]));
+                    var x2 = x.div(p.sub(roots[j]));
+                    if (isNaN(x2.x) || isNaN(x2.y)) {
+                        throw "";
+                    }
+                    x = x2;
                 }
             }
             /*
