@@ -302,7 +302,7 @@ function polyroots(incs) {
             var x = f(p);
             for (var j = 0; j < roots.length; j++) {
                 if (i != j) {
-                    var x2 = x.div(p.sub(roots[j]));
+                    var x2 = fixy(x.div(p.sub(roots[j])));
                     if (isNaN(x2.x) || isNaN(x2.y)) {
                         throw "";
                     }

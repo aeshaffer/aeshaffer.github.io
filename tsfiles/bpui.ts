@@ -187,6 +187,9 @@ class BPWidget {
     };
 
     displayTables(zs: BPZeroes, cpi: CPInfo) {
+        if(this.criticalpoints == null || this.criticalvalues == null) {
+            return;
+        }
         this.criticalpoints.empty();
         this.criticalvalues.empty();
 
@@ -858,7 +861,7 @@ class BPWidget {
         this.clearlines.on("click", function() { that.doclearlines(); });
         // $("#regions").on("click", cf);
 
-
+        if(this.clearpreimages != null) {
         this.clearpreimages.on("click",
             function(e) {
                 cssscatter(that.regions.parent(".zeroesholder"),
@@ -872,6 +875,7 @@ class BPWidget {
                     [], "path", true);
             }
         );
+        }
         this.showpreimages.on("change", function(e) {
             var v = $(e.target).val();
             if (v == "none") {
@@ -936,6 +940,7 @@ class BPWidget {
             that.clearplots.click();
         })
 
+        if(this.hidecps != null) {
         this.hidecps.change(function() {
             if ($(this).is(":checked")) {
                 $("body").addClass("hidecps");
@@ -943,6 +948,7 @@ class BPWidget {
                 $("body").removeClass("hidecps");
             }
         });
+        }
 
         this.showadvanced.change();
 
@@ -1005,10 +1011,12 @@ class BPWidget {
             $.each(pilis, function(i, e) { that.foundpreimages.append(e); });
         });
 
+        if(this.screenshot != null) {
         this.screenshot.click(function() {
             var rainbowcanvas = (<HTMLCanvasElement>(that.rainbow.element));
             window.open("./screenshot.html", "width=" + rainbowcanvas.width + "height=" + rainbowcanvas.height);
         })
+        }
 
         this.plotbutton.click(function() {
             that.replotMe();

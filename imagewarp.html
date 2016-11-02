@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
+
 <head>
   <link rel="stylesheet" type="text/css" href="blaschke.css" />
-  <script type="text/javascript" src="./numeric-1.2.3.js" ></script>
+  <script type="text/javascript" src="./numeric-1.2.3.js"></script>
   <script type="text/javascript" src="./jquery-ui-1.9.1.custom/js/jquery-1.8.2.js"></script>
   <script type="text/javascript" src="./jquery-ui-1.9.1.custom/js/jquery-ui-1.9.1.custom.js"></script>
-  <script type="text/javascript" src="./tsjs/polynomials.js" ></script>
+  <script type="text/javascript" src="./tsjs/polynomials.js"></script>
   <script type="text/javascript" src="./tsjs/ellipse.js"></script>
   <script type="text/javascript" src="./tsjs/lmellipse.js"></script>
   <script type="text/javascript" src="./tsjs/hsvToRGB.js"></script>
@@ -18,7 +19,7 @@
   <script type="text/javascript" src="./tsjs/interpolation2.js"></script>
 
   <script type="text/javascript" src="./js/imagewarp.js"></script>
-  
+
   <script type="text/javascript">
     var bpwidget;
     $(function() {
@@ -30,6 +31,7 @@
   <title>Blaschke Product Applet</title>
   <meta charset="utf-8" />
 </head>
+
 <body>
   <div style="float: left; width: 400px; height: 400px;">
     <h2>Pick a File:</h2>
@@ -40,7 +42,7 @@
     <button type="button" id="goandrew">Andrew</button>
     <button type="button" id="gogoose">Goose</button>
     <h3>Or, pick a file from your computer:</h3>
-    Pick a file to upload, then click "Load."  For best results, pick an image larger than 400x400 pixels.
+    Pick a file to upload, then click "Load." For best results, pick an image larger than 400x400 pixels.
     <input type="file" id="uploadfile"></input>
     <button type="button" id="goupload">Load</button>
     <h3>Pick a URL (might not work)</h3>
@@ -54,33 +56,42 @@
   </div>
   <h2 style="clear: both;">Pick Zeroes, and Click "Warp Image"</h2>
   <div style="display: none">
-    Eval: <div class="progress"></div>
-    RB: <ul class="rainbowstatus"><li></li></ul>
-    Reg: <ul class="regionsstatus"><li></li></ul>
+    Eval:
+    <div class="progress"></div>
+    RB:
+    <ul class="rainbowstatus">
+      <li></li>
+    </ul>
+    Reg:
+    <ul class="regionsstatus">
+      <li></li>
+    </ul>
   </div>
-  <div class="zeroesholder rainbowholder">
-    <span class="zhlabel">arg(B)</span>
-    <div class="circle"></div>
-    <canvas class="rainbow graph">
+  <div style="position: relative;">
+    <div class="zeroesholder rainbowholder">
+      <span class="zhlabel">arg(B)</span>
+      <div class="circle"></div>
+      <canvas class="rainbow graph">
+      </canvas>
+      <canvas class="rblines graph lines">
+      </canvas>
+    </div>
+    <canvas class="range graph">
     </canvas>
-    <canvas class="rblines graph lines">
-    </canvas>
-  </div>
-  <canvas class="range graph">
-    </canvas>
-     <canvas class="regions graph">
+    <canvas class="regions graph">
     </canvas>
     <canvas class="rglines graph">
     </canvas>
     <canvas class="rblines graph">
     </canvas>
-  <div class="zeroesholder rainbowholder" style="width: 400px; height: 400px;">
-    Mapped Image
-    <canvas id="mapcanvas" width="400" height="400"></canvas>
-    <button type="button" id="mapimage" style="position: absolute; right: 0px; top: 0px;">Warp Image</button>
+    <div class="zeroesholder rainbowholder" style="width: 400px; height: 400px;">
+      Mapped Image
+      <canvas id="mapcanvas" width="400" height="400"></canvas>
+      <button type="button" id="mapimage" style="position: absolute; right: 0px; top: 0px;">Warp Image</button>
+    </div>
   </div>
   <br/>
-    <div>
+  <div>
     Show Advanced Options:<input type="checkbox" class="showadvanced" value="false" />
     <span class="advanced">
       Rendered Size: <input class="pixels" value="400" />
@@ -88,10 +99,9 @@
       Window Scale: <input class="windowscale" value="1" />
     </span>
     <br/>
-    <button type="button" class="plotbutton">Plot</button>    
+    <button type="button" class="plotbutton">Plot</button>
     <button type="button" class="workergo advanced">Fast Plot</button>
-    <button type="button" class="clearplots">Clear Plots</button>
-    &nbsp;
+    <button type="button" class="clearplots">Clear Plots</button> &nbsp;
     <select class="showpreimages advanced">
       <option value="none">Hide Range</option>
       <option value="regions" selected="selected">Regions Plot</option>
@@ -101,28 +111,32 @@
     <a href="./composetool.html">Open Compose Tool</a>
   </div>
   <div>
-    Skip Points: <input class="skippoints" value="1" style="width: 50px;"/>
+    Skip Points: <input class="skippoints" value="1" style="width: 50px;" />
     <!-- Angle: <input class="theta" value="0"/>
 	 <button type="button" class="timesPI">*= &pi;</button>
 	 <button type="button" class="plottheta">Plot Identified</button><br/>
 	 -->
-    Auto Identify Points: <input class="autolinespoints" value="2" style="width: 50px;"/>
+    Auto Identify Points: <input class="autolinespoints" value="2" style="width: 50px;" />
     <button type="button" class="clearlines">Clear Lines</button>
     <button type="button" class="autolinesgo">Redraw Lines</button>
-    <button type="button" class="animatelines">Animate Lines</button>
-    Auto Re-Draw:<input class="reidonrplot"  type="checkbox"/>    
-    Solid Lines:<input class="solidtangents"  type="checkbox" />
-    Guess Ellipse:<input class="doguessellipse"  type="checkbox" />
+    <button type="button" class="animatelines">Animate Lines</button> Auto Re-Draw:<input class="reidonrplot" type="checkbox"
+    /> Solid Lines:<input class="solidtangents" type="checkbox" /> Guess Ellipse:<input class="doguessellipse" type="checkbox"
+    />
     <span class="advanced">Plot Interp:<input class="plotinterp" value="false" type="checkbox"/></span>
   </div>
-  <div id="clicklocation" style="margin: 10px 0px;" >
+  <div id="clicklocation" style="margin: 10px 0px;">
     <table style="width: 398px; border: 1px solid black; text-align: left;">
       <tr>
-	<th>Click
-	  <input class="textz" style="width: 100px;"></input>
-	  <button type="button" class="gotextz">Go</button>
-	</th><th>B(CL)</th></tr>
-      <tr><td class="point">&nbsp;</td><td class="dest">&nbsp;</td></tr>
+        <th>Click
+          <input class="textz" style="width: 100px;"></input>
+          <button type="button" class="gotextz">Go</button>
+        </th>
+        <th>B(CL)</th>
+      </tr>
+      <tr>
+        <td class="point">&nbsp;</td>
+        <td class="dest">&nbsp;</td>
+      </tr>
     </table>
   </div>
   <div style="clear: both;">
@@ -130,7 +144,7 @@
       <h3>Load/Edit</h3>
       <button type="button" class="loadbutton">Load</button>
       <a class="permalink">Permalink</a>
-      <textarea class="zsstring" style="width: 100%" ></textarea>
+      <textarea class="zsstring" style="width: 100%"></textarea>
     </div>
   </div>
   <div style="display: inline-block; width: 200px" class="statsblock">
@@ -144,6 +158,7 @@
     <h3>Ordered Ct. Angles</h3>
     <ul class="criticalangles"></ul>
   </div>
-  <br style="clear: both" />
-  This applet was made with the <a href="http://www.numericjs.com">Numeric Javascript</a> library and <a href="http://jquery.org">JQuery</a>.
+  <br style="clear: both" /> This applet was made with the <a href="http://www.numericjs.com">Numeric Javascript</a> library
+  and <a href="http://jquery.org">JQuery</a>.
+
 </html>

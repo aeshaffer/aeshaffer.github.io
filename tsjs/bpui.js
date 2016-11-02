@@ -205,6 +205,9 @@ var BPWidget = (function () {
     };
     ;
     BPWidget.prototype.displayTables = function (zs, cpi) {
+        if (this.criticalpoints == null || this.criticalvalues == null) {
+            return;
+        }
         this.criticalpoints.empty();
         this.criticalvalues.empty();
         var doclear = false;
@@ -794,11 +797,13 @@ var BPWidget = (function () {
         this.clearplots.on("click", function () { that.doclearplots(); });
         this.clearlines.on("click", function () { that.doclearlines(); });
         // $("#regions").on("click", cf);
-        this.clearpreimages.on("click", function (e) {
-            cssscatter(that.regions.parent(".zeroesholder"), that.plotDims().graphN, [], "pi", true);
-            cssscatter(that.rainbow.parent(".zeroesholder"), that.plotDims().graphN, [], "pi", true);
-            cssscatter(that.range.siblings(".rangepath"), that.plotDims().graphN, [], "path", true);
-        });
+        if (this.clearpreimages != null) {
+            this.clearpreimages.on("click", function (e) {
+                cssscatter(that.regions.parent(".zeroesholder"), that.plotDims().graphN, [], "pi", true);
+                cssscatter(that.rainbow.parent(".zeroesholder"), that.plotDims().graphN, [], "pi", true);
+                cssscatter(that.range.siblings(".rangepath"), that.plotDims().graphN, [], "path", true);
+            });
+        }
         this.showpreimages.on("change", function (e) {
             var v = $(e.target).val();
             if (v == "none") {
@@ -856,14 +861,16 @@ var BPWidget = (function () {
             }
             that.clearplots.click();
         });
-        this.hidecps.change(function () {
-            if ($(this).is(":checked")) {
-                $("body").addClass("hidecps");
-            }
-            else {
-                $("body").removeClass("hidecps");
-            }
-        });
+        if (this.hidecps != null) {
+            this.hidecps.change(function () {
+                if ($(this).is(":checked")) {
+                    $("body").addClass("hidecps");
+                }
+                else {
+                    $("body").removeClass("hidecps");
+                }
+            });
+        }
         this.showadvanced.change();
         this.skippoints.change(function () { that.rescatter(); });
         this.windowscale.change(function () { that.resizeCanvasesRescatter(); });
@@ -922,10 +929,12 @@ var BPWidget = (function () {
             var pilis = preimages.map(function (cv) { return $("<li>").text(dcomplex(cv)); });
             $.each(pilis, function (i, e) { that.foundpreimages.append(e); });
         });
-        this.screenshot.click(function () {
-            var rainbowcanvas = (that.rainbow.element);
-            window.open("./screenshot.html", "width=" + rainbowcanvas.width + "height=" + rainbowcanvas.height);
-        });
+        if (this.screenshot != null) {
+            this.screenshot.click(function () {
+                var rainbowcanvas = (that.rainbow.element);
+                window.open("./screenshot.html", "width=" + rainbowcanvas.width + "height=" + rainbowcanvas.height);
+            });
+        }
         this.plotbutton.click(function () {
             that.replotMe();
         });
