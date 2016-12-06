@@ -1,3 +1,4 @@
+/// <reference path="numeric-1.2.3.js" />
 function resizeAndCopy(mine, openers) {
 	mine.width = openers.width; 
 	mine.height = openers.height;
@@ -23,22 +24,25 @@ $(function() {
 
 
     if(!window.opener) {
-	alert("blah");
+		alert("blah");
     } else {
+		var margin = 5;
     	var rainbow = window.opener.$("canvas.rainbow")[0];
     	var lines = window.opener.$("canvas.rblines")[0];
     	ss = $("#screenshot")[0];
-    	ss.width = rainbow.width + 2;
-    	ss.height = rainbow.height + 2;
+    	ss.width = rainbow.width + 2*margin;
+    	ss.height = rainbow.height + 2*margin;
 		var mylines = resizeAndCopy($("#lines")[0], lines);
 		var myrainbow = resizeAndCopy($("#rainbow")[0], rainbow);
     	ssctx = ss.getContext("2d");
-    	ssctx.drawImage(myrainbow, 1,1);
-    	ssctx.drawImage(mylines,1,1);
+    	ssctx.drawImage(myrainbow, margin, margin);
+    	ssctx.drawImage(mylines,margin, margin);
     	var zs = window.opener.bpwidget.zs;
+		var zsdelta = new numeric.T(margin, margin);
+		//zs = zs.map(function(z) { return xy2c(z).add(zsdelta);});	
     	var cpi = window.opener.bpwidget.cpi;
     	var s = rainbow.width / 2.0;
-    	ssctx.translate((myrainbow.width)/ 2.0, myrainbow.height / 2.0);
+    	ssctx.translate(margin + (myrainbow.width)/ 2.0, margin + myrainbow.height / 2.0);
     	ssctx.scale(1.0, -1.0);
     	ssctx.lineWidth=1;
     	var r = 5;
