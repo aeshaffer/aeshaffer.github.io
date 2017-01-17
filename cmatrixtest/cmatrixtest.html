@@ -1,0 +1,51 @@
+<html>
+
+<head>
+<title>Iterate Automorphism</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="../jquery-ui-1.11.1/jquery-ui.js"></script>
+    <script src="../numeric-1.2.3.js" type="text/javascript"></script>
+    <script src="../tsjs/polynomials.js" type="text/javascript"></script>
+    <script src="../tsjs/cmatrix.js" type="text/javascript"></script>
+    <script type="text/javascript">
+
+function AMat() { return fromsingle(eval($("#matrixA").val())); }
+    function BMat() { return fromsingle(eval($("#matrixB").val())); }
+    function zscal() { return eval($("#scalar").val());}
+
+$(function() {
+    
+    $("#AB").on("click", function() {
+        var result = CMult(AMat(), BMat());
+        $("#output").val(printMatrix(result));
+    });
+    $("#zA").on("click", function() {
+        var result = ScalarMult(AMat(), zscal());
+        $("#output").val(printMatrix(result));
+    });
+});
+    </script>
+</head>
+<body>
+    <input id="scalar" value="c(1,2)"></input>
+    <textarea id="matrixA" rows="5" style="width: 25%">
+[
+[c(2,0), c(1,0), c(0,0), c(0,0), c(0,0)],
+[c(1,0), c(2,0), c(1,0), c(0,0), c(0,0)],
+[c(0,0), c(1,0), c(2,0), c(1,0), c(0,0)],
+[c(0,0), c(0,0), c(1,0), c(2,0), c(1,0)],
+[c(0,0), c(0,0), c(0,0), c(1,0), c(2,0)]
+]
+    
+    </textarea>
+    <textarea id="matrixB" rows="5" style="width: 25%">
+[
+[c(3,0), c(-2,0)],
+[c(4,0), c(-1,0)]
+]
+    </textarea>
+<textarea id="output" rows="5" style="width: 25%"></textarea>
+<button id="AB" value="AB">AB</button>
+<button id="zA" value="zA">zA</button>
+</body>
+</html>

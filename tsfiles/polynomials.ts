@@ -189,6 +189,11 @@ function dcp(z: C): string {
     return round5(z.x) + " " + (y >= 0 ? "+" : "") + round5(y) + "j";
 }
 
+function ccmd(z: C): string {
+    var y = z.y == undefined ? 0 : z.y;
+    return "c(" + round5(z.x) + ", " + round5(y) + ")";
+}
+
 function dcomplex(z: C) {
     return dc(z) + " (arg=" + round2(normalizeangle(z.angle())) + ")";
 }
