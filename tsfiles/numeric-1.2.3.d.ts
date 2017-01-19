@@ -39,10 +39,13 @@ declare module numeric {
     function inv(x: Array<Array<number>>): Array<Array<number>>;
     function eig(x: Array<Array<number>>): EIG;
     function solve(A: Array<Array<number>>, b: Array<number>): Array<number>;
-    function dot(A: Array<Array<number>>, z: number | Array<Array<number>> | Array<number>): Array<Array<number>>;
+    function dot(A: Array<Array<number>>, z: number | Array<Array<number>>): Array<Array<number>>;
+    function dot(A: Array<Array<number>>, z: Array<number>): Array<number>;
     function add(A: Array<Array<number>>, y: Array<Array<number>>): Array<Array<number>>;
     function sub(A: Array<Array<number>>, y: Array<Array<number>>): Array<Array<number>>;
     function identity(n: number): Array<Array<number>>;
+    function clone(A: Array<Array<T>>): Array<Array<T>>;
+    function clone(A: Array<T>): Array<T>;
 }
 
 type C = numeric.T;

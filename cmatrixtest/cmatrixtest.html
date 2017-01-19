@@ -7,11 +7,15 @@
     <script src="../numeric-1.2.3.js" type="text/javascript"></script>
     <script src="../tsjs/polynomials.js" type="text/javascript"></script>
     <script src="../tsjs/cmatrix.js" type="text/javascript"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/3.8.1/math.min.js"></script>
     <script type="text/javascript">
 
-function AMat() { return fromsingle(eval($("#matrixA").val())); }
+    function AMat() { return fromsingle(eval($("#matrixA").val())); }
     function BMat() { return fromsingle(eval($("#matrixB").val())); }
     function zscal() { return eval($("#scalar").val());}
+
+    // var M = tosingle(realmatrix([[1,2],[3,4]]))
+    // LUsolve(LU(M), [c(0,0), c(0,0)])
 
 $(function() {
     

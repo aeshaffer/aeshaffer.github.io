@@ -25,33 +25,50 @@ var CMatrix = (function () {
 function trace(A0) {
     return A0.ip.map(function (row, i) { return c(A0.rp[i][i], A0.ip[i][i]); }).csum();
 }
+function zeroes(n) {
+    var retval = new Array(n);
+    for (var i = 0; i < n; i++) {
+        retval[i] = new Array(n);
+        for (var j = 0; j < n; j++) {
+            retval[i][j] = 0;
+        }
+    }
+    return retval;
+}
+function realmatrix(m) {
+    return new CMatrix(m, zeroes(m.length));
+}
 function ceye(n) {
     var rp = numeric.identity(n);
-    var ip = numeric.sub(numeric.identity(n), numeric.identity(n));
+    var ip = zeroes(n);
     return new CMatrix(rp, ip);
 }
 //
 // http://mathfaculty.fullerton.edu/mathews/n2003/faddeev/FaddeevLeverrierMod/Links/FaddeevLeverrierMod_lnk_4.html
 function chareq(A0) {
-    var Bmatrices = new Array();
-    var ps = new Array();
+    var n = A0.ip.length;
+    var I = ceye(A0.ip.length);
+    var Bmatrices = new Array(n + 1);
+    var ps = new Array(n + 1);
     var BLast = A0;
     var pLast = trace(A0);
-    Bmatrices.push(BLast);
-    ps.push(pLast);
+    ps[1] = pLast;
+    Bmatrices[1] = BLast;
     console.log(printMatrix(BLast));
     console.log(pLast);
-    for (var i = 2; i <= A0.rp.length; i++) {
-        var piI = ScalarMult(ceye(A0.ip.length), pLast);
+    for (var i = 2; i <= n; i++) {
+        var piI = ScalarMult(I, pLast);
         var Bnext = CMult(A0, CSub(BLast, piI));
         var pNext = trace(Bnext).div(i);
         BLast = Bnext;
         pLast = pNext;
-        ps.push(pLast);
+        Bmatrices[i] = BLast;
+        ps[i] = pLast;
         console.log(printMatrix(Bnext));
         console.log(pLast);
     }
-    var poly = ps.reverse();
+    //var Ainv = ScalarMult(CSub(Bmatrices[n-1], ScalarMult(I, ps[n -1])), c(1, 0).div(ps[n]));
+    var poly = ps.filter(function (z) { return z != undefined; }).reverse();
     console.log(poly);
     poly = poly.map(function (z) { return z.mul(-1); });
     poly.push(c(1, 0));
@@ -59,9 +76,91 @@ function chareq(A0) {
     var evalues = polyroots(poly);
     return evalues;
 }
+function evalsnumeric(A0) {
+    var eig = numeric.eig(CtoRFourBlock(A0));
+    return eig.lambda.x.map(function (x0, i) { return c(x0, eig.lambda.y[i]); });
+}
+function evecsnumeric(A0) {
+    var eig = numeric.eig(CtoRFourBlock(A0));
+    return eig.E.x.map(function (e, i) {
+        return ({ lambda: c(eig.lambda.x[i], eig.lambda.y[i]),
+            vec: e.map(function (v, j) { return c(eig.E.x[i][j], eig.E.y[i][j]); }) });
+    });
+}
+// function algorithmB(A: CMatrix) {
+//     var thetas = spacedAngles(32);
+//     for(var t of thetas) {
+//         var HT = ScalarMult(A, t2c(-t));
+//         var eig = numeric.eig(HT.rp);
+//         eig.E.map(())
+//     }
+function sideBySide(A, B) {
+    var rp = A.rp.map(function (row, i) { return row.concat(B[i]); });
+    var ip = A.ip.map(function (row, i) { return row.concat(B[i]); });
+    return new CMatrix(rp, ip);
+}
+function sideBySideN(A, B) {
+    return A.map(function (row, i) { return row.concat(B[i]); });
+}
+function stackN(A, B) {
+    return A.concat(B);
+}
+function stack(A, B) {
+    var rp = A.rp.concat(B.rp);
+    var ip = A.ip.concat(B.ip);
+    return new CMatrix(rp, ip);
+}
+function fourBlockN(A00, A01, A10, A11) {
+    var A0 = sideBySideN(A00, A01);
+    var A1 = sideBySideN(A10, A11);
+    return stackN(A0, A1);
+}
+function fourBlock(A00, A01, A10, A11) {
+    var A0 = sideBySide(A00, A01);
+    var A1 = sideBySide(A10, A11);
+    return stack(A0, A1);
+}
+function VtoRStack(vec) {
+    return vec.map(function (z) { return z.x; }).concat(vec.map(function (z) { return z.y; }));
+}
+function RStackToV(vec) {
+    var retval = new Array();
+    for (var i = 0; i < vec.length / 2; i++) {
+        retval.push(c(vec[i], vec[i + vec.length / 2]));
+    }
+    return retval;
+}
+function CtoRFourBlock(mat) {
+    return fourBlockN(mat.rp, ScalarMult(realmatrix(mat.ip), c(-1, 0)).rp, mat.ip, mat.rp);
+}
+function MVDot(mat, vec) {
+    var mat1 = CtoRFourBlock(mat);
+    var vec1 = VtoRStack(vec);
+    var retval0 = numeric.dot(mat1, vec1);
+    return RStackToV(retval0);
+}
+// function evectors(A0: CMatrix) {
+//     var x = chareq(A0);
+//     var retval = new Array<numeric.EIG>();
+//     for(var ev of x) {
+//         var mat = CSub(A0, ScalarMult(ceye(2), ev));
+//         var realmat = 
+//         var sln = numeric.eig(realmat);
+//         retval.push(sln);
+//     }
+//     return retval;
+// }
 function printMatrix(A0) {
+    return printMatrixT(tosingle(A0));
+}
+function printMatrixT(A0) {
     return "[\r\n" +
-        tosingle(A0).map(function (row) { return "[" + row.map(function (v) { return ccmd(v); }).join(",") + "]"; }).join(",\r\n")
+        A0.map(function (row) { return "[" + row.map(function (v) { return ccmd(v); }).join(",") + "]"; }).join(",\r\n")
+        + "\r\n]";
+}
+function printMatrixN(A0) {
+    return "[\r\n" +
+        A0.map(function (row) { return "[" + row.map(function (v) { return ccmd(c(v, 0)); }).join(",") + "]"; }).join(",\r\n")
         + "\r\n]";
 }
 function fromsingle(A0) {
@@ -91,5 +190,11 @@ function ScalarMult(A, z) {
     var rp = numeric.sub(vz(A.rp, z1.x), vz(A.ip, z1.y));
     var ip = numeric.add(vz(A.ip, z1.x), vz(A.rp, z1.y));
     return new CMatrix(rp, ip);
+}
+function psub(x, y) {
+    return x.map(function (v, i) { return v.sub(y[i]); });
+}
+function pmul(x, y) {
+    return x.map(function (v, i) { return v.mul(y[i]); });
 }
 //# sourceMappingURL=cmatrix.js.map
