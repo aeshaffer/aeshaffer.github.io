@@ -293,6 +293,8 @@ class BPWidget {
         this.permalink.attr("href", wl + "?" + zscode);
     };
 
+    dropzero(zdiv) {}
+
     updatezero(zdiv) {
         try {
             var nudge = getNudge($(zdiv));
@@ -391,7 +393,7 @@ class BPWidget {
             .draggable({
                 containment: cw, scroll: false,
                 drag: function() { that.updatezero($(this)); },
-                stop: function() { that.updatezero($(this)); }
+                stop: function() { that.updatezero($(this)); that.dropzero($(this)); }
             });
 
 
@@ -444,10 +446,10 @@ class BPWidget {
         var endBPGE = (new Date()).getTime();
         this.progress.append("NWRP " + N + " " + as.length + " " + (endBPGE - startBPGE));
 
-        if (this.regions.length > 0 && $(this.regions[0]).is(":visible")) {
+        if (this.regions.length > 0 && $(this.regions.element).is(":visible")) {
             var rgidata = new Uint8Array(4 * N * N);
             rpipToHue(rpip, rgidata, function(bpz) { return region(cpi.cvangles, bpz); });
-            finishCanvas(rgidata, this.regions[0], cpi);
+            finishCanvas(rgidata, this.regions.element, cpi);
         }
 
         var bad = biggestanglediff(cpi.cps.map(function(bpz) { return bpz.angle(); }));

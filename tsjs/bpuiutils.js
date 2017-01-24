@@ -294,6 +294,9 @@ function clearCanvasInner(cxt, preserveTransform) {
         cxt.restore();
     }
 }
+function clearAllGraphs() {
+    clearCanvas($(".graph"));
+}
 function clearCanvas(selector) {
     if (selector != null) {
         selector.each(function (i, e) {

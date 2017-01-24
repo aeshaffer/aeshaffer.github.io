@@ -17,7 +17,7 @@ function graphicsWorkerHandler(event, rainbow, regions, cpi, zs) {
 }
 
 
-function finishCanvas(idata0, canvas, cpi) {
+function finishCanvas(idata0, canvas : HTMLCanvasElement, cpi) {
     var N = Math.sqrt(idata0.length/4);
     var rainbowctx = canvas.getContext("2d");
     var idata1 = rainbowctx.createImageData(N, N);

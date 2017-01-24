@@ -70,10 +70,9 @@ $(function () {
         outerwidget.resizeCanvasesRescatter();
         innerwidget.resizeCanvasesRescatter();
         composewidget.resizeCanvasesRescatter();
-        clearCanvas($(".graph"));
+        clearAllGraphs();
     });
     $("#plotallbutton").on("click", replot);
-    $("#composebutton").on("click", doCompose);
     $("#composedzs")
         .on("change", resizeMe)
         .on("change", function () {
@@ -94,30 +93,48 @@ $(function () {
         $("#innerzs").val("z=-0.5,-0.5&z=0,0.75&z=0,0&z=0.5,0");
         $("#outerzs").change();
         $("#innerzs").change();
+        handleFinish();
     });
 });
-function redisplay() {
-    doCompose();
-    if ($("#autoplot").is(":checked")) {
+function doAutoPlot() { return $("#autoplot").is(":checked"); }
+function handleFinish() {
+    if (doAutoPlot()) {
+        clearCanvas($(".rblines"));
         replot();
+    }
+    else {
+        clearAllGraphs();
     }
 }
 var ComposeWidget = (function (_super) {
     __extends(ComposeWidget, _super);
     function ComposeWidget(obj) {
         _super.call(this, obj);
+        var that = this;
+        this.plotregions = new JQuerySingletonWrapper($("#plotregions"));
+        this.plotregions.inner.on("change", function (e) {
+            if (that.plotregions.inner.is(":checked")) {
+                that.regions.parent("div").show();
+            }
+            else {
+                that.regions.parent("div").hide();
+            }
+        });
+        this.plotregions.inner.change();
         this.plotDims = function () {
             return { N: 150, zoom: 1, windowN: 300, graphN: 300 };
         };
         this.updatezero = function (zdiv) {
             BPWidget.prototype.updatezero.call(this, zdiv);
-            redisplay();
-            clearCanvas(this.rblines);
+            doCompose();
         };
         this.addZero = function (z) {
             BPWidget.prototype.addZero.call(this, z);
-            redisplay();
-            clearCanvas(this.rblines);
+            doCompose();
+        };
+        this.dropzero = function (z) {
+            BPWidget.prototype.dropzero.call(this, z);
+            handleFinish();
         };
         this.setAllDims();
     }

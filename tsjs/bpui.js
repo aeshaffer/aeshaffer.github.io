@@ -299,6 +299,7 @@ var BPWidget = (function () {
         this.permalink.attr("href", wl + "?" + zscode);
     };
     ;
+    BPWidget.prototype.dropzero = function (zdiv) { };
     BPWidget.prototype.updatezero = function (zdiv) {
         try {
             var nudge = getNudge($(zdiv));
@@ -389,7 +390,7 @@ var BPWidget = (function () {
             .draggable({
             containment: cw, scroll: false,
             drag: function () { that.updatezero($(this)); },
-            stop: function () { that.updatezero($(this)); }
+            stop: function () { that.updatezero($(this)); that.dropzero($(this)); }
         });
         for (var i = 0; i < this.zs.length; i++) {
             if (this.zs[i].abs().x == 0) {
@@ -438,10 +439,10 @@ var BPWidget = (function () {
         var bpzs = rpipToBpzs(rpip);
         var endBPGE = (new Date()).getTime();
         this.progress.append("NWRP " + N + " " + as.length + " " + (endBPGE - startBPGE));
-        if (this.regions.length > 0 && $(this.regions[0]).is(":visible")) {
+        if (this.regions.length > 0 && $(this.regions.element).is(":visible")) {
             var rgidata = new Uint8Array(4 * N * N);
             rpipToHue(rpip, rgidata, function (bpz) { return region(cpi.cvangles, bpz); });
-            finishCanvas(rgidata, this.regions[0], cpi);
+            finishCanvas(rgidata, this.regions.element, cpi);
         }
         var bad = biggestanglediff(cpi.cps.map(function (bpz) { return bpz.angle(); }));
         var valfun = function (bpz) {

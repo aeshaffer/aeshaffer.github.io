@@ -67,64 +67,86 @@ function replot() {
     inneroverlay.getContext('2d').putImageData(innerdata, 0, 0);
 }
 
-$(function() {
+$(function () {
 
-    $(".clearplots").on("click", function() {
+    $(".clearplots").on("click", function () {
         outerwidget.resizeCanvasesRescatter();
         innerwidget.resizeCanvasesRescatter();
         composewidget.resizeCanvasesRescatter();
-        clearCanvas($(".graph"));
+        clearAllGraphs();
     });
 
     $("#plotallbutton").on("click", replot);
-    $("#composebutton").on("click", doCompose);
     $("#composedzs")
         .on("change", resizeMe)
-        .on("change", function() {
+        .on("change", function () {
             $("#permalink").attr("href", "./blaschke.html?" + $(this).val());
         });
     $("#innerzs")
         .on("change", resizeMe)
-        .on("change", function() {
+        .on("change", function () {
             $("#innerpermalink").attr("href", "./blaschke.html?" + $(this).val());
         });
     $("#outerzs")
         .on("change", resizeMe)
-        .on("change", function() {
+        .on("change", function () {
             $("#outerpermalink").attr("href", "./blaschke.html?" + $(this).val());
         });
-    $("#testbutton").on("click", function() {
+    $("#testbutton").on("click", function () {
         $("#outerzs").val("z=-0.5,-0.5&z=0,0.75&z=0,0&z=0.5,0");
         $("#innerzs").val("z=-0.5,-0.5&z=0,0.75&z=0,0&z=0.5,0");
         $("#outerzs").change();
         $("#innerzs").change();
+        handleFinish();
     });
 });
 
-function redisplay() {
-    doCompose();
-    if ($("#autoplot").is(":checked")) {
+function doAutoPlot() { return $("#autoplot").is(":checked"); }
+
+function handleFinish() {
+    if (doAutoPlot()) {
+        clearCanvas($(".rblines"));
         replot();
+    } else { 
+        clearAllGraphs(); 
     }
 }
 
 class ComposeWidget extends EasyResizeWidget {
-    setAllDims : Function;
+    setAllDims: Function;
+    plotregions: JQuerySingletonWrapper<HTMLInputElement>;
     constructor(obj) {
         super(obj);
-        this.plotDims = function() {
+
+        var that = this;
+
+        this.plotregions = new JQuerySingletonWrapper<HTMLInputElement>($("#plotregions"));
+
+        this.plotregions.inner.on("change", function (e) {
+            if (that.plotregions.inner.is(":checked")) {
+                that.regions.parent("div").show();
+            } else {
+                that.regions.parent("div").hide();
+            }
+        });
+
+        this.plotregions.inner.change();
+
+        this.plotDims = function () {
             return { N: 150, zoom: 1, windowN: 300, graphN: 300 };
-        }       
-        this.updatezero = function(zdiv) {
-            BPWidget.prototype.updatezero.call(this, zdiv);
-            redisplay();
-            clearCanvas(this.rblines);
         }
-        this.addZero = function(z) {
+        this.updatezero = function (zdiv) {
+            BPWidget.prototype.updatezero.call(this, zdiv);
+            doCompose();
+        }
+        this.addZero = function (z) {
             BPWidget.prototype.addZero.call(this, z);
-            redisplay();
-            clearCanvas(this.rblines);
-        }       
+            doCompose();
+        }
+        this.dropzero = function (z) {
+            BPWidget.prototype.dropzero.call(this, z);
+            handleFinish();
+        }
         this.setAllDims();
     }
 }

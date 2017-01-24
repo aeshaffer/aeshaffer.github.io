@@ -326,6 +326,10 @@ function clearCanvasInner(cxt: CanvasRenderingContext2D, preserveTransform: bool
     }
 }
 
+function clearAllGraphs() {
+    clearCanvas($(".graph"));    
+}
+
 function clearCanvas(selector: JQuery) {
     if (selector != null) {
         selector.each(function(i, e) { 

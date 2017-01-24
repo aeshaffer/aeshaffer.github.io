@@ -111,7 +111,7 @@ function sideBySideN(A: number[][], B: number[][]) {
     return A.map((row, i) => row.concat(B[i]));
 }
 
-function stackN(A: number[][], B: number[][]) {
+function stackN(A: number[][], B: number[][]): number[][] {
     return A.concat(B);
 }
 
