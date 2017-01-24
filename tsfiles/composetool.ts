@@ -118,10 +118,12 @@ class ComposeWidget extends EasyResizeWidget {
         this.updatezero = function(zdiv) {
             BPWidget.prototype.updatezero.call(this, zdiv);
             redisplay();
+            clearCanvas(this.rblines);
         }
         this.addZero = function(z) {
             BPWidget.prototype.addZero.call(this, z);
             redisplay();
+            clearCanvas(this.rblines);
         }       
         this.setAllDims();
     }
