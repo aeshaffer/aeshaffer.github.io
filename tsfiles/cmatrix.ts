@@ -22,6 +22,7 @@ class CMatrix {
     }
     rp: number[][];
     ip: number[][];
+    n() { return this.rp.length; } 
 }
 
 function trace(A0: CMatrix): numeric.T {
@@ -194,13 +195,30 @@ function fromsingle(A0: numeric.T[][]) {
 }
 
 function tosingle(A0: CMatrix) {
-    return A0.rp.map((row,i) => row.map((v, j) => c(v, A0.ip[i][j])));
+    return A0.rp.map((row,i) => row.map(
+        (v, j) => c(A0.rp[i][j], A0.ip[i][j]))
+        );
 }
 
-function CMult(A: CMatrix, B: CMatrix) {
+function coerceToCMatrix(A: CMatrix | Array<Array<C>>): CMatrix {
+    if(A instanceof CMatrix) { return A; }
+    else { return fromsingle(A); }
+}
+function coerceToSingle(A: CMatrix | Array<Array<C>>): Array<Array<C>> {
+    if(A instanceof CMatrix) { return tosingle(A); }
+    else { return A; }
+}
+
+function CMult(A0: CMatrix | Array<Array<C>>, B0: CMatrix | Array<Array<C>>) {
+    var A = coerceToCMatrix(A0);
+    var B = coerceToCMatrix(B0);
     var rp = numeric.sub(numeric.dot(A.rp, B.rp), numeric.dot(A.ip, B.ip));
     var ip = numeric.add(numeric.dot(A.ip, B.rp), numeric.dot(A.rp, B.ip));
     return new CMatrix(rp, ip);
+}
+
+function SingleMult(A: CMatrix | Array<Array<C>>, B: CMatrix | Array<Array<C>>) {
+    return tosingle(CMult(A, B));
 }
 
 function CSub(A: CMatrix, B: CMatrix) {
@@ -210,6 +228,7 @@ function CSub(A: CMatrix, B: CMatrix) {
 function CAdd(A: CMatrix, B: CMatrix) {
     return new CMatrix(numeric.sub(A.rp, B.rp), numeric.sub(A.ip, B.ip));
 }
+
 function vz(v: number[][], z: number): number[][] {
     return v.map(row => row.map(y => y * z));
 }
@@ -227,4 +246,70 @@ function psub(x: Array<C>, y: Array<C>): Array<C> {
 
 function pmul(x: Array<C>, y: Array<C>): Array<C> {
     return x.map((v,i) => v.mul(y[i]));
+}
+
+function swapRows(N: number, i: number, j: number) {
+    var A = tosingle(ceye(N));
+    var row = A[i];
+    A[i] = A[j];
+    A[j] = row;
+    return A;
+}
+
+function maxIndex(startI: number, vec: Array<C>) {
+    var maxI = 0;
+    var maxV = null;
+    for(var i = startI; i < vec.length; i++) {
+        var v = vec[i].abs().x; 
+        if(maxV == null || v > maxV) { maxI = i; maxV = v;}
+    }
+    return {maxI, maxV};
+}
+
+function multipliers(B: Array<Array<C>>, col: number) {
+    var retvalL = tosingle(ceye(B.length));
+    var retvalR = tosingle(ceye(B.length));
+    var pivotvalue = B[col][col];
+    if(pivotvalue.abs().x > 0) {
+        for(var i = col+1; i < B.length; i++) {
+            retvalL[i][col] = B[i][col].div(pivotvalue);
+            retvalR[i][col] = B[i][col].div(pivotvalue).mul(-1);
+        }
+    }
+    return {retvalL, retvalR};
+}
+
+function CLU(A: CMatrix) {
+    console.log(printMatrix(A));
+    var L = tosingle(ceye(A.n()));
+    var U = tosingle(A);
+    var P = tosingle(ceye(A.n()));
+    console.log(printMatrix(CMult(L, U)));
+    for(var col = 0; col < A.n(); col++) {
+        // Get max in column;
+        var colvec = U.map(r => r[col]);
+        var maxes = maxIndex(col, colvec);
+        var permute = swapRows(A.n(), col, maxes.maxI);
+        // L = SingleMult(L, permute);
+        U = SingleMult(permute, U);
+        P = SingleMult(permute, P);
+        var multipliersMat = multipliers(U, col);
+        console.log(printMatrix(CMult(multipliersMat.retvalL, multipliersMat.retvalR)));
+        L = SingleMult(L, multipliersMat.retvalL);
+        U = SingleMult(multipliersMat.retvalR, U);
+        console.log(printMatrix(CMult(L, U)));
+    }    
+    return {U, L, P};
+}
+
+function CheckCLU(A: CMatrix) {
+    var LU = CLU(A);
+    console.log("L, U, P");
+    console.log(printMatrixT(LU.L));
+    console.log(printMatrixT(LU.U));
+    console.log(printMatrixT(LU.P));
+    console.log("P*A");
+    console.log(printMatrix(CMult(LU.P, A)));
+    console.log("L*U");
+    console.log(printMatrix(CMult(LU.L, LU.U)));
 }

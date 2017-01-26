@@ -20,6 +20,7 @@ var CMatrix = (function () {
             }
         }
     }
+    CMatrix.prototype.n = function () { return this.rp.length; };
     return CMatrix;
 }());
 function trace(A0) {
@@ -169,12 +170,33 @@ function fromsingle(A0) {
     return new CMatrix(rp, ip);
 }
 function tosingle(A0) {
-    return A0.rp.map(function (row, i) { return row.map(function (v, j) { return c(v, A0.ip[i][j]); }); });
+    return A0.rp.map(function (row, i) { return row.map(function (v, j) { return c(A0.rp[i][j], A0.ip[i][j]); }); });
 }
-function CMult(A, B) {
+function coerceToCMatrix(A) {
+    if (A instanceof CMatrix) {
+        return A;
+    }
+    else {
+        return fromsingle(A);
+    }
+}
+function coerceToSingle(A) {
+    if (A instanceof CMatrix) {
+        return tosingle(A);
+    }
+    else {
+        return A;
+    }
+}
+function CMult(A0, B0) {
+    var A = coerceToCMatrix(A0);
+    var B = coerceToCMatrix(B0);
     var rp = numeric.sub(numeric.dot(A.rp, B.rp), numeric.dot(A.ip, B.ip));
     var ip = numeric.add(numeric.dot(A.ip, B.rp), numeric.dot(A.rp, B.ip));
     return new CMatrix(rp, ip);
+}
+function SingleMult(A, B) {
+    return tosingle(CMult(A, B));
 }
 function CSub(A, B) {
     return new CMatrix(numeric.sub(A.rp, B.rp), numeric.sub(A.ip, B.ip));
@@ -196,5 +218,69 @@ function psub(x, y) {
 }
 function pmul(x, y) {
     return x.map(function (v, i) { return v.mul(y[i]); });
+}
+function swapRows(N, i, j) {
+    var A = tosingle(ceye(N));
+    var row = A[i];
+    A[i] = A[j];
+    A[j] = row;
+    return A;
+}
+function maxIndex(startI, vec) {
+    var maxI = 0;
+    var maxV = null;
+    for (var i = startI; i < vec.length; i++) {
+        var v = vec[i].abs().x;
+        if (maxV == null || v > maxV) {
+            maxI = i;
+            maxV = v;
+        }
+    }
+    return { maxI: maxI, maxV: maxV };
+}
+function multipliers(B, col) {
+    var retvalL = tosingle(ceye(B.length));
+    var retvalR = tosingle(ceye(B.length));
+    var pivotvalue = B[col][col];
+    if (pivotvalue.abs().x > 0) {
+        for (var i = col + 1; i < B.length; i++) {
+            retvalL[i][col] = B[i][col].div(pivotvalue);
+            retvalR[i][col] = B[i][col].div(pivotvalue).mul(-1);
+        }
+    }
+    return { retvalL: retvalL, retvalR: retvalR };
+}
+function CLU(A) {
+    console.log(printMatrix(A));
+    var L = tosingle(ceye(A.n()));
+    var U = tosingle(A);
+    var P = tosingle(ceye(A.n()));
+    console.log(printMatrix(CMult(L, U)));
+    for (var col = 0; col < A.n(); col++) {
+        // Get max in column;
+        var colvec = U.map(function (r) { return r[col]; });
+        var maxes = maxIndex(col, colvec);
+        var permute = swapRows(A.n(), col, maxes.maxI);
+        // L = SingleMult(L, permute);
+        U = SingleMult(permute, U);
+        P = SingleMult(permute, P);
+        var multipliersMat = multipliers(U, col);
+        console.log(printMatrix(CMult(multipliersMat.retvalL, multipliersMat.retvalR)));
+        L = SingleMult(L, multipliersMat.retvalL);
+        U = SingleMult(multipliersMat.retvalR, U);
+        console.log(printMatrix(CMult(L, U)));
+    }
+    return { U: U, L: L, P: P };
+}
+function CheckCLU(A) {
+    var LU = CLU(A);
+    console.log("L, U, P");
+    console.log(printMatrixT(LU.L));
+    console.log(printMatrixT(LU.U));
+    console.log(printMatrixT(LU.P));
+    console.log("P*A");
+    console.log(printMatrix(CMult(LU.P, A)));
+    console.log("L*U");
+    console.log(printMatrix(CMult(LU.L, LU.U)));
 }
 //# sourceMappingURL=cmatrix.js.map
