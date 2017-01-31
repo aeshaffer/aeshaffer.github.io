@@ -195,6 +195,9 @@ function CMult(A0, B0) {
     var ip = numeric.add(numeric.dot(A.ip, B.rp), numeric.dot(A.rp, B.ip));
     return new CMatrix(rp, ip);
 }
+function SingleSub(A0, B0) {
+    return A0.map(function (row, i) { return row.map(function (v, j) { return v.sub(B0[i][j]); }); });
+}
 function SingleMult(A, B) {
     return tosingle(CMult(A, B));
 }
@@ -203,6 +206,12 @@ function CSub(A, B) {
 }
 function CAdd(A, B) {
     return new CMatrix(numeric.sub(A.rp, B.rp), numeric.sub(A.ip, B.ip));
+}
+function vvdot(a, b) {
+    return a.map(function (v, i) { return v.mul(b[i]); }).csum();
+}
+function vzC(A, b) {
+    return A.map(function (row) { return vvdot(row, b); });
 }
 function vz(v, z) {
     return v.map(function (row) { return row.map(function (y) { return y * z; }); });
@@ -250,25 +259,73 @@ function multipliers(B, col) {
     }
     return { retvalL: retvalL, retvalR: retvalR };
 }
+function transpose(A) {
+    return A.map(function (row, i) { return row.map(function (v, j) { return A[j][i]; }); });
+}
+function isIdentity(A) {
+    var I = tosingle(ceye(A.length));
+    var shouldBeZero = SingleSub(I, A);
+    return isZero(shouldBeZero);
+}
+function isZero(shouldBeZero) {
+    var rowsums = shouldBeZero.map(function (row) { return row.map(function (v) { return v.abs(); }).csum(); });
+    var sums = rowsums.csum().abs().x;
+    return sums == 0;
+}
+function areEqual(A, B) {
+    return isZero(SingleSub(A, B));
+}
+function forwardSubst(L, b) {
+    var y = Array(b.length);
+    for (var i = 0; i < b.length; i++) {
+        var s = c(0, 0);
+        for (var j = 0; j < i; j++) {
+            s = s.add(L[i][j].mul(y[j]));
+        }
+        y[i] = (b[i].sub(s)).div(L[i][i]);
+    }
+    return y;
+}
+function ge(U0) {
+    var U = transpose(U0);
+    var I = tosingle(ceye(U0.length));
+    for (var i = 0; i < U0.length; i++) {
+        var multipliersMat = multipliers(U, i);
+        I = SingleMult(multipliersMat.retvalR, I);
+        U = SingleMult(multipliersMat.retvalR, U);
+    }
+    return { "I": transpose(I), "U": transpose(U) };
+}
 function CLU(A) {
     console.log(printMatrix(A));
     var L = tosingle(ceye(A.n()));
     var U = tosingle(A);
-    var P = tosingle(ceye(A.n()));
     console.log(printMatrix(CMult(L, U)));
     for (var col = 0; col < A.n(); col++) {
         // Get max in column;
         var colvec = U.map(function (r) { return r[col]; });
         var maxes = maxIndex(col, colvec);
         var permute = swapRows(A.n(), col, maxes.maxI);
-        // L = SingleMult(L, permute);
+        L = SingleMult(L, permute);
         U = SingleMult(permute, U);
-        P = SingleMult(permute, P);
+        //P = SingleMult(permute, P);
         var multipliersMat = multipliers(U, col);
-        console.log(printMatrix(CMult(multipliersMat.retvalL, multipliersMat.retvalR)));
+        var mprod = SingleMult(multipliersMat.retvalL, multipliersMat.retvalR);
+        console.log(printMatrixT(mprod));
+        console.log(isIdentity(mprod));
         L = SingleMult(L, multipliersMat.retvalL);
         U = SingleMult(multipliersMat.retvalR, U);
-        console.log(printMatrix(CMult(L, U)));
+        console.log(printMatrixT(SingleMult(L, U)));
+        console.log(areEqual(SingleMult(L, U), tosingle(A)));
+    }
+    var P = tosingle(ceye(A.n()));
+    for (var col = 0; col < A.n(); col++) {
+        var colvec = L.map(function (r) { return r[col]; });
+        var maxes = maxIndex(col, colvec);
+        var permute = swapRows(A.n(), col, maxes.maxI);
+        L = SingleMult(permute, L);
+        P = SingleMult(permute, P);
+        console.log(areEqual(SingleMult(P, A), SingleMult(L, U)));
     }
     return { U: U, L: L, P: P };
 }
@@ -282,5 +339,6 @@ function CheckCLU(A) {
     console.log(printMatrix(CMult(LU.P, A)));
     console.log("L*U");
     console.log(printMatrix(CMult(LU.L, LU.U)));
+    return LU;
 }
 //# sourceMappingURL=cmatrix.js.map
