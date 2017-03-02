@@ -2,6 +2,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 
 <head>
+  <meta charset="utf-8" />
+  <title>Blaschke Product Applet</title>
   <link rel="stylesheet" type="text/css" href="blaschke.css" />
   <script type="text/javascript" src="./numeric-1.2.3.js"></script>
   <script type="text/javascript" src="./jquery-ui-1.9.1.custom/js/jquery-1.8.2.js"></script>
@@ -22,19 +24,16 @@
 
   <script type="text/javascript">
     var bpwidget;
-    $(function() {
-    bpwidget = new BPWidget($("html"), true);
-    bpwidget.wireup();
+    $(function () {
+      bpwidget = new BPWidget($("html"), true);
+      bpwidget.wireup();
     });
   </script>
-
-  <title>Blaschke Product Applet</title>
-  <meta charset="utf-8" />
 </head>
 
 <body>
-  <div style="float: left; width: 400px; height: 400px;">
-    <h2>Pick a File:</h2>
+  <h2>Pick a File:</h2>
+  <div style="float: left; width: 400px; height: 400px">
     <h3>Examples</h3>
     <button type="button" id="goantique">Antique</button>
     <button type="button" id="goclock2">Modern</button>
@@ -43,20 +42,20 @@
     <button type="button" id="gogoose">Goose</button>
     <h3>Or, pick a file from your computer:</h3>
     Pick a file to upload, then click "Load." For best results, pick an image larger than 400x400 pixels.
-    <input type="file" id="uploadfile"></input>
+    <input type="file" id="uploadfile" />
     <button type="button" id="goupload">Load</button>
     <h3>Pick a URL (might not work)</h3>
-    <input style="width: 75%;" id="loadimage" value="./antique.png"></input>
+    <input style="width: 75%;" id="loadimage" value="./antique.png" />
     <button type="button" id="goloadimage">Load</button>
     <br/>
   </div>
+
   <div style="float: left; width: 400px; height: 400px; position: relative;">
     <div style="position: absolute; right: 0px; top: 0px;">Original Image</div>
     <canvas id="imagecanvas" width="400" height="400"></canvas>
   </div>
   <h2 style="clear: both;">Pick Zeroes, and Click "Warp Image"</h2>
-  <div style="display: none">
-    Eval:
+  <div style="display: none"> Eval:
     <div class="progress"></div>
     RB:
     <ul class="rainbowstatus">
@@ -67,6 +66,7 @@
       <li></li>
     </ul>
   </div>
+
   <div style="position: relative;">
     <div class="zeroesholder rainbowholder">
       <span class="zhlabel">arg(B)</span>
@@ -76,21 +76,32 @@
       <canvas class="rblines graph lines">
       </canvas>
     </div>
-    <canvas class="range graph">
-    </canvas>
-    <canvas class="regions graph">
-    </canvas>
-    <canvas class="rglines graph">
-    </canvas>
-    <canvas class="rblines graph">
-    </canvas>
-    <div class="zeroesholder rainbowholder" style="width: 400px; height: 400px;">
-      Mapped Image
+    <div class="zeroesholder rainbowholder" style="width: 400px; height: 400px;"> Mapped Image
       <canvas id="mapcanvas" width="400" height="400"></canvas>
       <button type="button" id="mapimage" style="position: absolute; right: 0px; top: 0px;">Warp Image</button>
     </div>
   </div>
   <br/>
+
+  <div style="position: relative; display: none;">
+    <div class="zeroesholder" style="display: none;">      
+      <canvas class="range graph">
+      </canvas>
+    </div>
+    <div class="zeroesholder" style="display: none;">
+      B<canvas class="regions graph">
+      </canvas>
+    </div>
+    <div class="zeroesholder" style="display: none;">
+      C<canvas class="rglines graph">
+      </canvas>
+    </div>
+    <div class="zeroesholder" style="display: none;">
+      D<canvas class="rblines graph">
+      </canvas>
+    </div>
+  </div>
+
   <div>
     Show Advanced Options:<input type="checkbox" class="showadvanced" value="false" />
     <span class="advanced">
@@ -111,7 +122,8 @@
     <a href="./composetool.html">Open Compose Tool</a>
   </div>
   <div>
-    Skip Points: <input class="skippoints" value="1" style="width: 50px;" />
+    Skip Points:
+    <input class="skippoints" value="1" style="width: 50px;" />
     <!-- Angle: <input class="theta" value="0"/>
 	 <button type="button" class="timesPI">*= &pi;</button>
 	 <button type="button" class="plottheta">Plot Identified</button><br/>
@@ -128,7 +140,7 @@
     <table style="width: 398px; border: 1px solid black; text-align: left;">
       <tr>
         <th>Click
-          <input class="textz" style="width: 100px;"></input>
+          <input class="textz" style="width: 100px;" />
           <button type="button" class="gotextz">Go</button>
         </th>
         <th>B(CL)</th>
@@ -149,7 +161,7 @@
   </div>
   <div style="display: inline-block; width: 200px" class="statsblock">
     <h3>Find Preimages</h3>
-    <input class="rangepoint"></input>
+    <input class="rangepoint" />
     <button type="button" class="findpreimages">Find Preimages</button>
     <ul class="foundpreimages">
     </ul>
