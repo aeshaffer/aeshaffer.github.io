@@ -8,6 +8,14 @@ body.hidecps .cp {
     display: none;
 }
 
+.fp {
+    display: none;
+}
+
+body.showfps .fp {
+    display: block;
+}
+
 .bigdots .zhlabel {
     display:  none;
 }
@@ -83,6 +91,10 @@ div.pi, div.path {
     border: 1px solid #444444;
     width: 5px;
     height: 5px;
+}
+div.fp {
+    border: 1px solid #444444;
+    background-color: #CCCCCC;
 }
 div.cp {
     border: 1px solid #444444;

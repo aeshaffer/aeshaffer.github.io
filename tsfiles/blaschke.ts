@@ -360,6 +360,16 @@ function maxDistPair(ints: Array<C>) {
     return {p0 : ints[maxI], p1: ints[maxJ]};
 }
 
+function fixedpoints(zs: BPZeroes): Array<numeric.T> {
+    var num = bpnum(zs);
+    var den = bpden(zs);
+    var zpoly = [c(0,0),c(1,0)];
+    var zden = polymult(zpoly, den);  
+    var poly = polysub(num, zden);
+    var fixedpoints = polyroots(poly);    
+    return fixedpoints;
+}
+
 function preimage(zs: BPZeroes, beta: C): Array<numeric.T> {
     var num = bpnum(zs);
     var den = bpden(zs);
@@ -416,9 +426,14 @@ function sortBy<T>(vals: Array<T>, indices: Array<number>): Array<T> {
 }
 
 class CPInfo {
+    constructor(cps: Array<numeric.T>, cvs: Array<numeric.T>, cvangles: Array<number>, fps: Array<numeric.T>) {
+        this.cps = cps, this.cvs = cvs; this.cvangles = cvangles; this.fps = fps;
+    }
     cps: Array<numeric.T>;
     cvs: Array<numeric.T>;
     cvangles : Array<number>;
+    fps: Array<numeric.T>;
+    plottableFPS() { return this.fps.filter(z => fixy(z).x <= 1.1 && fixy(z).y <= 1.1); }
 }
 
 function cpinfo(zs: BPZeroes): CPInfo {
@@ -449,7 +464,8 @@ function cpinfo(zs: BPZeroes): CPInfo {
     var cvangles = sortedcvs.map(function(cv) {return cv.angle();}).map(normalizeangle);
     cvangles.sort(function(a,b) {return a-b});
     // circlecps.sort(function(a,b) { return normalizeangle(a.angle()) - normalizeangle(b.angle()); });
-    return {"cps": sortedcps, "cvs": sortedcvs, "cvangles": cvangles};
+    var fps = fixedpoints(zs)
+    return new CPInfo(sortedcps, sortedcvs, cvangles, fps);
 }
 
 function getangleindex(theta: number, ts: Array<number>): number {

@@ -319,6 +319,15 @@ function maxDistPair(ints) {
     }
     return { p0: ints[maxI], p1: ints[maxJ] };
 }
+function fixedpoints(zs) {
+    var num = bpnum(zs);
+    var den = bpden(zs);
+    var zpoly = [c(0, 0), c(1, 0)];
+    var zden = polymult(zpoly, den);
+    var poly = polysub(num, zden);
+    var fixedpoints = polyroots(poly);
+    return fixedpoints;
+}
 function preimage(zs, beta) {
     var num = bpnum(zs);
     var den = bpden(zs);
@@ -368,8 +377,12 @@ function sortBy(vals, indices) {
     return foo;
 }
 var CPInfo = (function () {
-    function CPInfo() {
+    function CPInfo(cps, cvs, cvangles, fps) {
+        this.cps = cps, this.cvs = cvs;
+        this.cvangles = cvangles;
+        this.fps = fps;
     }
+    CPInfo.prototype.plottableFPS = function () { return this.fps.filter(function (z) { return fixy(z).x <= 1.1 && fixy(z).y <= 1.1; }); };
     return CPInfo;
 }());
 function cpinfo(zs) {
@@ -396,7 +409,8 @@ function cpinfo(zs) {
     var cvangles = sortedcvs.map(function (cv) { return cv.angle(); }).map(normalizeangle);
     cvangles.sort(function (a, b) { return a - b; });
     // circlecps.sort(function(a,b) { return normalizeangle(a.angle()) - normalizeangle(b.angle()); });
-    return { "cps": sortedcps, "cvs": sortedcvs, "cvangles": cvangles };
+    var fps = fixedpoints(zs);
+    return new CPInfo(sortedcps, sortedcvs, cvangles, fps);
 }
 function getangleindex(theta, ts) {
     // Check the first N-1

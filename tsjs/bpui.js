@@ -143,6 +143,7 @@ var BPWidget = (function () {
         this.showadvanced = g(".showadvanced");
         this.criticalpoints = g(".criticalpoints");
         this.criticalvalues = g(".criticalvalues");
+        this.fixedpointsUL = g(".fixedpoints");
         this.criticalangles = g(".criticalangles");
         this.zeroes = g(".zeroes");
         this.permalink = g(".permalink");
@@ -159,6 +160,7 @@ var BPWidget = (function () {
         this.plotinterp = g(".plotinterp");
         this.plotpolygon = g(".plotpolygon");
         this.hidecps = g(".hidecps");
+        this.showfps = g(".showfps");
         this.windowscale = g(".windowscale");
         this.rayThreshold = g(".raythreshold");
         this.graphzoom = g(".graphzoom");
@@ -186,7 +188,7 @@ var BPWidget = (function () {
         this.findpreimages = g(".findpreimages");
         this.foundpreimages = g(".foundpreimages");
         this.zs = [];
-        this.cpi = new CPInfo();
+        this.cpi = new CPInfo([], [], [], []);
         this.bpzs = [];
         try {
             this.worker = new Worker("../js/bpworker.js");
@@ -205,6 +207,28 @@ var BPWidget = (function () {
     };
     ;
     BPWidget.prototype.displayTables = function (zs, cpi) {
+        this.updateCPCVSTable(cpi);
+        this.zeroes.empty();
+        for (var i = 0; i < zs.length; i++) {
+            var li = $("<li>");
+            li.text(dcomplex(zs[i]));
+            this.zeroes.append(li);
+        }
+        this.updateCVAnglesTable(cpi);
+        this.updateFPSTable(this.zs, cpi);
+        var oldval = this.zsstring.val();
+        this.zsstring.val("");
+        var zscode = zsString(this.zs);
+        this.zsstring.val(zscode);
+        this.zsstring.attr("rows", zs.length);
+        if (oldval != this.zsstring.val()) {
+            this.zsstring.change();
+        }
+        var wl = window.location.href.replace(window.location.search, "");
+        this.permalink.attr("href", wl + "?" + zscode);
+    };
+    ;
+    BPWidget.prototype.updateCPCVSTable = function (cpi) {
         if (this.criticalpoints == null || this.criticalvalues == null) {
             return;
         }
@@ -233,8 +257,8 @@ var BPWidget = (function () {
             this.criticalpoints.append(cpli);
             var cvli = $("<li class='cv'>");
             cvli.addClass("cv" + i);
-            var dc = dcomplex(cpi.cvs[i]);
-            cvli.text(dc);
+            var dci = dcomplex(cpi.cvs[i]);
+            cvli.text(dci);
             this.criticalvalues.append(cvli);
             /*
             var rgb = hsvToRgb(anglehue(cpi.cvs[i]), 1, 1);
@@ -264,18 +288,14 @@ var BPWidget = (function () {
             })();
             if (doclear && i - 1 >= 0) {
                 var dc0 = dcomplex(cpi.cvs[i - 1]);
-                if (dc != dc0) {
+                if (dci != dc0) {
                     cpli.css("clear", "left");
                     cvli.css("clear", "left");
                 }
             }
         }
-        this.zeroes.empty();
-        for (var i = 0; i < zs.length; i++) {
-            var li = $("<li>");
-            li.text(dcomplex(zs[i]));
-            this.zeroes.append(li);
-        }
+    };
+    BPWidget.prototype.updateCVAnglesTable = function (cpi) {
         this.criticalangles.empty();
         var rolledcvangles = roll(cpi.cvangles);
         for (var i = 0; i < cpi.cvangles.length; i++) {
@@ -287,18 +307,17 @@ var BPWidget = (function () {
             li.css("background-color", rgbstring);
             this.criticalangles.append(li);
         }
-        var oldval = this.zsstring.val();
-        this.zsstring.val("");
-        var zscode = zsString(this.zs);
-        this.zsstring.val(zscode);
-        this.zsstring.attr("rows", zs.length);
-        if (oldval != this.zsstring.val()) {
-            this.zsstring.change();
-        }
-        var wl = window.location.href.replace(window.location.search, "");
-        this.permalink.attr("href", wl + "?" + zscode);
     };
-    ;
+    BPWidget.prototype.updateFPSTable = function (zs, cpi) {
+        this.fixedpointsUL.empty();
+        for (var _i = 0, _a = cpi.fps; _i < _a.length; _i++) {
+            var fp = _a[_i];
+            var li = $("<li>");
+            li.text(dc(fp) + " Norm:" + round5(fp.abs().x));
+            li.attr("title", " Check:" + dc(bpeval(zs, fp)));
+            this.fixedpointsUL.append(li);
+        }
+    };
     BPWidget.prototype.dropzero = function (zdiv) { };
     BPWidget.prototype.updatezero = function (zdiv) {
         try {
@@ -349,6 +368,7 @@ var BPWidget = (function () {
         var cps = this.cpi.cps;
         var cvs = this.cpi.cvs;
         var cvangles = this.cpi.cvangles;
+        var fps = this.cpi.plottableFPS();
         this.displayTables(this.zs, this.cpi);
         var cw = this.rainbow.parent(".zeroesholder");
         var cwidth = this.plotDims().graphN;
@@ -364,6 +384,7 @@ var BPWidget = (function () {
         this.attachrangeMD(preimages);
         var rgns = this.regions.parent(".zeroesholder");
         cssscatter(rgns, cwidth, cps, "cp");
+        cssscatter(rgns, cwidth, this.cpi.plottableFPS(), "fp");
         cssscatter(rgns, cwidth, this.zs, "zero");
         if (this.plotinterp.is(":checked")) {
             if (this.skippoints.val() != "") {
@@ -382,6 +403,7 @@ var BPWidget = (function () {
         else {
             cssscatter(cw, cwidth, [], "innerzero", true);
         }
+        cssscatter(cw, cwidth, this.cpi.plottableFPS(), "fp");
         var zerodivs = cssscatter(cw, cwidth, this.zs, "zero");
         var that = this;
         zerodivs.addClass("draggable")
@@ -869,6 +891,16 @@ var BPWidget = (function () {
                 }
                 else {
                     $("body").removeClass("hidecps");
+                }
+            });
+        }
+        if (this.showfps != null) {
+            this.showfps.change(function () {
+                if ($(this).is(":checked")) {
+                    $("body").addClass("showfps");
+                }
+                else {
+                    $("body").removeClass("showfps");
                 }
             });
         }

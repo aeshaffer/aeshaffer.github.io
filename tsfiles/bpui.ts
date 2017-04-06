@@ -48,7 +48,9 @@ class BPWidget {
     criticalpoints: JQuerySingletonWrapper<HTMLUListElement>;
     criticalvalues: JQuerySingletonWrapper<HTMLUListElement>;
     criticalangles: JQuerySingletonWrapper<HTMLUListElement>;
+    fixedpointsUL: JQuerySingletonWrapper<HTMLUListElement>;
     zeroes: JQuerySingletonWrapper<HTMLUListElement>;
+
     permalink: JQuerySingletonWrapper<HTMLAnchorElement>;
     point: JQuerySingletonWrapper<HTMLTableDataCellElement>;
     dest: JQuerySingletonWrapper<HTMLTableDataCellElement>;
@@ -65,6 +67,7 @@ class BPWidget {
     plotinterp: JQuerySingletonWrapper<HTMLInputElement>;
     plotpolygon: JQuerySingletonWrapper<HTMLInputElement>;
     hidecps: JQuerySingletonWrapper<HTMLInputElement>;
+    showfps: JQuerySingletonWrapper<HTMLInputElement>;
 
     windowscale: JQuerySingletonWrapper<HTMLInputElement>;
     rayThreshold: JQuerySingletonWrapper<HTMLInputElement>;
@@ -117,6 +120,7 @@ class BPWidget {
         this.showadvanced = g(".showadvanced");
         this.criticalpoints = g(".criticalpoints");
         this.criticalvalues = g(".criticalvalues");
+        this.fixedpointsUL = g(".fixedpoints");
         this.criticalangles = g(".criticalangles");
         this.zeroes = g(".zeroes");
         this.permalink = g(".permalink");
@@ -135,6 +139,7 @@ class BPWidget {
         this.plotinterp = g(".plotinterp");
         this.plotpolygon = g(".plotpolygon");
         this.hidecps = g(".hidecps");
+        this.showfps = g(".showfps");
 
         this.windowscale = g(".windowscale");
         this.rayThreshold = g(".raythreshold");
@@ -165,7 +170,7 @@ class BPWidget {
         this.foundpreimages = g(".foundpreimages");
 
         this.zs = [];
-        this.cpi = new CPInfo();
+        this.cpi = new CPInfo([], [], [], []);
         this.bpzs = [];
 
         try {
@@ -187,7 +192,33 @@ class BPWidget {
     };
 
     displayTables(zs: BPZeroes, cpi: CPInfo) {
-        if(this.criticalpoints == null || this.criticalvalues == null) {
+      
+        this.updateCPCVSTable(cpi);
+
+        this.zeroes.empty();
+        for (var i = 0; i < zs.length; i++) {
+            var li = $("<li>");
+            li.text(dcomplex(zs[i]));
+            this.zeroes.append(li);
+        }
+
+        this.updateCVAnglesTable(cpi);
+        this.updateFPSTable(this.zs, cpi);
+
+        var oldval = this.zsstring.val();
+        this.zsstring.val("");
+        var zscode = zsString(this.zs);
+        this.zsstring.val(zscode);
+        this.zsstring.attr("rows", zs.length);
+        if (oldval != this.zsstring.val()) {
+            this.zsstring.change();
+        }
+        var wl = window.location.href.replace(window.location.search, "");
+        this.permalink.attr("href", wl + "?" + zscode);
+    };
+
+    updateCPCVSTable(cpi: CPInfo) {
+          if(this.criticalpoints == null || this.criticalvalues == null) {
             return;
         }
         this.criticalpoints.empty();
@@ -219,8 +250,8 @@ class BPWidget {
 
             var cvli = $("<li class='cv'>");
             cvli.addClass("cv" + i);
-            var dc = dcomplex(cpi.cvs[i]);
-            cvli.text(dc);
+            var dci = dcomplex(cpi.cvs[i]);
+            cvli.text(dci);
             this.criticalvalues.append(cvli);
 
             /*
@@ -253,20 +284,15 @@ class BPWidget {
 
             if (doclear && i - 1 >= 0) {
                 var dc0 = dcomplex(cpi.cvs[i - 1]);
-                if (dc != dc0) {
+                if (dci != dc0) {
                     cpli.css("clear", "left");
                     cvli.css("clear", "left");
                 }
             }
         }
+    }
 
-        this.zeroes.empty();
-        for (var i = 0; i < zs.length; i++) {
-            var li = $("<li>");
-            li.text(dcomplex(zs[i]));
-            this.zeroes.append(li);
-        }
-
+    updateCVAnglesTable(cpi: CPInfo) {
         this.criticalangles.empty();
         var rolledcvangles = roll(cpi.cvangles);
         for (var i = 0; i < cpi.cvangles.length; i++) {
@@ -280,18 +306,17 @@ class BPWidget {
 
             this.criticalangles.append(li);
         }
+    }
 
-        var oldval = this.zsstring.val();
-        this.zsstring.val("");
-        var zscode = zsString(this.zs);
-        this.zsstring.val(zscode);
-        this.zsstring.attr("rows", zs.length);
-        if (oldval != this.zsstring.val()) {
-            this.zsstring.change();
+    updateFPSTable(zs: BPZeroes, cpi: CPInfo) {
+        this.fixedpointsUL.empty();
+        for(var fp of cpi.fps) {
+            var li = $("<li>");
+            li.text(dc(fp) + " Norm:" + round5(fp.abs().x));
+            li.attr("title", " Check:" + dc(bpeval(zs, fp)));
+            this.fixedpointsUL.append(li);
         }
-        var wl = window.location.href.replace(window.location.search, "");
-        this.permalink.attr("href", wl + "?" + zscode);
-    };
+    }
 
     dropzero(zdiv) {}
 
@@ -344,6 +369,7 @@ class BPWidget {
         var cps = this.cpi.cps;
         var cvs = this.cpi.cvs;
         var cvangles = this.cpi.cvangles;
+        var fps = this.cpi.plottableFPS();
 
         this.displayTables(this.zs, this.cpi);
 
@@ -365,6 +391,7 @@ class BPWidget {
 
         var rgns = this.regions.parent(".zeroesholder");
         cssscatter(rgns, cwidth, cps, "cp");
+        cssscatter(rgns, cwidth, this.cpi.plottableFPS(), "fp");
         cssscatter(rgns, cwidth, this.zs, "zero");
 
         if (this.plotinterp.is(":checked")) {
@@ -384,7 +411,7 @@ class BPWidget {
         }
 
 
-
+        cssscatter(cw, cwidth, this.cpi.plottableFPS(), "fp");
         var zerodivs = cssscatter(cw, cwidth, this.zs, "zero");
         var that = this;
         zerodivs.addClass("draggable")
@@ -943,13 +970,23 @@ class BPWidget {
         })
 
         if(this.hidecps != null) {
-        this.hidecps.change(function() {
-            if ($(this).is(":checked")) {
-                $("body").addClass("hidecps");
-            } else {
-                $("body").removeClass("hidecps");
-            }
-        });
+            this.hidecps.change(function() {
+                if ($(this).is(":checked")) {
+                    $("body").addClass("hidecps");
+                } else {
+                    $("body").removeClass("hidecps");
+                }
+            });
+        }
+    
+        if(this.showfps != null) {
+            this.showfps.change(function() {
+                if ($(this).is(":checked")) {
+                    $("body").addClass("showfps");
+                } else {
+                    $("body").removeClass("showfps");
+                }
+            });
         }
 
         this.showadvanced.change();
