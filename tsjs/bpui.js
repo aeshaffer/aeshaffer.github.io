@@ -207,6 +207,9 @@ var BPWidget = (function () {
     };
     ;
     BPWidget.prototype.displayTables = function (zs, cpi) {
+        if (this.criticalpoints == null || this.criticalvalues == null) {
+            return;
+        }
         this.updateCPCVSTable(cpi);
         this.zeroes.empty();
         for (var i = 0; i < zs.length; i++) {
@@ -229,9 +232,6 @@ var BPWidget = (function () {
     };
     ;
     BPWidget.prototype.updateCPCVSTable = function (cpi) {
-        if (this.criticalpoints == null || this.criticalvalues == null) {
-            return;
-        }
         this.criticalpoints.empty();
         this.criticalvalues.empty();
         var doclear = false;
