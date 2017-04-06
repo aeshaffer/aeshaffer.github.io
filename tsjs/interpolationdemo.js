@@ -32,6 +32,14 @@ var alphas = [0 * delta, 1 * delta, 2 * delta, 3 * delta, 4 * delta, 5 * delta];
 var betas = alphas.map(function (t) { return t + delta / 2; });
 var alphas2 = [0, Math.PI / 2];
 var betas2 = [Math.PI / 6, Math.PI];
+var alphas3 = [1.570796327,
+    3.141592654,
+    4.71238898,
+];
+var betas3 = [2.35619449,
+    3.926990817,
+    5.497787144
+];
 function cleanepsilons(z) {
     var nx = (Math.abs(z.x) < 0.00001) ? 0 : z.x;
     var ny = (Math.abs(z.y) < 0.00001) ? 0 : z.y;
@@ -120,6 +128,10 @@ $(function () {
     $("#demo2").click(function () {
         $("#alphas").val(alphas2.join("\n")).change();
         $("#betas").val(betas2.join("\n")).change();
+    });
+    $("#demo3").click(function () {
+        $("#alphas").val(alphas3.join("\n")).change();
+        $("#betas").val(betas3.join("\n")).change();
     });
     $("#interpolate").click(function () {
         var alphas = getZs("#alphas");
