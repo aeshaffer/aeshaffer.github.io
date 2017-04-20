@@ -207,7 +207,7 @@ var ni = new numeric.T(0.0, 1.0);
 var nni = new numeric.T(0.0, -1.0);
 
 function iszero(z: C): boolean {
-    return z.abs().x == 0;
+    return z.abs().x < 0.00005;
 }
 
 type polynomial = Array<numeric.T>;

@@ -56,12 +56,6 @@ function bpgridevalArrayInner(bpe, N, as, rowcallback) {
     var retval = { realparts: realparts, imagparts: imagparts /*, N: N */ };
     return retval;
 }
-function zString(z) {
-    return "z=" + z.x + "," + (z.y == undefined ? 0 : z.y);
-}
-function zsString(zs) {
-    return zs.map(zString).join("\n&");
-}
 /*
 function lt(a) {
     

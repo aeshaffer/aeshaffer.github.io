@@ -28,21 +28,51 @@ function getQSMap(s) {
     }
     return b;
 }
-function parseZsString(s, key) {
-    var k = (key == undefined ? "z" : key);
-    if (s.indexOf("&") == 0) {
-        s = s.slice(1);
-    }
-    var zs = getQSMap(s)[k];
-    var retval = new Array();
-    if (zs == undefined) {
+function zsQueryString(zs) {
+    return zs.map(function (z) { return "z=" + z.x + "," + fixy(z).y; }).join("\n&");
+}
+function zsString(zs) {
+    // return zsQueryString(zs);
+    return zs.map(function (z) { return z.x + "," + fixy(z).y; }).join("\n");
+}
+function zsQueryStringFromString(s) {
+    var zs = parseZsString(s);
+    return zsQueryString(zs);
+}
+function parseCRLFZsString(s) {
+    var zs = s.replace(/[\r\n|]+/g, "|").split("|");
+    var partses = zs.map(function (pair) { return pair.split(","); });
+    if (partses.every(function (parts) { return parts.length == 2; })) {
+        var retval = partses.map(function (parts) { return c(parseFloat(parts[0]), parseFloat(parts[1])); });
         return retval;
     }
-    for (var i = 0; i < zs.length; i++) {
-        var parts = zs[i].split(",");
-        retval.push(c(parseFloat(parts[0]), parseFloat(parts[1])));
+    else {
+        throw "Couldn't parse" + s;
     }
-    return retval;
+}
+function parseZsString(s, key) {
+    if (s == "") {
+        return new Array(0);
+    }
+    else if (s.indexOf("=") == -1) {
+        return parseCRLFZsString(s);
+    }
+    else {
+        var k = (key == undefined ? "z" : key);
+        if (s.indexOf("&") == 0) {
+            s = s.slice(1);
+        }
+        var zs = getQSMap(s)[k];
+        var retval = new Array();
+        if (zs == undefined) {
+            return retval;
+        }
+        for (var i = 0; i < zs.length; i++) {
+            var parts = zs[i].split(",");
+            retval.push(c(parseFloat(parts[0]), parseFloat(parts[1])));
+        }
+        return retval;
+    }
 }
 function setupRegions(sel) {
     var html = '<div class="circle"></div>'

@@ -220,15 +220,15 @@ var BPWidget = (function () {
         this.updateCVAnglesTable(cpi);
         this.updateFPSTable(this.zs, cpi);
         var oldval = this.zsstring.val();
-        this.zsstring.val("");
+        var zsquerystring = zsQueryString(this.zs);
         var zscode = zsString(this.zs);
-        this.zsstring.val(zscode);
-        this.zsstring.attr("rows", zs.length);
-        if (oldval != this.zsstring.val()) {
+        if (oldval != zscode) {
+            this.zsstring.val(zscode);
+            this.zsstring.attr("rows", zs.length);
             this.zsstring.change();
         }
         var wl = window.location.href.replace(window.location.search, "");
-        this.permalink.attr("href", wl + "?" + zscode);
+        this.permalink.attr("href", wl + "?" + zsquerystring);
     };
     ;
     BPWidget.prototype.updateCPCVSTable = function (cpi) {
@@ -413,7 +413,9 @@ var BPWidget = (function () {
             containment: cw, scroll: false,
             drag: function () { that.updatezero($(this)); },
             stop: function () { that.updatezero($(this)); that.dropzero($(this)); }
-        });
+        })
+            .removeClass("zerozero")
+            .draggable('enable');
         for (var i = 0; i < this.zs.length; i++) {
             if (this.zs[i].abs().x == 0) {
                 cw.find(".zero" + i).removeClass("draggable")

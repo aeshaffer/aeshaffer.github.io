@@ -21,10 +21,8 @@ function composeSetup() {
 }
 
 function doCompose() {
-    var zss1 = $("#outerzs").val();
-    var zss2 = $("#innerzs").val();
-    var zs1 = parseZsString(zss1);
-    var zs2 = parseZsString(zss2);
+    var zs1 = outerwidget.zs;
+    var zs2 = innerwidget.zs;
     var composedzs = bpcompose(zs1, zs2);
     $("#composedzs").val(zsString(composedzs));
     $("#composedzs").change();
@@ -49,9 +47,8 @@ function doCompose() {
 }
 
 function resizeMe() {
-    $(this).attr("rows", $(this).val().split("&").length);
-    var ns = $(this).val().replace(/\n/g, "").replace(/&/g, "\n&");
-    $(this).val(ns);
+    var zs = parseZsString($(this).val());
+    $(this).attr("rows", zs.length);    
 }
 
 function replot() {
@@ -80,21 +77,24 @@ $(function () {
     $("#composedzs")
         .on("change", resizeMe)
         .on("change", function () {
+            var qs = zsQueryStringFromString($(this).val());
             $("#permalink").attr("href", "./blaschke.html?" + $(this).val());
         });
     $("#innerzs")
         .on("change", resizeMe)
         .on("change", function () {
-            $("#innerpermalink").attr("href", "./blaschke.html?" + $(this).val());
+            var qs = zsQueryStringFromString($(this).val());
+            $("#innerpermalink").attr("href", "./blaschke.html?" + qs);
         });
     $("#outerzs")
         .on("change", resizeMe)
         .on("change", function () {
+            var qs = zsQueryStringFromString($(this).val());
             $("#outerpermalink").attr("href", "./blaschke.html?" + $(this).val());
         });
     $("#testbutton").on("click", function () {
-        $("#outerzs").val("z=-0.5,-0.5&z=0,0.75&z=0,0&z=0.5,0");
-        $("#innerzs").val("z=-0.5,-0.5&z=0,0.75&z=0,0&z=0.5,0");
+        $("#outerzs").val(["-0.5,-0.5", "0,0.75", "0,0", "0.5,0"].join("\n"));
+        $("#innerzs").val(["-0.5,-0.5", "0,0.75", "0,0", "0.5,0"].join("\n"));
         $("#outerzs").change();
         $("#innerzs").change();
         handleFinish();
