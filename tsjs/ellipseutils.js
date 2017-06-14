@@ -1,8 +1,14 @@
 /// <reference path="../tsfiles/jquery.d.ts" />
 /// <reference path="numeric-1.2.3.d.ts" />
 var ranges = (function () {
-    function ranges() {
+    function ranges(obj) {
+        this.minX = obj.minX;
+        this.minY = obj.minY;
+        this.maxX = obj.maxX;
+        this.maxY = obj.maxY;
     }
+    ranges.prototype.width = function () { return this.maxX - this.minX; };
+    ranges.prototype.height = function () { return this.maxY - this.minY; };
     return ranges;
 }());
 function lineCircleIntersection(lp, ld, cc, r) {

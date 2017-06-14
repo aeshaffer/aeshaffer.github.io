@@ -1,0 +1,54 @@
+<html>
+
+<head>
+    <title>Circle Inversion's Theorem</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="../jquery-ui-1.11.1/jquery-ui.js"></script>
+    <script src="../numeric-1.2.3.js" type="text/javascript"></script>
+    <script src="../tsjs/polynomials.js" type="text/javascript"></script>
+    <script src="../tsjs/ellipseutils.js" type="text/javascript"></script>
+    <script src="../tsjs/bpuiutils.js" type="text/javascript"></script>
+    <script src="inversion.js" type="text/javascript"></script>
+
+    <style type="text/css">
+        .cpt {
+            width: 10px;
+            height: 10px;
+            border: 1px solid black;
+            border-radius: 10px;
+            position: absolute;
+        }
+
+
+        .cpt span {
+            width: 100%;
+            position: absolute;
+            top: -200%;
+            left: 0px;
+        }
+    </style>
+</head>
+
+<body>
+    <div style="border: 1px solid black; position: relative; float: left;">
+        <div id="pointA" class="cpt"><span>A</span></div>
+        <canvas style="border: 1px solid green; float: left;" id="canvas" height="512" width="512"></canvas>
+    </div>
+    <div style="width: 150px; float: left;">
+        <input type="radio" name="examples" id="noExamples" checked>Hide Examples</input><br/>
+        <input type="radio" name="examples" id="showExamples">Show Examples 1</input>
+        <ul>
+            <li>Concentric circles</li>
+            <li>a line not through the origin maps to a circle through the origin</li>
+            <li>a circle maps to a circle</li>
+        </ul>
+        <br />
+        <input type="radio" name="examples" id="showMoreExamples">Show Example 2</input>
+        <ul>
+            <li>Orthogonal Lines map to Orthogonal circles.</li>
+            <li>Lines tangent to the circle map to circles tangent to the circle.</li>
+        </ul>
+    </div>
+</body>
+
+</html>

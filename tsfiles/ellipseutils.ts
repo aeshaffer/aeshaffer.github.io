@@ -6,6 +6,12 @@ class ranges {
     maxX: number;
     minY: number;
     maxY: number;
+    width(): number { return this.maxX - this.minX; }
+    height(): number { return this.maxY - this.minY; }
+    constructor(obj: any) {
+        this.minX = obj.minX; this.minY = obj.minY;
+        this.maxX = obj.maxX; this.maxY = obj.maxY;
+    }
 }
 
 function lineCircleIntersection(lp: C, ld: C, cc: C, r: number) {
@@ -39,6 +45,7 @@ function resetInner(r: ranges, fudgefactor, ctx2, cvs2) {
     ctx2.lineWidth = 1.0 / cvs2.width * (r.maxX - r.minX);
     axes(r, ctx2);
 }
+
 
 function axes(r: ranges, ctx2) {
     ctx2.clearRect(r.minX, r.minY, r.maxX -r.minX, r.maxY - r.minY);
