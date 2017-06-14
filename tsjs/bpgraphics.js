@@ -61,8 +61,7 @@ function doRange(canvas, bpzs, cpi, N) {
     var rangecxt = getCtx(canvas);
     var rangeidata = getID(canvas, N);
     showRegions(rangeidata.data, bpzs.zs, bpzs.zs, cpi.cvangles);
-    rangecxt.putImageData(rangeidata, 0, 0);
-    //scatter(rangecxt, cpi.cvs, "#000000", N);
+    finishCanvas(rangeidata.data, canvas, cpi);
 }
 function region(cvangles, bpz) {
     var i = getangleindex(bpz.angle(), cvangles);

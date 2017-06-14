@@ -128,8 +128,17 @@ var JQuerySingletonWrapper = (function () {
     };
     return JQuerySingletonWrapper;
 }());
+var PerformanceLog = (function () {
+    function PerformanceLog() {
+    }
+    PerformanceLog.prototype.flopsPerMS = function () {
+        return (this.N * this.N * this.degree) / this.timeInMS;
+    };
+    return PerformanceLog;
+}());
 var BPWidget = (function () {
     function BPWidget(obj, allElements) {
+        this.performanceHistory = new Array(0);
         function g(sel) {
             var retval = new JQuerySingletonWrapper(obj.find(sel));
             if (allElements && retval.length == 0) {
@@ -161,6 +170,7 @@ var BPWidget = (function () {
         this.plotpolygon = g(".plotpolygon");
         this.hidecps = g(".hidecps");
         this.showfps = g(".showfps");
+        this.replotondrop = g(".replotondrop");
         this.windowscale = g(".windowscale");
         this.rayThreshold = g(".raythreshold");
         this.graphzoom = g(".graphzoom");
@@ -318,7 +328,11 @@ var BPWidget = (function () {
             this.fixedpointsUL.append(li);
         }
     };
-    BPWidget.prototype.dropzero = function (zdiv) { };
+    BPWidget.prototype.dropzero = function (zdiv) {
+        if (this.replotondrop.is(":checked")) {
+            this.justReplotme(true);
+        }
+    };
     BPWidget.prototype.updatezero = function (zdiv) {
         try {
             var nudge = getNudge($(zdiv));
@@ -749,6 +763,7 @@ var BPWidget = (function () {
         if (z.abs().x <= 1) {
             this.zs.push(z);
             this.rescatter();
+            this.dropzero(null);
         }
     };
     BPWidget.prototype.attachrangeMD = function (preimagepanel) {
@@ -971,12 +986,45 @@ var BPWidget = (function () {
             });
         }
         this.plotbutton.click(function () {
-            that.replotMe();
+            that.resizeRescatterAndReplotMe();
         });
     };
     ;
-    BPWidget.prototype.replotMe = function () {
+    BPWidget.prototype.resizeRescatterAndReplotMe = function () {
         this.resizeCanvasesRescatter();
+        this.justReplotme();
+    };
+    BPWidget.prototype.getAdaptiveN = function (adaptivePerformance, plotDimsN) {
+        if (adaptivePerformance) {
+            var adaptiveN;
+            if (this.performanceHistory.length == 0) {
+                adaptiveN = this.plotDims().N;
+            }
+            else {
+                var averageflopsPerMS = this.performanceHistory.map(function (x) { return x.flopsPerMS(); }).sum() / this.performanceHistory.length;
+                adaptiveN = Math.sqrt(1000 * averageflopsPerMS / this.zs.length);
+                adaptiveN = Math.round(Math.min(this.plotDims().N, adaptiveN));
+            }
+            return adaptiveN;
+        }
+        else {
+            return this.plotDims().N;
+        }
+    };
+    BPWidget.prototype.addPerformanceLog = function (degree, N, timeInMS) {
+        var pl = new PerformanceLog();
+        pl.degree = degree;
+        pl.N = N;
+        pl.timeInMS = timeInMS;
+        this.performanceHistory.push(pl);
+        console.log(pl.N + "\t" + pl.degree + "\t" + pl.timeInMS);
+        if (this.performanceHistory.length > 10) {
+            var startIndex = this.performanceHistory.length - 10;
+            this.performanceHistory = this.performanceHistory.slice(startIndex);
+        }
+    };
+    BPWidget.prototype.justReplotme = function (adaptivePerformance) {
+        if (adaptivePerformance === void 0) { adaptivePerformance = false; }
         var th = this.rayThreshold.val();
         if (th == undefined || th == "") {
             th = 0;
@@ -984,7 +1032,11 @@ var BPWidget = (function () {
         else {
             th = parseFloat(this.rayThreshold.val());
         }
-        this.fastReplot(this.zs, this.plotDims().N, this.cpi, th);
+        var N = this.getAdaptiveN(adaptivePerformance, this.plotDims().N);
+        var t0 = performance.now();
+        this.fastReplot(this.zs, N, this.cpi, th);
+        var t1 = performance.now();
+        this.addPerformanceLog(this.zs.length, N, t1 - t0);
     };
     return BPWidget;
 }());

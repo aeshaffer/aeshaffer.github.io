@@ -52,9 +52,9 @@ function resizeMe() {
 }
 
 function replot() {
-    outerwidget.replotMe();
-    innerwidget.replotMe();
-    composewidget.replotMe();
+    outerwidget.resizeRescatterAndReplotMe();
+    innerwidget.resizeRescatterAndReplotMe();
+    composewidget.resizeRescatterAndReplotMe();
     var innerdata = innerwidget.regions.element.getContext('2d').getImageData(0, 0, 300, 300);
     var image = composewidget.regions.element.getContext('2d').getImageData(0, 0, 300, 300);
 

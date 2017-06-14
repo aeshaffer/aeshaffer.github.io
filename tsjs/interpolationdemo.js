@@ -156,7 +156,7 @@ $(function () {
             .val(zsString(zs2))
             .change();
         widget.resizeCanvasesRescatter();
-        widget.replotMe();
+        widget.resizeRescatterAndReplotMe();
         drawTicksCanvas(alphasbetas, bpf, widget.plotDims().graphN, widget.rainbow.element);
         fillTable(alphasbetas, bpf);
     });

@@ -40,6 +40,15 @@ class JQuerySingletonWrapper<T extends HTMLElement> {
     each(...args: any[]) { return this.inner.each.apply(this.inner, args); }
 }
 
+class PerformanceLog {
+    N: number;
+    degree: number;
+    timeInMS: number;
+    flopsPerMS() {
+        return (this.N * this.N * this.degree) / this.timeInMS;
+    }
+}
+
 class BPWidget {
 
     container: JQuery; //
@@ -68,6 +77,7 @@ class BPWidget {
     plotpolygon: JQuerySingletonWrapper<HTMLInputElement>;
     hidecps: JQuerySingletonWrapper<HTMLInputElement>;
     showfps: JQuerySingletonWrapper<HTMLInputElement>;
+    replotondrop: JQuerySingletonWrapper<HTMLInputElement>;
 
     windowscale: JQuerySingletonWrapper<HTMLInputElement>;
     rayThreshold: JQuerySingletonWrapper<HTMLInputElement>;
@@ -105,7 +115,11 @@ class BPWidget {
     rainbowworker: Worker;
     regionsworker: Worker;
 
+    performanceHistory: PerformanceLog[];
+
     constructor(obj: JQuery, allElements: boolean) {
+
+        this.performanceHistory = new Array<PerformanceLog>(0);
 
         function g<T extends HTMLElement>(sel): JQuerySingletonWrapper<any> {
             var retval = new JQuerySingletonWrapper<T>(obj.find(sel));
@@ -140,6 +154,7 @@ class BPWidget {
         this.plotpolygon = g(".plotpolygon");
         this.hidecps = g(".hidecps");
         this.showfps = g(".showfps");
+        this.replotondrop = g(".replotondrop");
 
         this.windowscale = g(".windowscale");
         this.rayThreshold = g(".raythreshold");
@@ -319,7 +334,11 @@ class BPWidget {
         }
     }
 
-    dropzero(zdiv) { }
+    dropzero(zdiv) {
+        if (this.replotondrop.is(":checked")) {
+            this.justReplotme(true);
+        }
+    }
 
     updatezero(zdiv) {
         try {
@@ -811,6 +830,7 @@ class BPWidget {
         if (z.abs().x <= 1) {
             this.zs.push(z);
             this.rescatter();
+            this.dropzero(null);
         }
     }
 
@@ -1061,22 +1081,58 @@ class BPWidget {
         }
 
         this.plotbutton.click(function () {
-            that.replotMe();
+            that.resizeRescatterAndReplotMe();
         });
     };
 
 
-    replotMe() {
+    resizeRescatterAndReplotMe() {
         this.resizeCanvasesRescatter();
+        this.justReplotme();
+    }
+
+    getAdaptiveN(adaptivePerformance: boolean, plotDimsN: number): number {
+        if (adaptivePerformance) {
+            var adaptiveN: number;
+            if (this.performanceHistory.length == 0) {
+                adaptiveN = this.plotDims().N;
+            } else {
+                var averageflopsPerMS = this.performanceHistory.map(x => x.flopsPerMS()).sum() / this.performanceHistory.length;
+                adaptiveN = Math.sqrt(1000 * averageflopsPerMS / this.zs.length);
+                adaptiveN = Math.round(Math.min(this.plotDims().N, adaptiveN));
+            }
+            return adaptiveN;
+        } else {
+            return this.plotDims().N;
+        }
+    }
+
+    addPerformanceLog(degree: number, N: number, timeInMS: number) {
+        var pl = new PerformanceLog();
+        pl.degree = degree;
+        pl.N = N;
+        pl.timeInMS = timeInMS;
+        this.performanceHistory.push(pl);
+        console.log(pl.N + "\t" + pl.degree + "\t" + pl.timeInMS);
+        if (this.performanceHistory.length > 10) {
+            var startIndex = this.performanceHistory.length - 10;
+            this.performanceHistory = this.performanceHistory.slice(startIndex);
+        }
+    }
+
+    justReplotme(adaptivePerformance: boolean = false) {
         var th = this.rayThreshold.val();
         if (th == undefined || th == "") {
             th = 0;
         } else {
             th = parseFloat(this.rayThreshold.val());
         }
-        this.fastReplot(this.zs, this.plotDims().N, this.cpi, th);
+        var N = this.getAdaptiveN(adaptivePerformance, this.plotDims().N);
+        var t0 = performance.now();
+        this.fastReplot(this.zs, N, this.cpi, th);
+        var t1 = performance.now();
+        this.addPerformanceLog(this.zs.length, N, t1-t0);
     }
-
 }
 
 class EasyResizeWidget extends BPWidget {

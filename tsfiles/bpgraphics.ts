@@ -17,7 +17,7 @@ function graphicsWorkerHandler(event, rainbow, regions, cpi, zs) {
 }
 
 
-function finishCanvas(idata0, canvas : HTMLCanvasElement, cpi) {
+function finishCanvas(idata0: Uint8ClampedArray, canvas : HTMLCanvasElement, cpi) {
     var N = Math.sqrt(idata0.length/4);
     var rainbowctx = canvas.getContext("2d");
     var idata1 = rainbowctx.createImageData(N, N);
@@ -62,36 +62,34 @@ function workerRegions(regionsworker, bprpip, N, cvangles) {
 			       });
 }
 
-function getCtx(canvas) {
+function getCtx(canvas: HTMLCanvasElement) {
     return canvas.getContext("2d");
 }
 
-function getID(canvas, N) {
+function getID(canvas: HTMLCanvasElement, N) {
     return getCtx(canvas).createImageData(N,N);
 }
 
-function doRange(canvas, bpzs, cpi, N) {
+function doRange(canvas: HTMLCanvasElement, bpzs: any, cpi: CPInfo, N: number) {
     var rangecxt = getCtx(canvas);
     var rangeidata = getID(canvas, N);
     showRegions(rangeidata.data, bpzs.zs, bpzs.zs, cpi.cvangles);
-    rangecxt.putImageData(rangeidata, 0, 0);
-    //scatter(rangecxt, cpi.cvs, "#000000", N);
+    finishCanvas(rangeidata.data, canvas, cpi);
 }
-
 
 function region(cvangles, bpz) {
     var i = getangleindex(bpz.angle(), cvangles);
     return 1.0*i/(cvangles.length);
 }
 
-function showRegions(idata, zs, bpzs, cvangles, rowcallback?) {    
+function showRegions(idata: Uint8ClampedArray, zs: C[], bpzs: C[], cvangles: number[], rowcallback?) {    
     return mapOverbpzs(idata, zs, bpzs, 
 		       function(z, bpz) { return region(cvangles, bpz); },
 		       rowcallback);
 }
 
 
-function mapOverbpzs(idata, zs, bpzs, huefn, rowcallback) {
+function mapOverbpzs(idata: Uint8ClampedArray, zs: C[], bpzs: C[], huefn, rowcallback) {
     var N = bpzs.length;
     for(var row = 0; row < N; row++) {
 	for(var col = 0; col < N; col++) {
