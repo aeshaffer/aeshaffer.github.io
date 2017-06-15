@@ -1,63 +1,99 @@
+<!DOCTYPE html>
 <html>
+
 <head>
-<title>Blaschke Tool User's Guide</title>
-<style type="text/css">
-body {
-  width: 800px;
-  margin: 0px auto;
-}
-.button {
-  background-color: gray;
-  border: 1px solid black;
-}
-img {
-margin: 5px;
-}
-</style>
+  <title>Blaschke Tool User's Guide</title>
+  <style type="text/css">
+    body {
+      width: 800px;
+      margin: 0px auto;
+    }
+
+    .button {
+      background-color: gray;
+      border: 1px solid black;
+    }
+
+    img {
+      margin: 5px;
+    }
+  </style>
 </head>
+
 <body>
-<h1>Blaschke Tool User's Guide</h1>
-<a href="blaschke.html">Back to Applet</a><br/>
-<h3 id="introduction">Introduction</h3>
+  <h1>Blaschke Tool User's Guide</h1>
+  <a href="blaschke.html">Back to Applet</a><br/>
+  <h3 id="introduction">Introduction</h3>
 
-<p><img src="zeroesandcps.png" style="float: left" />To get started with the applet, first specify the zeroes of the Blaschke product that you want to investigate.  Each white circle is a zero of the Blaschke product, and the grey circles are drawn at the critical points.  The white points (except for the zero at zero) can be dragged around the circle.  Double-clicking on the circle will add a new zero at that point, and dragging a zero outside of the circle will remove it.  The grey critical points will be automatically recomputed.  Numerical values for the Zeroes, Critical Values, and Critical Points are displayed to the right of the circle.</p>
+  <p><img src="zeroesandcps.png" style="float: left" />To get started with the applet, first specify the zeroes of the Blaschke
+    product that you want to investigate. Each white circle is a zero of the Blaschke product, and the grey circles are drawn
+    at the critical points. The white points (except for the zero at zero) can be dragged around the circle. Double-clicking
+    on the circle will add a new zero at that point, and dragging a zero outside of the circle will remove it. The grey critical
+    points will be automatically recomputed. Numerical values for the Zeroes, Critical Values, and Critical Points are displayed
+    to the right of the circle.</p>
 
-<p>One can also enter the zeroes of a Blaschke product in the "Load/Edit" box, and click <span class="button">Load</span> to configure the Blaschke product to use those zeroes.  Clicking "Permalink" will generate a web link with these zeroes which can be bookmarked for future reference.</p>
+  <p>One can also enter the zeroes of a Blaschke product in the "Load/Edit" box, and click <span class="button">Load</span>    to configure the Blaschke product to use those zeroes. Clicking "Permalink" will generate a web link with these zeroes
+    which can be bookmarked for future reference.</p>
 
-<br style="clear: both;" />
-<h3>Plots</h3>
-<img src="FullTopPlot.png" style="width: 100%;" />
+  <p>Tip: if you want to see a Blaschke product without a zero at zero, you can remove it from the "Load/Edit" box and click
+    <span class="button">Load</span>.</p>
 
-<p><img src="Rainbow.png" style="width: 100px; height: 100px; float: right;" />The user can generate or regenerate a color plot the argument of the Blaschke product by clicking the <span class="button">Plot</span> button.  This generates three plots: "arg(B)," "Region Preimages," and "Region Images."  Each color on the "arg(B)" plot corresponds to an angle &lambda;  For example:
-  <ul>
-    <li>Red: B(z) is real</li>
-    <li>Green: B(z) = r*e<sup>i(2/3)&pi;</sup></li>
-    <li>Blue: B(z) = r*e<sup>i(4/3)&pi;</sup></li>
-  </ul>
-</p>
+  <p>N.B.  Blaschke products can have a leading term of modulus 1. The applet uses a Blaschke product of the form
+    <img src="guide-bpform.png" style="vertical-align:middle">.  Another useful form is to write the numerator of each term as (a<sub>i</sub>-z) and keep the same denominator.  Single-factor Blaschke products of that form have the benefit of being self-inverse.
+  </p>
 
-<br style="clear: both;" />
-<h4>Region Preimages and Region Images</h4>
-<p>The Region Images plot divides the circle into regions bounded by curves which pass through the critical points of the plot.  (Each curve is a preimage of f(t) = t * e<sup>i*arg(w)</sup> where w is a critical value of B.)  In the illustration below, each region on the left of a given color maps one-to-one with to the region of the same color on the right.  The grey circles in the "Region Images" plot are the critical values of the Blaschke product (which lie on the boundaries between the colored regions.  Also observe that in this example there are four regions of each color on the left hand side (one adjacent to each zero), illustrating the fact that a Blaschke product of degree n is an n-to-1 map.</p>
+  <br style="clear: both;" />
+  <h3>Plots</h3>
+  <img src="FullTopPlot.png" style="width: 100%;" />
 
-<img src="RegionPreimagesAndImages.png" style="width:600px; margin: 0px auto; display: block;" />
+  <p><img src="Rainbow.png" style="width: 100px; height: 100px; float: right;" />The user can generate or regenerate a color
+    plot the argument of the Blaschke product by clicking the <span class="button">Plot</span> button. This generates three
+    plots: "arg(B)," "Region Preimages," and "Region Images." Each color on the "arg(B)" plot corresponds to an angle &lambda;
+    For example:
+    <ul>
+      <li>Red: B(z) is real</li>
+      <li>Green: B(z) = r*e<sup>i(2/3)&pi;</sup></li>
+      <li>Blue: B(z) = r*e<sup>i(4/3)&pi;</sup></li>
+    </ul>
+  </p>
 
-<h4>Plotting Preimages</h4>
-<p>Clicking in the "Region Images" circle and dragging one's mouse around will draw, in the "Region Preimages" circle, the points which map to the points which you drag over.  Clicking the <span class="button">Clear PIs</span> button clears those paths.</p>
+  <br style="clear: both;" />
+  <h4>Region Preimages and Region Images</h4>
+  <p>The Region Images plot divides the circle into regions bounded by curves which pass through the critical points of the
+    plot. (Each curve is a preimage of f(t) = t * e<sup>i*arg(w)</sup> where w is a critical value of B.) In the illustration
+    below, each region on the left of a given color maps one-to-one with to the region of the same color on the right. The
+    grey circles in the "Region Images" plot are the critical values of the Blaschke product (which lie on the boundaries
+    between the colored regions. Also observe that in this example there are four regions of each color on the left hand
+    side (one adjacent to each zero), illustrating the fact that a Blaschke product of degree n is an n-to-1 map.</p>
 
-<h4>Find Preimages</h4>
-<p><img src="FindPreimages.png" style="float: left;" />The <span class="button">Find Preimages</span> utility lets you enter an imaginary number in <pre>x+yi</pre> format, and it will find points which map to that value under the Blaschke product.</p>
+  <img src="RegionPreimagesAndImages.png" style="width:600px; margin: 0px auto; display: block;" />
 
-<h2 style="clear: both;">Drawing lines</h2>
-<p><img src="DrawLines.png" style="width: 50%; float: left;"/>The applet can also draw lines which help to illustrate the properties of the Blaschke-Poncelet curves.  Entering a value N in the "Auto Identify Points" box will pick N for &lambda; and the applet will then plot lines connecting the points which B maps to e<sup>i&lambda;</sup>.  Entering a value M other than 1 in the "Skip Points" box will instead skip M points when drawing lines.</p>
+  <h4>Plotting Preimages</h4>
+  <p>Clicking in the "Region Images" circle and dragging one's mouse around will draw, in the "Region Preimages" circle, the
+    points which map to the points which you drag over. Clicking the <span class="button">Clear PIs</span> button clears
+    those paths.</p>
 
-<h3>Options</h3>
-<p>The "Auto Re-Draw" checkbox will automatically replot these lines as the zeroes of the Blaschke product are manipulated. The "Guess Ellipse" checkbox will attempt to fit an ellipse to that curve.   The "Solid Lines" checkbox will draw the approximation to the Poncelet curve in red, and draw the ellipse (if specified) with bolder lines.</p>
+  <h4>Find Preimages</h4>
+  <p><img src="FindPreimages.png" style="float: left;" />The <span class="button">Find Preimages</span> utility lets you enter
+    an imaginary number in
+    <pre>x+yi</pre> format, and it will find points which map to that value under the Blaschke product.</p>
 
-<h2>Acknowledgements</h2>
+  <h2 style="clear: both;">Drawing lines</h2>
+  <p><img src="DrawLines.png" style="width: 50%; float: left;" />The applet can also draw lines which help to illustrate the
+    properties of the Blaschke-Poncelet curves. Entering a value N in the "Auto Identify Points" box will pick N for &lambda;
+    and the applet will then plot lines connecting the points which B maps to e<sup>i&lambda;</sup>. Entering a value M other
+    than 1 in the "Skip Points" box will instead skip M points when drawing lines.</p>
 
-<p>This code uses the <a href="http://www.numericjs.com/">Numeric.js</a> numerics library for javascript, <a href="http://jquery.org">jQuery</a>.  The algorithm to best-fit an ellipse to a set of data points was adapted from a Python example <a href="http://nicky.vanforeest.com/misc/fitEllipse/fitEllipse.html">Fitting an Ellipse to a Set of Data Points</a>.</p>
+  <h3>Options</h3>
+  <p>The "Auto Re-Draw" checkbox will automatically replot these lines as the zeroes of the Blaschke product are manipulated.
+    The "Guess Ellipse" checkbox will attempt to fit an ellipse to that curve. The "Solid Lines" checkbox will draw the approximation
+    to the Poncelet curve in red, and draw the ellipse (if specified) with bolder lines.</p>
+
+  <h2>Acknowledgements</h2>
+
+  <p>This code uses the <a href="http://www.numericjs.com/">Numeric.js</a> numerics library for javascript, <a href="http://jquery.org">jQuery</a>.
+    The algorithm to best-fit an ellipse to a set of data points was adapted from a Python example <a href="http://nicky.vanforeest.com/misc/fitEllipse/fitEllipse.html">Fitting an Ellipse to a Set of Data Points</a>.</p>
 
 </body>
-</html>
 
+</html>
