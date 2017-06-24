@@ -15,6 +15,15 @@ function cToPosition2(r, xy) {
     var top = (fixy(xy).y - r.minY) * ypixelsperunit - 5;
     return { "left": left, "top": top };
 }
+function positionToC2(r, psn) {
+    var h = getCanvasWH();
+    var x = (psn.left) / (h.width);
+    var y = (psn.top) / (h.height);
+    return {
+        "x": r.minX + (r.maxX - r.minX) * x,
+        "y": -1 * (r.minY + (r.maxY - r.minY) * y)
+    };
+}
 function cToPosition(r, x, y) {
     return cToPosition2(r, new numeric.T(x, y));
 }
@@ -59,6 +68,76 @@ function circleThrough(z1, z2, z3) {
 }
 function invert(circleRadius, a) {
     return rt2c((circleRadius * circleRadius) / (a.abs().x), a.angle());
+}
+function lineSegmentsCircles(color, linePts, ctx) {
+    for (var i = 0; i < linePts.length; i++) {
+        lineSegmentCircle(color, linePts[i], linePts[(i + 1) % linePts.length], ctx);
+    }
+}
+function lineSegmentCircle(color, a, b, ctx) {
+    ctx.beginPath();
+    ctx.strokeStyle = color;
+    ctx.moveTo(a.x, a.y);
+    ctx.lineTo(b.x, b.y);
+    ctx.stroke();
+    var circleA = invert(circleRadius, a);
+    var circleB = invert(circleRadius, b);
+    var circleMidPoint = invert(circleRadius, a.add(b).div(2));
+    drawArc(color, circleA, circleMidPoint, circleB, ctx);
+}
+function radiusSegment(color, r0, r1, theta, ctx) {
+    var c0 = rt2c(r0, theta);
+    var c1 = rt2c(r1, theta);
+    var c0inv = invert(circleRadius, c0);
+    var c1inv = invert(circleRadius, c1);
+    ctx.beginPath();
+    ctx.strokeStyle = color;
+    ctx.moveTo(c0.x, c0.y);
+    ctx.lineTo(c1.x, c1.y);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.strokeStyle = color;
+    ctx.moveTo(c0inv.x, c0inv.y);
+    ctx.lineTo(c1inv.x, c1inv.y);
+    ctx.stroke();
+}
+function circleArc(color, r, t0, t1, ctx) {
+    var c0 = rt2c(r, t0);
+    var cmp = rt2c(r, (t1 / 2 + t0 / 2));
+    var c1 = rt2c(r, t1);
+    drawArc(color, c0, cmp, c1, ctx);
+    var c0inv = invert(circleRadius, c0);
+    var cmpinv = invert(circleRadius, cmp);
+    var c1inv = invert(circleRadius, c1);
+    drawArc(color, c0inv, cmpinv, c1inv, ctx);
+}
+function drawArc(color, circleA, circleMidPoint, circleB, ctx) {
+    var circle = circleThrough(circleA, circleMidPoint, circleB);
+    var numberA = normalizeangle(circleA.sub(circle.center).angle());
+    var numberB = normalizeangle(circleB.sub(circle.center).angle());
+    var numberMP = normalizeangle(circleMidPoint.sub(circle.center).angle());
+    if (numberB < numberA) {
+        var x = numberB;
+        numberB = numberA;
+        numberA = x;
+    }
+    var anticlockwise;
+    if (numberMP < numberA) {
+        anticlockwise = true;
+    }
+    else if (numberMP >= numberA && numberMP < numberB) {
+        anticlockwise = false;
+    }
+    else if (numberMP >= numberB) {
+        anticlockwise = true;
+    }
+    else {
+        throw "Shouldn't happen.";
+    }
+    ctx.beginPath();
+    ctx.strokeStyle = color;
+    ctx.arc(circle.center.x, circle.center.y, circle.radius, numberA, numberB, anticlockwise);
+    ctx.stroke();
 }
 function lineCircle(color, pt, dir0, ctx) {
     var dir = dir0.div(dir0.abs()).mul(Math.max(r.width(), r.height()));
@@ -118,6 +197,11 @@ $(function () {
     $("#pointA").draggable({});
     resetInner2(r, 50, ctx, cvs);
     $("#pointA").css(cToPosition(r, 1.25, 0));
+    $("#canvas").click(function (e) {
+        var posX = $(this).offset().left, posY = $(this).offset().top;
+        var z = positionToC2(r, { left: e.pageX - posX, top: e.pageY - posY });
+        $("#pointA").css(cToPosition2(r, c(z.x, -z.y)));
+    });
     window.requestAnimationFrame(drawAndRAF);
     setInterval(draw, 1000);
     function drawAndRAF() {
@@ -136,15 +220,61 @@ $(function () {
         console.log(a);
         var showExamples = $("#showExamples").is(":checked");
         var showOtherExamples = $("#showMoreExamples").is(":checked");
+        var showBoxesExamples = $("#showBoxesExamples").is(":checked");
         if (showExamples) {
             lineCircle("blue", c(0, 1.6), c(1, 0), ctx);
             invertCircle("green", c(-1.4, -1.4), .5, ctx);
             invertCircle("orange", c(0, 0), .8, ctx);
         }
-        if (showOtherExamples) {
+        else if (showOtherExamples) {
             lineCircle("orange", c(0, -1.1), c(1, 0), ctx);
             lineCircle("orange", c(1.5, 0), c(0, 1), ctx);
-            lineCircle("blue", c(0, 1), c(1, 0), ctx);
+            lineCircle("blue", c(-1, 0), c(0, 1), ctx);
+            lineCircle("red", c(0, .9), c(.1, 0), ctx);
+        }
+        else if (showBoxesExamples) {
+            var squareAt = function (ctr, es) { return [
+                ctr.add(c(-es / 2, -es / 2)),
+                ctr.add(c(es / 2, -es / 2)),
+                ctr.add(c(es / 2, es / 2)),
+                ctr.add(c(-es / 2, es / 2))
+            ]; };
+            var diamondAt = function (ctr, es) { return [
+                ctr.add(c(-es / 2, 0)),
+                ctr.add(c(0, -es / 2)),
+                ctr.add(c(es / 2, 0)),
+                ctr.add(c(0, es / 2))
+            ]; };
+            for (var i = 0; i <= 20; i += 1) {
+                for (var j = 0; j < 20; j++) {
+                    var c1 = c(0, 0).add(c(.25 * i, .25 * j));
+                    var pts = squareAt(c1, .2);
+                    var norms = pts.map(function (z) { return z.abs().x; });
+                    var minabs = Math.min.apply(null, norms);
+                    var maxabs = Math.max.apply(null, norms);
+                    if (c1.x > -.01 && maxabs < 3 && minabs > 1) {
+                        lineSegmentsCircles("blue", pts, ctx);
+                    }
+                }
+            }
+            lineSegmentsCircles("red", [
+                c(0, -1.5),
+                c(0, -1.5).add(c(.25, .25)),
+                c(0, -1.5).add(c(-.25, .25))
+            ], ctx);
+            lineSegmentsCircles("green", diamondAt(c(-1, -1), .9), ctx);
+            lineSegmentsCircles("red", squareAt(c(.5, -.5), .25), ctx);
+            var tfudge = .2;
+            var tmax = Math.PI - tfudge;
+            var tmin = Math.PI / 2 + tfudge;
+            circleArc("blue", .9, tmin, tmax, ctx);
+            circleArc("blue", (.9 + .75) / 2, tmin, tmax, ctx);
+            circleArc("blue", .75, tmin, tmax, ctx);
+            circleArc("blue", (.6 + .75) / 2, tmin, tmax, ctx);
+            circleArc("blue", .6, tmin, tmax, ctx);
+            radiusSegment("blue", .9, .6, tmin, ctx);
+            radiusSegment("blue", .9, .6, tmax, ctx);
+            radiusSegment("blue", .9, .6, (tmin + tmax) / 2, ctx);
         }
         ctx.beginPath();
         ctx.strokeStyle = "black";
@@ -186,4 +316,3 @@ $(function () {
         }
     }
 });
-//# sourceMappingURL=inversion.js.map
