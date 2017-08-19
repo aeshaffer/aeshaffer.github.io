@@ -74,7 +74,7 @@ $(function () {
         .on("change", resizeMe)
         .on("change", function () {
         var qs = zsQueryStringFromString($(this).val());
-        $("#permalink").attr("href", "./blaschke.html?" + $(this).val());
+        $("#permalink").attr("href", "./blaschke.html?" + qs);
     });
     $("#innerzs")
         .on("change", resizeMe)
@@ -86,7 +86,7 @@ $(function () {
         .on("change", resizeMe)
         .on("change", function () {
         var qs = zsQueryStringFromString($(this).val());
-        $("#outerpermalink").attr("href", "./blaschke.html?" + $(this).val());
+        $("#outerpermalink").attr("href", "./blaschke.html?" + qs);
     });
     $("#testbutton").on("click", function () {
         $("#outerzs").val(["-0.5,-0.5", "0,0.75", "0,0", "0.5,0"].join("\n"));
