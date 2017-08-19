@@ -148,7 +148,7 @@ function getBPrimeNumerator(as) {
     var nonzeroas = as.filter(function (z) { return z.abs().x > .0001; });
     var den = bpden(nonzeroas);
     var denp = dcoeffs(den);
-    return polysub(polymult(nump, den), polymult(denp, num));
+    return polysub(polymult(nump, den), polymult(denp, num)).map(fixy);
 }
 var NumDen = (function () {
     function NumDen() {
@@ -380,6 +380,9 @@ var CPInfo = (function () {
     return CPInfo;
 }());
 function cpinfo(zs) {
+    if (zs.length == 0) {
+        return new CPInfo(new Array(), new Array(), new Array(), new Array());
+    }
     var bpp = getBPrimeNumerator(zs);
     // FIXME: For some reason, for a large number
     // of zeroes, I get mostly derivative zeroes

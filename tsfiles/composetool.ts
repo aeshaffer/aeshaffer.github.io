@@ -24,6 +24,7 @@ function doCompose() {
     var zs1 = outerwidget.zs;
     var zs2 = innerwidget.zs;
     var composedzs = bpcompose(zs1, zs2);
+    composewidget.zs = composedzs;
     $("#composedzs").val(zsString(composedzs));
     $("#composedzs").change();
     $("#preimages tbody").empty();
@@ -85,12 +86,14 @@ $(function () {
         .on("change", function () {
             var qs = zsQueryStringFromString($(this).val());
             $("#innerpermalink").attr("href", "./blaschke.html?" + qs);
+            doCompose();
         });
     $("#outerzs")
         .on("change", resizeMe)
         .on("change", function () {
             var qs = zsQueryStringFromString($(this).val());
             $("#outerpermalink").attr("href", "./blaschke.html?" + qs);
+            doCompose();
         });
     $("#testbutton").on("click", function () {
         $("#outerzs").val(["-0.5,-0.5", "0,0.75", "0,0", "0.5,0"].join("\n"));
