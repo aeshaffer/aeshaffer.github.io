@@ -223,7 +223,7 @@ function resize(g: JQuery, pd: PlotDimensions) {
     */
 }
 
-function rpipToBpzs(rpip: RPIP) {
+function rpipToBpzs(rpip: RPIP): zsAndBPValues {
     var bpzs = cifyrpip(rpip);
     var bpzs2 = { bpzs: bpzs, zs: cgrid(bpzs.length) };
     return bpzs2;

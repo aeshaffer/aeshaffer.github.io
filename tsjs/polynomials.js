@@ -126,6 +126,11 @@ function cifyrow(as) {
 function cifygrid(zs) {
     return zs.map(function (r) { return cifyrow(r); });
 }
+var zsAndBPValues = (function () {
+    function zsAndBPValues() {
+    }
+    return zsAndBPValues;
+}());
 var RPIP = (function () {
     function RPIP() {
     }

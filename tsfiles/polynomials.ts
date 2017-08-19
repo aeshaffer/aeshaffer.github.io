@@ -151,6 +151,11 @@ function cifygrid(zs: Array<Array<XY>>): Array<Array<numeric.T>> {
     return zs.map(function (r) { return cifyrow(r); });
 }
 
+class zsAndBPValues {
+    zs: numeric.T[][];
+    bpzs: numeric.T[][];
+}
+
 class RPIP {
     realparts: Float32Array;
     imagparts: Float32Array;

@@ -70,9 +70,9 @@ function getID(canvas: HTMLCanvasElement, N) {
     return getCtx(canvas).createImageData(N,N);
 }
 
-function doRange(canvas: HTMLCanvasElement, bpzs: any, cpi: CPInfo, N: number) {
+function doRange(canvas: HTMLCanvasElement, bpzs: zsAndBPValues, cpi: CPInfo, N: number) {
     var rangecxt = getCtx(canvas);
-    var rangeidata = getID(canvas, N);
+    var rangeidata = getID(canvas, bpzs.zs.length);
     showRegions(rangeidata.data, bpzs.zs, bpzs.zs, cpi.cvangles);
     finishCanvas(rangeidata.data, canvas, cpi);
 }
@@ -82,14 +82,14 @@ function region(cvangles, bpz) {
     return 1.0*i/(cvangles.length);
 }
 
-function showRegions(idata: Uint8ClampedArray, zs: C[], bpzs: C[], cvangles: number[], rowcallback?) {    
+function showRegions(idata: Uint8ClampedArray, zs: C[][], bpzs: C[][], cvangles: number[], rowcallback?) {    
     return mapOverbpzs(idata, zs, bpzs, 
 		       function(z, bpz) { return region(cvangles, bpz); },
 		       rowcallback);
 }
 
 
-function mapOverbpzs(idata: Uint8ClampedArray, zs: C[], bpzs: C[], huefn, rowcallback) {
+function mapOverbpzs(idata: Uint8ClampedArray, zs: C[][], bpzs: C[][], huefn, rowcallback) {
     var N = bpzs.length;
     for(var row = 0; row < N; row++) {
 	for(var col = 0; col < N; col++) {

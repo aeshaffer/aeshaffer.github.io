@@ -59,7 +59,7 @@ function getID(canvas, N) {
 }
 function doRange(canvas, bpzs, cpi, N) {
     var rangecxt = getCtx(canvas);
-    var rangeidata = getID(canvas, N);
+    var rangeidata = getID(canvas, bpzs.zs.length);
     showRegions(rangeidata.data, bpzs.zs, bpzs.zs, cpi.cvangles);
     finishCanvas(rangeidata.data, canvas, cpi);
 }
