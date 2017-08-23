@@ -42,7 +42,7 @@ function zsQueryStringFromString(s: string) {
     return zsQueryString(zs);
 }
 function parseCRLFZsString(s: string) {
-    var zs = s.replace(/[\r\n|]+/g, "|").split("|");
+    var zs = s.trim().replace(/[\r\n|]+/g, "|").split("|");
     var partses = zs.map(pair => pair.split(","));
     if(partses.every(parts => parts.length == 2)) {
         var retval = partses.map(parts => c(parseFloat(parts[0]), parseFloat(parts[1])));

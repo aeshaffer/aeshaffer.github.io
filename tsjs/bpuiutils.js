@@ -40,7 +40,7 @@ function zsQueryStringFromString(s) {
     return zsQueryString(zs);
 }
 function parseCRLFZsString(s) {
-    var zs = s.replace(/[\r\n|]+/g, "|").split("|");
+    var zs = s.trim().replace(/[\r\n|]+/g, "|").split("|");
     var partses = zs.map(function (pair) { return pair.split(","); });
     if (partses.every(function (parts) { return parts.length == 2; })) {
         var retval = partses.map(function (parts) { return c(parseFloat(parts[0]), parseFloat(parts[1])); });
