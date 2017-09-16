@@ -14,6 +14,63 @@ class ranges {
     }
 }
 
+function backtransformcircletangent(x: number, y: number, z: C, z1: C, 
+centertomajlen: number, centertominlen: number, majunit: C, center: C): C {
+    var circlen = c(x,y).norm2();    
+    var tp0 = fixy(c(x,y).mul(z1.unit()));
+    var circlen0 = tp0.norm2();
+    var tp1 = c(tp0.x * centertomajlen, tp0.y * centertominlen);
+    var tp2 = tp1.mul(majunit);
+    var tp3 = tp2.add(center);
+
+    return tp3;
+}
+
+function sanitycheck(z: C, tp3: C, f1: C, f2: C ) {
+    var angleztpf1 = z.sub(tp3).div(f1.sub(tp3)).angle();
+    var angleztpf2 = z.sub(tp3).div(f2.sub(tp3)).angle();
+
+    var shouldbesigma = tp3.sub(f1).norm2() + tp3.sub(f2).norm2();
+    var shouldbePi = angleztpf1 + angleztpf2;
+    return {shouldbePi, shouldbesigma};
+}
+
+function ellipsetangent(z: C, f1: C, f2: C, sigma: number): C[] {
+    var center = f1.add(f2).div(2);
+    var majunit = f2.sub(f1).unit();
+    var f1subf2len = f1.sub(f2).norm2();
+
+    var ftomajlen = (sigma - f1subf2len) / 2;
+    var centertomajlen = f1subf2len / 2 + ftomajlen;
+    var centertominlen = Math.sqrt((sigma/2)**2 - (f1subf2len/2)**2);
+
+    var f10 = f1.sub(center).div(majunit);
+    var f20 = f2.sub(center).div(majunit);
+
+    // rotate so that the ellipse is centered at the origin and
+    // the major axis is horizontal.
+    var z0 = fixy(z.sub(center).div(majunit));
+
+    // scale so that the ellipse is a unit circle.
+    var z1 = c(z0.x / centertomajlen, z0.y / centertominlen);
+
+    var absz1 = z1.norm2();
+    var y = Math.sqrt(1.0 - 1.0/(absz1**2));
+    var x = Math.sqrt(1.0 - y**2);
+   
+    var retval1 = backtransformcircletangent(x, y, z, z1, 
+        centertomajlen, centertominlen, majunit, center);
+    
+    var retval2 = backtransformcircletangent(x, -y, z, z1, 
+        centertomajlen, centertominlen, majunit, center);
+
+    var check1 = sanitycheck(z, retval1, f1, f2);
+    var check2 = sanitycheck(z, retval2, f1, f2);
+    
+    return [retval1, retval2];
+}
+
+
 function lineCircleIntersection(lp: C, ld: C, cc: C, r: number) {
     var poly = [lp.sub(cc), ld];
     var polyconj = poly.map(function(f) { return f.conj(); });

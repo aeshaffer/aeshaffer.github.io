@@ -53,10 +53,14 @@ $(function () {
     reset(-1, 1, -1, 1);
     function repositionDivs() {
         // Flip y coordinate.
-        $("#f1div").css({ left: cvs.width * (f1.x - minX) / (maxX - minX) - 5 + "px",
-            top: cvs.height * (maxY - f1.y) / (maxY - minY) - 5 + "px" });
-        $("#f2div").css({ left: cvs.width * (f2.x - minX) / (maxX - minX) - 5 + "px",
-            top: cvs.height * (maxY - f2.y) / (maxY - minY) - 5 + "px" });
+        $("#f1div").css({
+            left: cvs.width * (f1.x - minX) / (maxX - minX) - 5 + "px",
+            top: cvs.height * (maxY - f1.y) / (maxY - minY) - 5 + "px"
+        });
+        $("#f2div").css({
+            left: cvs.width * (f2.x - minX) / (maxX - minX) - 5 + "px",
+            top: cvs.height * (maxY - f2.y) / (maxY - minY) - 5 + "px"
+        });
     }
     repositionDivs();
     function updatef(pos, fn) {
@@ -68,10 +72,12 @@ $(function () {
         $("#f2y").val(f2.y.toFixed(2));
         resetIfGood();
     }
-    $("#f1div").draggable({ stop: function (event, ui) { updatef($(this).position(), f1); },
+    $("#f1div").draggable({
+        stop: function (event, ui) { updatef($(this).position(), f1); },
         drag: function (event, ui) { updatef($(this).position(), f1); }
     });
-    $("#f2div").draggable({ stop: function (event, ui) { updatef($(this).position(), f2); },
+    $("#f2div").draggable({
+        stop: function (event, ui) { updatef($(this).position(), f2); },
         drag: function (event, ui) { updatef($(this).position(), f2); }
     });
     function updateGlobals() {
@@ -108,10 +114,74 @@ $(function () {
         axes2();
         var f1c = c(f1.x, f1.y);
         var f2c = c(f2.x, f2.y);
+        // Draw circle centered at F1 of radius Sigma.
         ctx.beginPath();
         ctx.arc(f1.x, f1.y, sigma, 0, 2 * Math.PI, false);
         ctx.stroke();
-        var foldts = divideCircle(numfolds);
+        var foldts;
+        if ($("#polygonfolds").is(":checked")) {
+            var foldts = new Array();
+            var N = numfolds;
+            for (var i = 0; i < N; i++) {
+                // start at a point on the major axis and on the circle.
+                // the rotate by fractions of the circle.
+                var l = rt2c(sigma, (2 * Math.PI / N) * i);
+                var z = f1.add(f2.sub(f1).unit().mul(l));
+                for (var j = 0; j < 3; j++) {
+                    var tangentpts = ellipsetangent(z, f1c, f2c, sigma);
+                    var tangentcircleintersections = lineCircleIntersection(z, tangentpts[0].sub(z), f1, sigma);
+                    // Draw fold
+                    // ctx.save();
+                    // ctx.beginPath();
+                    // ctx.strokeStyle = "teal";
+                    // ctx.setLineDash([.01, .02]);
+                    // ctx.moveTo(tangentcircleintersections[0].x, tangentcircleintersections[0].y);
+                    // ctx.lineTo(tangentcircleintersections[1].x, tangentcircleintersections[1].y);
+                    // ctx.stroke();
+                    // ctx.restore();
+                    // translate everything so that the center of the ellipse is at the origin.
+                    var z0 = z.sub(f1.add(f2).div(2));
+                    var ti0 = tangentcircleintersections[0].sub(f1.add(f2).div(2));
+                    var ti1 = tangentcircleintersections[1].sub(f1.add(f2).div(2));
+                    ;
+                    // rotate so that z is on the real line.
+                    var ti01 = fixy(ti0.div(z0));
+                    var ti11 = fixy(ti1.div(z0));
+                    var tangentdirection = tangentcircleintersections[0].sub(tangentcircleintersections[1]).unit();
+                    // At this point, one of the tangent points is above the real line,
+                    // and the other is below it.  Take the point above for the next point.
+                    if (ti01.y > 0) {
+                        z = tangentcircleintersections[0];
+                    }
+                    else {
+                        z = tangentcircleintersections[1];
+                    }
+                    var tangentdirectionperp = tangentdirection.mul(t2c(Math.PI / 2));
+                    // Get the intersection between the chord
+                    // and a line from f2 perpendicular to the chord.
+                    var chordtof2line = lineLineIntersectionZD(f2, tangentdirectionperp, z, tangentdirection);
+                    // ctx.beginPath();
+                    // ctx.arc(chordtof2line.x, chordtof2line.y, .025, 0, 2*Math.PI, false);
+                    // ctx.stroke();
+                    // Then, find the points where the line from f2
+                    // to the intersection point with the chord 
+                    // hits the circle.
+                    var lci = lineCircleIntersection(f2, chordtof2line.sub(f2), f1, sigma);
+                    // Find which intersection between the line and the 
+                    // circle is in the same direction as the vector between f2 and
+                    // the chord.
+                    if (lci[0].sub(f2).div(chordtof2line.sub(f2)).x > 0) {
+                        foldts.push(lci[0].sub(f1).angle());
+                    }
+                    else {
+                        foldts.push(lci[1].sub(f1).angle());
+                    }
+                }
+            }
+        }
+        else {
+            var foldts = divideCircle(numfolds);
+        }
         // foldts.pop();
         for (var i = 0; i < foldts.length; i += 1) {
             var t = foldts[i];
@@ -132,12 +202,12 @@ $(function () {
             // other focus.
             var d = p.sub(mp).mul(rt2c(1, Math.PI / 2));
             d = d.div(d.norm2()).mul(sigma);
-            var intersections = lineCircleIntersection(mp, d, f1c, sigma);
+            var tangentcircleintersections = lineCircleIntersection(mp, d, f1c, sigma);
             // Draw fold
             ctx.beginPath();
             ctx.strokeStyle = "teal";
-            ctx.moveTo(intersections[0].x, intersections[0].y);
-            ctx.lineTo(intersections[1].x, intersections[1].y);
+            ctx.moveTo(tangentcircleintersections[0].x, tangentcircleintersections[0].y);
+            ctx.lineTo(tangentcircleintersections[1].x, tangentcircleintersections[1].y);
             ctx.stroke();
             // Draw line from point on circle to other focus.
             ctx.save();
@@ -149,12 +219,12 @@ $(function () {
             ctx.stroke();
             ctx.restore();
             // Draw right-angle marker at intersection between chord and focus-circle line.
-            var chordlineint = lineLineIntersectionZZ(p, f2c, intersections[0], intersections[1]);
+            var chordlineint = lineLineIntersectionZZ(p, f2c, tangentcircleintersections[0], tangentcircleintersections[1]);
             ctx.strokeStyle = "green";
             ctx.beginPath();
             var squarelength = sigma / 50.0;
             var alongYellow = chordlineint.add(p.sub(f2c).unit().mul(squarelength));
-            var corner = alongYellow.add(intersections[0].sub(intersections[1]).unit().mul(squarelength));
+            var corner = alongYellow.add(tangentcircleintersections[0].sub(tangentcircleintersections[1]).unit().mul(squarelength));
             var alongBlue = corner.sub(p.sub(f2c).unit().mul(squarelength));
             ctx.moveTo(alongYellow.x, alongYellow.y);
             ctx.lineTo(corner.x, corner.y);
@@ -162,6 +232,7 @@ $(function () {
             //            ctx.arc(chordline.x, chordline.y, .025, p.sub(f2c).angle(), Math.PI/2 + p.sub(f2c).angle(), false);     
             ctx.stroke();
         }
+        // Draw circles around the foci.
         ctx.strokeStyle = "#000000";
         ctx.beginPath();
         ctx.arc(f1.x, f1.y, .025, 0, 2 * Math.PI, false);
@@ -172,6 +243,7 @@ $(function () {
         ctx.closePath();
         ctx.stroke();
         ctx.beginPath();
+        // Draw ellipse.
         var majoraxisvector = f1c.sub(f2c);
         var majoraxisunitvector = majoraxisvector.div(majoraxisvector.norm2());
         var sigmac = c(sigma, 0);
