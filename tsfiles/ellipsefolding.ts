@@ -1,6 +1,6 @@
-/// <reference path="../numeric-1.2.3.js" />
-/// <reference path="../tsjs/polynomials.js" />
-/// <reference path="../tsjs/ellipseutils.js" />
+/// <reference path="numeric-1.2.3.d.ts" />
+/// <reference path="polynomials.ts" />
+/// <reference path="ellipseutils.ts" />
 
 "use strict";
 
@@ -28,14 +28,17 @@ function reset(inminX, inmaxX, inminY, inmaxY) {
     minX = inminX; minY = inminY;
     maxX = inmaxX; maxY = inmaxY;
     var fudgefactor = 50;
-    resetInner({minX, maxX, minY, maxY}, fudgefactor, ctx, cvs);
+    resetInner(new ranges({minX, maxX, minY, maxY}), fudgefactor, ctx, cvs);
 }
 
 function axes2() {
-    axes({minX, maxX, minY, maxY}, ctx);
+    axes(new ranges({minX, maxX, minY, maxY}), ctx);
 }
 
-var f1 = {}, f2 = {}, numfolds, sigma;
+var f1: C = c(0,0);
+var f2: C = c(-.5, 0);
+var numfolds: number;
+var sigma: number;
 
 $(function () {
 
@@ -220,7 +223,7 @@ repositionDivs();
         var minoraxislen = Math.sqrt(sigma * sigma - f2mf1 * f2mf1) / 2.0;
         var minoraxisunitvector = majoraxisunitvector.mul(c(0, 1));
 
-        var t = center.add(minoraxisunitvector.mul(minoraxislen));
+        var t2 = center.add(minoraxisunitvector.mul(minoraxislen));
         var b = center.sub(minoraxisunitvector.mul(minoraxislen));
 
         ctx.beginPath();
@@ -230,7 +233,7 @@ repositionDivs();
         var ps = new Array(ts.length);
         for (var i = 0; i < ts.length; i++) {
             var theta = ts[i];
-            var p = center.add(t.sub(center).mul(Math.sin(theta)).add(r.sub(center).mul(Math.cos(theta))));
+            var p = center.add(t2.sub(center).mul(Math.sin(theta)).add(r.sub(center).mul(Math.cos(theta))));
             p = fz(p);
             ps[i] = p;
             ctx.lineTo(p.x, p.y);
@@ -239,8 +242,8 @@ repositionDivs();
         ctx.stroke();
 
         for (var i = 0; i < ts.length; i++) {
-            var p = ps[i];
-            sigma - f1c.sub(p).norm2();
+            var p2 = ps[i];
+            sigma - f1c.sub(p2).norm2();
         }
 
 /*

@@ -15,6 +15,8 @@ declare module numeric {
         abs(): T;
         exp(): T;
         conj(): T;
+        unit(): T;
+        norm2(): number;
     }
     
     class EIG {
