@@ -1,8 +1,9 @@
 <html>
+
 <head>
-<title>
-    Ellipse Drawing
-    </title>   
+    <title>
+        Ellipse Drawing
+    </title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
     <script src="../jquery-ui-1.11.1/jquery-ui.js"></script>
     <script src="../numeric-1.2.3.js" type="text/javascript"></script>
@@ -12,36 +13,45 @@
     <script src="../tsjs/ellipsefolding.js" type="text/javascript"></script>
 
     <style type="text/css">
-     .focusdiv {
-         width: 10px; 
-         background-color: blue; 
-         height: 10px; 
-         border: 1px solid black; 
-         border-radius: 10px; 
-         position: absolute;
-     }
-     .errorParams {background-color: red;}
-     </style>
+        .focusdiv {
+            width: 10px;
+            background-color: blue;
+            height: 10px;
+            border: 1px solid black;
+            border-radius: 10px;
+            position: absolute;
+        }
+
+        .errorParams {
+            background-color: red;
+        }
+        #hiddenparams { display: none; }
+        #canvasandpoints {
+            border: 1px solid black; position: relative; margin: 0px auto;
+        }
+    </style>
 </head>
+
 <body>
-<div style="width: 512px;" id="params">
-    F1:<br />
-    X: <input type="text" id="f1x" value="0"></input>
-    Y: <input type="text" id="f1y" value="0"></input><br/>
-    F2:<br />
-    X: <input type="text" id="f2x" value="-.25"></input>
-    Y: <input type="text" id="f2y" value="0"></input><br/>
-    C: <input type="text" id="sigma" value=".75"></input>
-    Folds: <input type="text" id="numfolds" value="2"></input><br />
-    <input type="checkbox" id="polygonfolds" checked="checked"></input> Polygon Folds<br />
-    <input type="button" id="go" value="Go"></input>
-    <br/>
-</div>
-<div style="border: 1px solid black; position: relative;">
-    <div id="f1div" class="focusdiv"></div>
-    <div id="f2div" class="focusdiv"></div>
-    <canvas style="border: 1px solid green; float: left;" id="canvas" height="512" width="512"></canvas>
-    <div id="canvas3dcontainer" style="float: left;"></div>
-</div>
+    <h1>Construct an ellipse by folding</h1>
+    <div id="hiddenparams">
+        F1:<br /> X: <input type="text" id="f1x" value="0"></input>
+        Y: <input type="text" id="f1y" value="0"></input><br/> F2:
+        <br /> X: <input type="text" id="f2x" value="-.25"></input>
+        Y: <input type="text" id="f2y" value="0"></input><br/>
+    </div>
+    <div style="width: 512px;" id="params">
+        Circle Radius: <input type="text" id="sigma" value=".75"></input><br />
+        Number of Folds: <input type="text" id="numfolds" value="2"></input><br />
+        <input type="checkbox" id="polygonfolds" checked="checked"></input>Polygon Folds<br />
+        <input type="button" id="go" value="Go"></input>
+        <br/>
+    </div>
+    <div id="canvasandpoints">
+        <div id="f1div" class="focusdiv"></div>
+        <div id="f2div" class="focusdiv"></div>
+        <canvas id="canvas" height="512" width="512"></canvas>
+    </div>
 </body>
+
 </html>
