@@ -150,7 +150,7 @@ function getBPrimeNumerator(as) {
     var denp = dcoeffs(den);
     return polysub(polymult(nump, den), polymult(denp, num)).map(fixy);
 }
-var NumDen = (function () {
+var NumDen = /** @class */ (function () {
     function NumDen() {
     }
     return NumDen;
@@ -177,7 +177,7 @@ function getBPTheta(as, ts) {
     }
     return retval;
 }
-var Z1Z2ZTan = (function () {
+var Z1Z2ZTan = /** @class */ (function () {
     function Z1Z2ZTan() {
     }
     return Z1Z2ZTan;
@@ -330,7 +330,7 @@ function preimage(zs, beta) {
     var preimages = polyroots(poly);
     return preimages;
 }
-var OuterZeroAndPreimages = (function () {
+var OuterZeroAndPreimages = /** @class */ (function () {
     function OuterZeroAndPreimages() {
     }
     return OuterZeroAndPreimages;
@@ -370,7 +370,7 @@ function sortBy(vals, indices) {
     }
     return foo;
 }
-var CPInfo = (function () {
+var CPInfo = /** @class */ (function () {
     function CPInfo(cps, cvs, cvangles, fps) {
         this.cps = cps, this.cvs = cvs;
         this.cvangles = cvangles;
@@ -432,6 +432,7 @@ function quadPerspective(zs) {
         for (var j = 0; j < angleSorted.length; j++) {
             var ppt = perspective(angleSorted[j], i);
             if (isNaN(ppt.x) || isNaN(ppt.y) || Math.abs(ppt.x) > 10000 || Math.abs(ppt.y) > 10000) {
+                //console.log("Burp.");
             }
             else {
                 //console.log(ppt);

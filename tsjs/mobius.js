@@ -15,7 +15,7 @@ function cdet(A) {
     var t2 = A[0][2].mul(tbtdet(M2));
     return t0.sub(t1).add(t2);
 }
-var MT = (function () {
+var MT = /** @class */ (function () {
     function MT() {
     }
     return MT;

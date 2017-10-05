@@ -27,7 +27,7 @@ function anglediff(theta) {
         }
     }
 }
-var Canglediff = (function () {
+var Canglediff = /** @class */ (function () {
     function Canglediff() {
     }
     return Canglediff;
@@ -126,12 +126,12 @@ function cifyrow(as) {
 function cifygrid(zs) {
     return zs.map(function (r) { return cifyrow(r); });
 }
-var zsAndBPValues = (function () {
+var zsAndBPValues = /** @class */ (function () {
     function zsAndBPValues() {
     }
     return zsAndBPValues;
 }());
-var RPIP = (function () {
+var RPIP = /** @class */ (function () {
     function RPIP() {
     }
     return RPIP;
@@ -297,6 +297,8 @@ function polyroots(incs) {
     }
     if (console != undefined) {
         if (console.log) {
+            //	    console.log(pypoly(incs)); 
+            //	    console.log(pypoly(cs));
         }
     }
     var n = 0;
@@ -305,6 +307,8 @@ function polyroots(incs) {
         var deltas = new Array();
         var newroots = new Array();
         if (console != undefined && console.log != undefined) {
+            // console.log("");
+            // console.log("Roots: " + printzs(roots));
         }
         for (var i = 0; i < roots.length; i++) {
             var p = roots[i];
@@ -324,6 +328,10 @@ function polyroots(incs) {
                     }
             */
             roots[i] = p.sub(x);
+            // All of our zeroes are in the disk - keep things from going crazy.
+            // if(roots[i].abs().x > 2) {
+            //     roots[i] = roots[i].div(roots[i].abs());
+            // }
         }
         // roots = newroots;
         n++;

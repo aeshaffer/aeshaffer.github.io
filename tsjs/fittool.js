@@ -1,10 +1,15 @@
 /// <reference path="bpui.ts" />
 /// <reference path="jquery.flot.d.ts" />
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var targetwidget;
 function fitSetup() {
     setupCanvases($("#targetdiv .zeroesholder"));
@@ -29,19 +34,20 @@ function fitSetup() {
     }
     replotBoundaries();
 }
-var FitWidget = (function (_super) {
+var FitWidget = /** @class */ (function (_super) {
     __extends(FitWidget, _super);
     function FitWidget(obj) {
-        _super.call(this, obj, false);
-        var that = this;
-        this.zsstring.change(function () {
+        var _this = _super.call(this, obj, false) || this;
+        var that = _this;
+        _this.zsstring.change(function () {
             that.zs = parseZsString(that.zsstring.val());
             that.rescatter();
             replotBoundaries();
         });
-        this.plotDims = function () {
+        _this.plotDims = function () {
             return { N: 100, zoom: 3, windowN: 300, graphN: 300 };
         };
+        return _this;
     }
     return FitWidget;
 }(BPWidget));
@@ -209,6 +215,7 @@ function interp(series, x) {
     }
     else {
         y = p1[1];
+        //	y = p1[1] + (p2[1] - p1[1]) * (x - p1[0]) / (p2[0] - p1[0]);
     }
     return y;
 }

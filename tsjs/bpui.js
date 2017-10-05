@@ -9,16 +9,21 @@
 /// <reference path="bpgraphics.ts" />
 /// <reference path="ellipseutils.ts" />
 "use strict";
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
-var JQuerySingletonWrapper = (function () {
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var JQuerySingletonWrapper = /** @class */ (function () {
     function JQuerySingletonWrapper() {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
+            args[_i] = arguments[_i];
         }
         this.inner = $.apply(null, args);
         this.element = this.inner[0];
@@ -31,104 +36,104 @@ var JQuerySingletonWrapper = (function () {
     JQuerySingletonWrapper.prototype.empty = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
+            args[_i] = arguments[_i];
         }
         return this.inner.empty.apply(this.inner, args);
     };
     JQuerySingletonWrapper.prototype.append = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
+            args[_i] = arguments[_i];
         }
         return this.inner.append.apply(this.inner, args);
     };
     JQuerySingletonWrapper.prototype.val = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
+            args[_i] = arguments[_i];
         }
         return this.inner.val.apply(this.inner, args);
     };
     JQuerySingletonWrapper.prototype.attr = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
+            args[_i] = arguments[_i];
         }
         return this.inner.attr.apply(this.inner, args);
     };
     JQuerySingletonWrapper.prototype.change = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
+            args[_i] = arguments[_i];
         }
         return this.inner.change.apply(this.inner, args);
     };
     JQuerySingletonWrapper.prototype.is = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
+            args[_i] = arguments[_i];
         }
         return this.inner.is.apply(this.inner, args);
     };
     JQuerySingletonWrapper.prototype.parent = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
+            args[_i] = arguments[_i];
         }
         return this.inner.parent.apply(this.inner, args);
     };
     JQuerySingletonWrapper.prototype.css = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
+            args[_i] = arguments[_i];
         }
         return this.inner.css.apply(this.inner, args);
     };
     JQuerySingletonWrapper.prototype.on = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
+            args[_i] = arguments[_i];
         }
         return this.inner.on.apply(this.inner, args);
     };
     JQuerySingletonWrapper.prototype.siblings = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
+            args[_i] = arguments[_i];
         }
         return this.inner.siblings.apply(this.inner, args);
     };
     JQuerySingletonWrapper.prototype.click = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
+            args[_i] = arguments[_i];
         }
         return this.inner.click.apply(this.inner, args);
     };
     JQuerySingletonWrapper.prototype.text = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
+            args[_i] = arguments[_i];
         }
         return this.inner.text.apply(this.inner, args);
     };
     JQuerySingletonWrapper.prototype.hide = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
+            args[_i] = arguments[_i];
         }
         return this.inner.hide.apply(this.inner, args);
     };
     JQuerySingletonWrapper.prototype.each = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
+            args[_i] = arguments[_i];
         }
         return this.inner.each.apply(this.inner, args);
     };
     return JQuerySingletonWrapper;
 }());
-var PerformanceLog = (function () {
+var PerformanceLog = /** @class */ (function () {
     function PerformanceLog() {
     }
     PerformanceLog.prototype.flopsPerMS = function () {
@@ -136,7 +141,7 @@ var PerformanceLog = (function () {
     };
     return PerformanceLog;
 }());
-var BPWidget = (function () {
+var BPWidget = /** @class */ (function () {
     function BPWidget(obj, allElements) {
         this.performanceHistory = new Array(0);
         function g(sel) {
@@ -523,6 +528,13 @@ var BPWidget = (function () {
             this.skippoints.attr("title", "");
             for (var i = 0; i < skips.length; i++) {
                 var skip = skips[i];
+                /*
+                    if(this.zs.length % skip != 0) {
+                        this.skippoints.css("background-color", "red");
+                        this.skippoints.attr("title", "Cannot skip "+this.zs.length+" points by " + skip + ".");
+                        return null;
+                    }
+                */
             }
             return skips;
         }
@@ -581,6 +593,8 @@ var BPWidget = (function () {
             }
             ctx.stroke();
             frontier.push({ t: piangles[0], dot: t1z });
+            // crossHairs(lines, N, skippedangles, drawnLength);
+            //ctx.restore();
         }
         ctx.restore();
         return frontier;
@@ -750,6 +764,7 @@ var BPWidget = (function () {
             catch (err) {
                 alert(err);
             }
+            //	this.guessellipse(ctx, ints2);
         }
         ctx.restore();
     };
@@ -1040,20 +1055,20 @@ var BPWidget = (function () {
     };
     return BPWidget;
 }());
-var EasyResizeWidget = (function (_super) {
+var EasyResizeWidget = /** @class */ (function (_super) {
     __extends(EasyResizeWidget, _super);
     function EasyResizeWidget(obj) {
-        _super.call(this, obj, false);
-        this.plotDims = function () {
+        var _this = _super.call(this, obj, false) || this;
+        _this.plotDims = function () {
             return { N: 150, zoom: 1, windowN: 300, graphN: 300 };
         };
-        this.resizeCanvases = function () {
+        _this.resizeCanvases = function () {
             resize(this.rainbow, this.plotDims());
             resize(this.rblines, this.plotDims());
             resize(this.regions, this.plotDims());
         };
-        var that = this;
-        this.zsstring.change(function () {
+        var that = _this;
+        _this.zsstring.change(function () {
             that.zs = parseZsString(that.zsstring.val());
             that.rescatter();
         });
@@ -1061,7 +1076,7 @@ var EasyResizeWidget = (function (_super) {
             e.width = that.plotDims().windowN;
             e.height = e.width;
         };
-        this.setAllDims = function () {
+        _this.setAllDims = function () {
             that.rainbow.each(setdims);
             that.regions.each(setdims);
             that.regions.each(setdims);
@@ -1069,7 +1084,8 @@ var EasyResizeWidget = (function (_super) {
             $("#overlay").each(setdims);
             $("#inneroverlay").each(setdims);
         };
-        this.setAllDims();
+        _this.setAllDims();
+        return _this;
     }
     return EasyResizeWidget;
 }(BPWidget));

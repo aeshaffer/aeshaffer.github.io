@@ -1,5 +1,5 @@
 /// <reference path="numeric-1.2.3.d.ts" />
-var CMatrix = (function () {
+var CMatrix = /** @class */ (function () {
     /**
      *
      */

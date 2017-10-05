@@ -4,7 +4,7 @@
 /// <reference path="jquery.d.ts" />
 /// <reference path="hsvToRGB.ts" />
 // From http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values
-var PlotDimensions = (function () {
+var PlotDimensions = /** @class */ (function () {
     function PlotDimensions() {
     }
     return PlotDimensions;
@@ -121,6 +121,12 @@ function cssscatter(cw, canvaswidth, pts, cssclass, doclear) {
         var nudge = getNudge(div);
         div.css("top", Math.round(offset - offset * y - nudge));
         div.css("left", Math.round(offset + offset * x - nudge));
+        /*
+            console.log(cssclass+i, " at ",
+                    offset - offset*y, div.css("top"),
+                    offset - offset*x, div.css("left"),
+                    nudge, div.width());
+        */
     }
     return cw.find("." + cssclass);
 }

@@ -4,20 +4,26 @@
 /// <reference path="polynomials.ts" />
 /// <reference path="bpui.ts" />
 /// <reference path="composetool.ts" />
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var widget;
-var InterpolationWidget = (function (_super) {
+var InterpolationWidget = /** @class */ (function (_super) {
     __extends(InterpolationWidget, _super);
     function InterpolationWidget(obj) {
-        _super.call(this, obj);
-        this.plotDims = function () {
+        var _this = _super.call(this, obj) || this;
+        _this.plotDims = function () {
             return { N: 301, zoom: 1, windowN: 301, graphN: 301 };
         };
-        this.setAllDims();
+        _this.setAllDims();
+        return _this;
     }
     return InterpolationWidget;
 }(EasyResizeWidget));

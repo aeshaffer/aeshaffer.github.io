@@ -1,6 +1,6 @@
 /// <reference path="../tsfiles/jquery.d.ts" />
 /// <reference path="numeric-1.2.3.d.ts" />
-var ranges = (function () {
+var ranges = /** @class */ (function () {
     function ranges(obj) {
         this.minX = obj.minX;
         this.minY = obj.minY;

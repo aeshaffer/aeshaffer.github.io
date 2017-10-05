@@ -20,7 +20,7 @@ function padLeft(nr, n, str) {
 function pdc(z) {
     return padLeft(dc(z), 21, " ");
 }
-var IntersectionData = (function () {
+var IntersectionData = /** @class */ (function () {
     function IntersectionData() {
     }
     return IntersectionData;
@@ -79,7 +79,9 @@ function getTangentSegments(zs, ajpct) {
                     inter: inter,
                     dc: pdc(x1.z) + "->" + pdc(x2.z) + "\tx\t "
                         + pdc(y1.z) + "->" + pdc(y2.z) + "\tat\t " + dc(inter)
-                        + " " + inter.angle() };
+                        + " " + inter.angle()
+                };
+            // console.log(intersections[j][i].dc);
         }
         prevpis = pis;
     }

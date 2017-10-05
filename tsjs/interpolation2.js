@@ -3,12 +3,12 @@
 /// <reference path="blaschke.ts" />
 /// <reference path="mobius.ts" />
 function o(a, b) { return a - b; }
-var alphasbetas = (function () {
+var alphasbetas = /** @class */ (function () {
     function alphasbetas() {
     }
     return alphasbetas;
 }());
-var pqPhiCheck = (function () {
+var pqPhiCheck = /** @class */ (function () {
     function pqPhiCheck() {
     }
     return pqPhiCheck;
@@ -180,7 +180,7 @@ function algorithmtest(b3, N) {
 }
 // Return a Blaschke product which identifies idpoints[0] to 1 
 // and idpoints[1] to -1.
-var interpolateOutput = (function () {
+var interpolateOutput = /** @class */ (function () {
     function interpolateOutput() {
     }
     return interpolateOutput;

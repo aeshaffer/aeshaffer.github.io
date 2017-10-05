@@ -176,6 +176,16 @@ $(function () {
                     else {
                         foldts.push(lci[1].sub(f1).angle());
                     }
+                    // ctx.beginPath();
+                    // ctx.arc(lci[0].x, lci[0].y, .025, 0, 2*Math.PI, false);
+                    // ctx.stroke();
+                    // ctx.beginPath();
+                    // ctx.arc(lci[1].x, lci[1].y, .025, 0, 2*Math.PI, false);
+                    // ctx.stroke();
+                    // foldts.push(lci[1].sub(f1).angle());
+                    // ctx.moveTo(z.x, z.y);
+                    // ctx.lineTo(tangentpts[1].x, tangentpts[1].y);
+                    // ctx.stroke();                
                 }
             }
         }

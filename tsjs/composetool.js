@@ -1,9 +1,14 @@
 /// <reference path="bpui.ts" />
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var outerwidget;
 var innerwidget;
 var composewidget;
@@ -109,13 +114,13 @@ function handleFinish() {
         clearAllGraphs();
     }
 }
-var ComposeWidget = (function (_super) {
+var ComposeWidget = /** @class */ (function (_super) {
     __extends(ComposeWidget, _super);
     function ComposeWidget(obj) {
-        _super.call(this, obj);
-        var that = this;
-        this.plotregions = new JQuerySingletonWrapper($("#plotregions"));
-        this.plotregions.inner.on("change", function (e) {
+        var _this = _super.call(this, obj) || this;
+        var that = _this;
+        _this.plotregions = new JQuerySingletonWrapper($("#plotregions"));
+        _this.plotregions.inner.on("change", function (e) {
             if (that.plotregions.inner.is(":checked")) {
                 that.regions.parent("div").show();
             }
@@ -123,23 +128,24 @@ var ComposeWidget = (function (_super) {
                 that.regions.parent("div").hide();
             }
         });
-        this.plotregions.inner.change();
-        this.plotDims = function () {
+        _this.plotregions.inner.change();
+        _this.plotDims = function () {
             return { N: 150, zoom: 1, windowN: 300, graphN: 300 };
         };
-        this.updatezero = function (zdiv) {
+        _this.updatezero = function (zdiv) {
             BPWidget.prototype.updatezero.call(this, zdiv);
             doCompose();
         };
-        this.addZero = function (z) {
+        _this.addZero = function (z) {
             BPWidget.prototype.addZero.call(this, z);
             doCompose();
         };
-        this.dropzero = function (z) {
+        _this.dropzero = function (z) {
             BPWidget.prototype.dropzero.call(this, z);
             handleFinish();
         };
-        this.setAllDims();
+        _this.setAllDims();
+        return _this;
     }
     return ComposeWidget;
 }(EasyResizeWidget));
