@@ -27,3 +27,4 @@ function elementToC(elem) {
     var retval = positionToC(elem.position());
     return c(retval.x, retval.y);
 }
+//# sourceMappingURL=common.js.map
