@@ -140,6 +140,7 @@ $(function () {
         $("#betas").val(betas3.join("\n")).change();
     });
     $("#interpolate").click(function () {
+        $(".results").addClass("hidden");
         var alphas = getZs("#alphas");
         var betas = getZs("#betas");
         var alphasbetas = alphas.concat(betas).sort(o);
@@ -165,9 +166,10 @@ $(function () {
         widget.resizeRescatterAndReplotMe();
         drawTicksCanvas(alphasbetas, bpf, widget.plotDims().graphN, widget.rainbow.element);
         fillTable(alphasbetas, bpf);
+        $(".results").removeClass("hidden");
     });
     $("#zsstring").change(function () {
-        $("#permalink").attr("href", "./blaschke.html?" + $(this).val());
+        $("#permalink").attr("href", "./blaschke.html?" + zsQueryStringFromString($(this).val()));
     });
 });
 function fillTable(alphasbetas, bpf) {

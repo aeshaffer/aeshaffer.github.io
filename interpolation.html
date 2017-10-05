@@ -11,7 +11,7 @@
   <script type="text/javascript" src="./tsjs/bpgraphics.js"></script>
   <script type="text/javascript" src="./tsjs/bpuiutils.js"></script>
   <script type="text/javascript" src="./tsjs/bpui.js"></script>
-  <script type="text/javascript" src="./tsjs/ellipseutils.js"></script>  
+  <script type="text/javascript" src="./tsjs/ellipseutils.js"></script>
   <script type="text/javascript" src="./tsjs/ellipse.js"></script>
   <script type="text/javascript" src="./tsjs/lmellipse.js"></script>
   <script type="text/javascript" src="./tsjs/composetool.js"></script>
@@ -22,7 +22,7 @@
   <link rel="stylesheet" type="text/css" href="blaschke.css"></link>
 
   <script type="text/javascript">
-  $(interpolationSetup);
+    $(interpolationSetup);
   </script>
   <style type="text/css">
     #zeroesdiv {
@@ -30,45 +30,59 @@
       margin: 0px 20px;
       float: left;
     }
+
+    .hidden {
+      display: none;
+    }
   </style>
 </head>
 
 <body>
-  <div style="width: 400px; float: left;">
+  <h1>Interpolating Boundary Values with Blaschke Products</h1>
+  <p></p>
+  <hr />
+  <div>
+    <button type="button" id="demo">Demo</button>
+    <button type="button" id="demo2">Demo 2</button>
+    <button type="button" id="demo3">Demo 3</button>
+  </div>
+  <div>
     <h3>Alphas</h3>
     <textarea id="alphas" style="width: 100%"></textarea>
     <h3>Betas</h3>
     <textarea id="betas" style="width: 100%"></textarea>
     <hr />
     <button type="button" id="interpolate">Go</button>
-    <button type="button" id="demo">Demo</button>
-    <button type="button" id="demo2">Demo 2</button>
-    <button type="button" id="demo3">Demo 3</button>
-  <a href="" id="permalink">Open In Blaschke Tool</a>
   </div>
-  <div style="width: 400px; float: left;">
-    <div id="zeroesdiv">
-      <div class="zeroesholder outerholder rainbowholder" style="margin: 10px 10px" ;>
+  <div class="results hidden">
+    <a href="" id="permalink" target="_blank">Open In Blaschke Tool</a>
+    <br />
+    <div style="width: 400px; float: left;">
+      <div id="zeroesdiv">
+        <div class="zeroesholder outerholder rainbowholder" style="margin: 10px 10px" ;>
+        </div>
+        <textarea id="zsstring" class="zsstring" style="width: 100%"></textarea>
       </div>
-      <textarea id="zsstring" class="zsstring" style="width: 100%"></textarea>
     </div>
+
+    <div style="width: 400px; float: left">
+      <canvas id="tickscanvas" width="320" height="320"></canvas>
+    </div>
+
+    <table id="valuestable" style="width: 100%; clear: both; text-align: center;">
+      <thead>
+        <tr>
+          <th>&theta;</th>
+          <th>z</th>
+          <th>value</th>
+          <th>&ang;value</th>
+        </tr>
+        <tbody>
+        </tbody>
+    </table>
+
   </div>
 
-  <div style="width: 400px; float: left">
-    <canvas id="tickscanvas" width="320" height="320"></canvas>
-  </div>
-
-  <table id="valuestable" style="width: 100%; clear: both; text-align: center;">
-    <thead>
-      <tr>
-        <th>&theta;</th>
-        <th>z</th>
-        <th>value</th>
-        <th>&ang;value</th>
-      </tr>
-      <tbody>
-      </tbody>
-  </table>
 </body>
 
 </html>
