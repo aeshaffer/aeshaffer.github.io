@@ -6,7 +6,6 @@
 /// <reference path="../tsfiles/ellipseutils.ts" />
 /// <reference path="../tsfiles/bpuiutils.ts" />
 
-
 var cvs: HTMLCanvasElement;
 var ctx: CanvasRenderingContext2D;
 

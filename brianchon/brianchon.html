@@ -46,6 +46,11 @@
             top: -200%;
             left: 0px;
         }
+
+        #canvasandpoints {
+            border: 1px solid black; position: relative; 
+            margin: 0px auto;
+        }
     </style>
 </head>
 
@@ -56,8 +61,8 @@
     <p>Notice that three principal diagonals always intersect at a single point.</p>
     <p>
         <input type="checkbox" id="angleSort" checked="checked">Force Hexagon to be Convex</input>
-    </p>>
-    <div style="border: 1px solid black; position: relative; float: left;">
+    </p>
+    <div id="canvasandpoints">
         <div id="focus0" class="cpt"><span>F<sub>0</sub></span></div>
         <div id="focus1" class="cpt"><span>F<sub>1</sub></span></div>
         <div id="ellipsePoint" class="cpt"><span>P</span></div>
@@ -67,7 +72,7 @@
         <div id="pointD" class="cpt"><span>D</span></div>
         <div id="pointE" class="cpt"><span>E</span></div>
         <div id="pointF" class="cpt"><span>F</span></div>
-        <canvas style="border: 1px solid green; float: left;" id="canvas" height="512" width="512"></canvas>
+        <canvas id="canvas" height="512" width="512"></canvas>
     </div>
 </body>
 

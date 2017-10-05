@@ -6,7 +6,7 @@
     <script src="../jquery-ui-1.11.1/jquery-ui.js"></script>
     <script src="../numeric-1.2.3.js" type="text/javascript"></script>
     <script src="../tsjs/polynomials.js" type="text/javascript"></script>
-    <script src="pascal.js" type="text/javascript"></script>
+    <script src="../tsjs/pascal.js" type="text/javascript"></script>
     <script src="../tsjs/ellipseutils.js" type="text/javascript"></script>
     <script src="../tsjs/lmellipse.js" type="text/javascript"></script>
     <script src="../tsjs/bpuiutils.js" type="text/javascript"></script>
@@ -19,53 +19,79 @@
             border-radius: 10px;
             position: absolute;
         }
-        
+
         #pointA,
         #pointD {
             background-color: blue;
         }
-        
+
         #pointB,
         #pointE {
             background-color: yellow;
         }
-        
+
         #pointC,
         #pointF {
             background-color: red;
         }
-        
+
         .cpt span {
             width: 100%;
             position: absolute;
             top: -200%;
             left: 0px;
         }
+
+        .fdistance {
+            display: none;
+        }
+
+        #intersectionstable,
+        #pointstable {
+            display: none;
+        }
+
+        .segment {
+            text-decoration: overline;
+        }
+
+        #canvasandpoints {
+            border: 1px solid black; margin: 0px auto; position: relative;
+        }
     </style>
 </head>
 
 <body>
-    <div style="border: 1px solid black; position: relative; float: left;">
-        <div id="pointA" class="cpt"><span>A</span></div>
-        <div id="pointB" class="cpt"><span>B</span></div>
-        <div id="pointC" class="cpt"><span>C</span></div>
-        <div id="pointD" class="cpt"><span>D</span></div>
-        <div id="pointE" class="cpt"><span>E</span></div>
-        <div id="pointF" class="cpt"><span>F</span></div>
-        <canvas style="border: 1px solid green; float: left;" id="canvas" height="512" width="512"></canvas>
-    </div>
-    <div style="float: left;">
-        <button id="insideexample">Inside Example</button>
-        <button id="outsideexample">Outside Example</button>
-        <div>
+    <h1>Pascal's Theorem</h1>
+    <p>Try moving the points A, B, C, D, E and F by dragging the circles on the screen.  
+        As you move the points A-E, an ellipse is drawn which passes through those points. 
+        As you move the point F, note the intersections
+        between the line <span class="segment">AF</span> and the line <span class="segment">DC</span>,         
+        between the line <span class="segment">DE</span> and the line <span class="segment">AB</span>, and
+        between the line <span class="segment">BC</span> and the line <span class="segment">EF</span>.
+        (Notice that these are lines, not line segments - the part of the line 
+        "outside" the line segment is displayed dotted, if necessary.)
+
+        If F is not on the ellipse, then these three points of intersection will form a nondegenerate triangle.
+        
+        If F is on the ellipse, all three of those intersections will be collinear.  
+        (The orange triangle will degenerate to a line segment.)  
+        
+        Try moving F along the ellipse and see what happens.        
+    </p>
+    <div>
+        <button id="insideexample">Example 1</button>
+        <button id="outsideexample">Example 2</button>
+        <button id="circleexample">Example 3</button>
+        <div class="fdistance">
             <span id="fdistance"></span>
         </div>
         <table id="pointstable">
             <thead>
                 <tr>
-                    <th>Pt.</th>
-                    <th>R</th>
-                    <th>Imag</th>
+                    <th>Point</th>
+                    <th>R(Point)</th>
+                    <th>Im(Point)</th>
                 </tr>
             </thead>
             <tbody>
@@ -82,8 +108,17 @@
             <tbody>
             </tbody>
         </table>
-
     </div>
+    <div id="canvasandpoints">
+        <div id="pointA" class="cpt"><span>A</span></div>
+        <div id="pointB" class="cpt"><span>B</span></div>
+        <div id="pointC" class="cpt"><span>C</span></div>
+        <div id="pointD" class="cpt"><span>D</span></div>
+        <div id="pointE" class="cpt"><span>E</span></div>
+        <div id="pointF" class="cpt"><span>F</span></div>
+        <canvas id="canvas" height="512" width="512"></canvas>
+    </div>
+
 </body>
 
 </html>

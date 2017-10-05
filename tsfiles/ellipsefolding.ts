@@ -21,8 +21,9 @@ function divideCircle(N) {
     return numeric.linspace(0, 2 * Math.PI * (1 - 1.0 / N), N);
 }
 
-var cvs;
-var ctx;
+var cvs : HTMLCanvasElement;
+var ctx : CanvasRenderingContext2D;
+
 var minX, maxX, minY, maxY;
 function reset(inminX, inmaxX, inminY, inmaxY) {
     minX = inminX; minY = inminY;
@@ -42,7 +43,7 @@ var sigma: number;
 
 $(function () {
 
-    cvs = document.getElementById("canvas");
+    cvs = document.getElementById("canvas") as HTMLCanvasElement;
     ctx = cvs.getContext("2d");
 
     $(".focusdiv").draggable();
