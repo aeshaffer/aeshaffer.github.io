@@ -8,13 +8,17 @@ var CircleInversion;
 (function (CircleInversion) {
     var cvs;
     var ctx;
+    var r = new ranges({ minX: -2, maxX: 2, minY: -2, maxY: 2 });
+    var circleRadius = 1;
+    var a;
     function getCanvasWH() { return { height: $(cvs).height(), width: $(cvs).width() }; }
     function cToPosition2(r, xy) {
         var h = getCanvasWH();
         var xpixelsperunit = h.width / (r.width());
         var ypixelsperunit = h.height / (r.height());
         var left = (xy.x - r.minX) * xpixelsperunit - 5;
-        var top = (fixy(xy).y - r.minY) * ypixelsperunit - 5;
+        // Invert y
+        var top = (r.maxY - fixy(xy).y) * ypixelsperunit - 5;
         return { "left": left, "top": top };
     }
     function positionToC2(r, psn) {
@@ -44,21 +48,31 @@ var CircleInversion;
     }
     function tickmarks(r, ctx) {
         ctx.strokeStyle = "lightgray";
-        for (var i = 10 * r.minX; i < 10 * r.maxX; i++) {
+        function vtick(i) {
             ctx.beginPath();
             ctx.moveTo(i / 10.0, .05);
             ctx.lineTo(i / 10.0, -.05);
             ctx.stroke();
         }
-        for (var i = 10 * r.minY; i < 10 * r.maxY; i++) {
+        function htick(i) {
             ctx.beginPath();
             ctx.moveTo(.05, i / 10.0);
             ctx.lineTo(-.05, i / 10.0);
             ctx.stroke();
         }
+        for (var i = 1; i < 10 * r.maxX; i++) {
+            vtick(i);
+        }
+        for (var i = 1; i < -10 * r.minX; i++) {
+            vtick(-i);
+        }
+        for (var i = 1; i < 10 * r.maxY; i++) {
+            htick(i);
+        }
+        for (var i = 1; i < -10 * r.minY; i++) {
+            htick(-i);
+        }
     }
-    var r = new ranges({ minX: -2, maxX: 2, minY: -2, maxY: 2 });
-    var circleRadius = 1;
     function circleThrough(z1, z2, z3) {
         var mpz1z2 = z1.add(z2).div(2);
         var z1z2perpdirection = z1.sub(z2).mul(t2c(Math.PI / 2));
@@ -173,19 +187,22 @@ var CircleInversion;
         ctx.arc(cinvCircle.center.x, cinvCircle.center.y, cinvCircle.radius, 0, 2 * Math.PI, false);
         ctx.stroke();
     }
-    function resetInner2(r, fudgefactor, ctx2, cvs2) {
-        var h = $(window).height() - $(cvs2).offset().top - fudgefactor;
-        var w = $(window).width() - $(cvs2).offset().left - 200;
+    function resetInner2(fudgefactor, ctx2, cvs2) {
+        var wh = window.innerHeight;
+        var ww = window.innerWidth;
+        var h = wh - $(cvs2).offset().top - fudgefactor;
+        var w = ww - $(cvs2).offset().left - 200;
         $(cvs2).height(h).attr("height", h).width(w).attr("width", w);
         if (h > w) {
             // Preserve the width, add extra to the height.
-            r.minY *= 1.0 * h / w;
-            r.maxY *= 1.0 * h / w;
+            r.minY = -2.0 * h / w;
+            r.maxY = 2.0 * h / w;
         }
         else {
-            r.minX *= 1.0 * w / h;
-            r.maxX *= 1.0 * w / h;
+            r.minX = -2.0 * w / h;
+            r.maxX = 2.0 * w / h;
         }
+        //console.log(h, w, r.minX, r.maxX, r.minY, r.maxY);
         ctx2.resetTransform();
         ctx2.transform(cvs2.width / 2, 0, 0, -cvs2.height / 2, cvs2.width / 2, cvs2.height / 2);
         ctx2.scale(2 / (r.maxX - r.minX), 2 / (r.maxY - r.minY));
@@ -193,12 +210,35 @@ var CircleInversion;
         ctx2.lineWidth = 1.0 / cvs2.width * (r.maxX - r.minX);
         axes(r, ctx2);
     }
+    function rescale() {
+        resetInner2(20, ctx, cvs);
+        if (a.x > r.maxX) {
+            a.x = r.maxX;
+        }
+        if (a.y > r.maxY) {
+            a.y = r.maxY;
+        }
+        if (a.x < r.minX) {
+            a.x = r.minX;
+        }
+        if (a.y < r.minY) {
+            a.y = r.minY;
+        }
+        var pos = cToPosition(r, a.x, a.y);
+        //console.log(a, r, pos);
+        $("#pointA").css(pos);
+    }
     function setup() {
         cvs = document.getElementById("canvas");
         ctx = cvs.getContext("2d");
         $("#pointA").draggable({});
-        resetInner2(r, 50, ctx, cvs);
-        $("#pointA").css(cToPosition(r, 1.25, 0));
+        $("#pointA").draggable({
+            stop: function (event, ui) { updateA(); },
+            drag: function (event, ui) { updateA(); }
+        });
+        $(window).on("resize", rescale);
+        a = xy2c({ x: 1.25, y: 0 });
+        rescale();
         $("#canvas").click(function (e) {
             var posX = $(this).offset().left, posY = $(this).offset().top;
             var z = positionToC2(r, { left: e.pageX - posX, top: e.pageY - posY });
@@ -213,15 +253,17 @@ var CircleInversion;
         requestAnimationFrame(drawAndRAF);
     }
     ;
+    function updateA() {
+        a = xy2c(positionToC(r, $("#pointA").position()));
+        console.log("Setting A to ", a);
+    }
     function draw() {
         axes(r, ctx);
         tickmarks(r, ctx);
-        var a = xy2c(positionToC(r, $("#pointA").position()));
         var aprime = invert(circleRadius, a);
         var insidept = a.abs().x < circleRadius ? a : aprime;
         var outsidept = a.abs().x < circleRadius ? aprime : a;
         var circleptY = Math.sqrt(circleRadius * circleRadius - insidept.abs().x * insidept.abs().x);
-        console.log(a);
         var showExamples = $("#showExamples").is(":checked");
         var showOtherExamples = $("#showMoreExamples").is(":checked");
         var showBoxesExamples = $("#showBoxesExamples").is(":checked");

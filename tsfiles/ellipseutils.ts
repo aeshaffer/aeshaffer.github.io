@@ -92,8 +92,11 @@ function lineLineIntersectionZZ(z00: C, z01: C, z10: C, z11: C) {
 }
 
 function resetInner(r: ranges, fudgefactor, ctx2, cvs2) {
-    var h = $(window).height() - $(cvs2).offset().top - fudgefactor;
+    var wh = window.innerHeight;
+    var h = wh - $(cvs2).offset().top - fudgefactor;
     $(cvs2).height(h).attr("height", h).width(h).attr("width", h);
+
+    //console.log("Setting to ", wh, "-", $(cvs2).offset().top, "=",  h);
 
     ctx2.resetTransform();
     ctx2.transform(cvs2.width / 2, 0, 0, -cvs2.width / 2, cvs2.width / 2, cvs2.width / 2);
@@ -105,7 +108,7 @@ function resetInner(r: ranges, fudgefactor, ctx2, cvs2) {
 
 
 function axes(r: ranges, ctx2) {
-    ctx2.clearRect(r.minX, r.minY, r.maxX -r.minX, r.maxY - r.minY);
+    ctx2.clearRect(r.minX, r.minY, r.maxX - r.minX, r.maxY - r.minY);
     ctx2.strokeStyle="lightgray";
     ctx2.beginPath();
     ctx2.moveTo(r.minX, 0);

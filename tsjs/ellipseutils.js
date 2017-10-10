@@ -68,8 +68,10 @@ function lineLineIntersectionZZ(z00, z01, z10, z11) {
     return lineLineIntersectionZD(z00, z00.sub(z01), z10, z10.sub(z11));
 }
 function resetInner(r, fudgefactor, ctx2, cvs2) {
-    var h = $(window).height() - $(cvs2).offset().top - fudgefactor;
+    var wh = window.innerHeight;
+    var h = wh - $(cvs2).offset().top - fudgefactor;
     $(cvs2).height(h).attr("height", h).width(h).attr("width", h);
+    //console.log("Setting to ", wh, "-", $(cvs2).offset().top, "=",  h);
     ctx2.resetTransform();
     ctx2.transform(cvs2.width / 2, 0, 0, -cvs2.width / 2, cvs2.width / 2, cvs2.width / 2);
     ctx2.scale(2 / (r.maxX - r.minX), 2 / (r.maxY - r.minY));
