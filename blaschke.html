@@ -3,6 +3,9 @@
 
 <head>
   <link rel="stylesheet" type="text/css" href="blaschke.css" />
+  <link rel="stylesheet" type="text/css" href="./jquery-ui-1.11.1/jquery-ui.css" />
+  <link rel="stylesheet" type="text/css" href="./jquery-ui-1.11.1/jquery-ui.structure.min.css" />
+  <link rel="stylesheet" type="text/css" href="./jquery-ui-1.11.1/jquery-ui.theme.min.css" />
   <script type="text/javascript" src="./numeric-1.2.3.js"></script>
   <script type="text/javascript" src="./jquery-2.1.1.js"></script>
   <script type="text/javascript" src="./jquery-ui-1.11.1/jquery-ui.js"></script>
@@ -23,6 +26,7 @@
     $(function () {
       bpwidget = new BPWidget($("html"), true);
       bpwidget.wireup();
+      $("#tabs").tabs();
     });
   </script>
 
@@ -35,60 +39,111 @@
   <div style="margin: 20px;" id="links">
     <a href="./guide/guide.html" style="margin: 0px 20px;">User's Guide</a>
     <a href="./composetool.html">Open Compose Tool</a>
-    <hr />
   </div>
-  <div id="settings1">
-    Show Advanced Options:<input type="checkbox" class="showadvanced" value="false" />
-    <span class="advanced">
-      Rendered Size: <input class="pixels" value="400" style="width: 50px;"/>
-      Zoom Size: <input class="graphzoom" value="1" style="width: 50px;"/>
-      Window Scale: <input class="windowscale" value="1" style="width: 50px;"/>
-    </span>
-    <br/>
+  <hr />
+  <div id="tabs">
+    <ul>
+      <li><a href="#settings2">Settings</a></li>
+      <li><a href="#evaluateBP">Evaluate</a></li>
+      <li><a href="#findpreimages">Preimages</a></li>
+      <li><a href="#loadpoints">Load Zeroes</a></li>
+      <li><a href="#advancedsettings">Other Options</a></li>
+      <li><a href="#displaysize">Display Size</a></li>
+    </ul>
+    <div id="settings2">
+      <label title="When identifying points, skip this many points.  (Must be a factor of the number of zeros of the Blaschke Product.)">
+      Skip Points: <input class="skippoints" value="1" style="width: 50px;" /></label>
+      <label title="Identify this many &lambda;s which are identified by the Blaschke Product.  IE: Draw this many inscribed polygons.">
+      Auto Identify Points: <input class="autolinespoints" value="2" style="width: 50px;" />
+      </label>
+      <br />
+      <label title="Re-draw lines connecting identified points as zeroes are dragged?">Auto Re-Draw Lines:<input class="reidonrplot" type="checkbox" checked="checked"/></label>
+      <label title="Re-plot arg(B) when a zero is dropped?">Auto&nbsp;Replot:<input class="replotondrop" type="checkbox" checked/></label>
+      <label>Thick Lines:<input class="solidtangents" type="checkbox" /></label>
+      <label>Guess Ellipse:<input class="doguessellipse" type="checkbox"/></label>
+      <br/>
+    </div>
+    <div id="advancedsettings">
+      <label title="Try to factor the Blaschke product with an inner factor of degree &quot;Skip Points&quot;." class="advanced">Plot Interpolated Decomposition:<input class="plotinterp" type="checkbox"></input></label><br/>
+      <label class="advanced">Plot Polygon (requires Thick Lines):<input class="plotpolygon" checked="checked" type="checkbox"/></label><br/>
+      <label class="advanced">Show&nbsp;Critical&nbsp;Points:<input class="showcps" checked="checked" type="checkbox"/></label>
+      <label class="advanced">Show&nbsp;Fixed&nbsp;Points:<input class="showfps" type="checkbox"/></label>
+      <br />
+      <label>Show / Hide Preimages Plots:
+      <select class="showpreimages advanced">
+          <option value="none">Hide Range</option>
+          <option value="regions" selected="selected">Regions Plot</option>
+          <option value="both">Both</option>
+        </select>
+      </label><br/>
+      <label class="advanced">B. Line Threshold: <input class="raythreshold" value="0"/></label><br />
+      <button type="button" class="workergo advanced">Fast Plot</button>      
+      <label style="display: none">Show Advanced Options:<input type="checkbox" class="showadvanced" checked="checked" /></label><br/>
+    </div>
+    <div id="displaysize">
+      <span class="advanced">
+              Pixel Height / Width: <input class="pixels" value="400" style="width: 50px;"/>
+              Zoom Size: <input class="graphzoom" value="1" style="width: 50px;"/>
+              Window Scale: <input class="windowscale" value="1" style="width: 50px;"/>
+              </span>
+      <br/>
+    </div>
+    <div id="loadpoints">
+      <span>Zeroes:</span><br/>
+      <textarea class="zsstring" style="width: 100%"></textarea>
+      <button type="button" class="loadbutton">Load</button>
+      <a class="permalink">Permalink</a>
+    </div>
+    <div id="evaluateBP">
+      Click on a point, or enter a point in the form <tt>x,y</tt>:
+      <input class="textz" style="width: 100px;" value=".2,.5"></input>
+      <button type="button" class="gotextz">Go</button>
+      <table style="border: 1px solid black; text-align: left;">
+        <tr>
+          <td>z=</td>
+          <td class="point" style="width: 250px"></td>
+          <td>
+          </td>
+        </tr>
+        <tr>
+          <td>B(z)=</td>
+          <td class="dest"></td>
+          <td />
+        </tr>
+      </table>
+    </div>
+    <div id="findpreimages">
+      Enter a point in the form <tt>x,y</tt> and click the button to find the points mapped to that point.
+      <p>z=<input class="rangepoint"></input>
+        <button type="button" class="findpreimages">Find Preimages</button>
+      </p>
+      <ul class="foundpreimages">
+      </ul>
+    </div>
+  </div>
+  <hr />
+  <div id="buttons">
     <button type="button" class="plotbutton">Plot</button>
-    <button type="button" class="workergo advanced">Fast Plot</button>
-    <button type="button" class="clearplots">Clear Plots</button> &nbsp;
-    <select class="showpreimages advanced">
-      <option value="none">Hide Range</option>
-      <option value="regions" selected="selected">Regions Plot</option>
-      <option value="both">Both</option>
-    </select>
-    <span class="advanced">B. Line Threshold: <input class="raythreshold" value="0"/></span>
+    <button type="button" class="autolinesgo">Redraw Lines</button>
+    <button type="button" class="animatelines">Animate Lines</button> &nbsp;
+    <button type="button" class="clearplots">Clear Plots</button>
+    <button type="button" class="clearlines">Clear Lines</button> &nbsp;
     <button type="button" class="screenshot">Screenshot</button>
   </div>
-  <div id="settings2">
-    Skip Points: <input class="skippoints" value="1" style="width: 50px;" />
-    <!-- Angle: <input class="theta" value="0"/>
-	 <button type="button" class="timesPI">*= &pi;</button>
-	 <button type="button" class="plottheta">Plot Identified</button><br/>
-	 -->
-    Auto Identify Points: <input class="autolinespoints" value="2" style="width: 50px;" />
-    <button type="button" class="clearlines">Clear Lines</button>
-    <button type="button" class="autolinesgo">Redraw Lines</button>
-    <button type="button" class="animatelines">Animate Lines</button> Auto Re-Draw Lines:<input class="reidonrplot" type="checkbox"
-    /> Solid Lines:<input class="solidtangents" type="checkbox" /> Guess Ellipse:<input class="doguessellipse" type="checkbox"
-    />
-    <span class="advanced">Plot Interp:<input class="plotinterp" value="false" type="checkbox"/></span>
-    <span class="advanced">Plot Polygon:<input class="plotpolygon" checked="checked" type="checkbox"/></span>
-    <span class="advanced">Hide&nbsp;Critical&nbsp;Points:<input class="hidecps" type="checkbox"/></span>
-    <span class="advanced">Show&nbsp;Fixed&nbsp;Points:<input class="showfps" type="checkbox"/></span>
-    <span class="advanced">Auto&nbsp;Replot:<input class="replotondrop" type="checkbox" checked/></span>
-  </div>
-  <div id="clicklocation" style="margin: 10px 0px;">
-    <table style="width: 398px; border: 1px solid black; text-align: left;">
-      <tr>
-        <th>Click
-          <input class="textz" style="width: 100px;"></input>
-          <button type="button" class="gotextz">Go</input>
-	</th><th>B(CL)</th></tr>
-      <tr><td class="point">&nbsp;</td><td class="dest">&nbsp;</td></tr>
-    </table>
-  </div>
+  <hr />
   <div style="display: none">
-  Eval: <div class="progress"></div>
-  RB: <ul class="rainbowstatus"><li></li></ul>
-  Reg: <ul class="regionsstatus"><li></li></ul>
+    Eval:
+    <div class="progress"></div>
+    RB:
+    <ul class="rainbowstatus">
+      <li></li>
+    </ul>
+    Reg:
+    <ul class="regionsstatus">
+      <li></li>
+    </ul>
   </div>
+  <br style="clear: both;" />
   <div class="zeroesholder rainbowholder">
     <span class="zhlabel">arg(B)</span>
     <div class="circle"></div>
@@ -104,24 +159,18 @@
     </div>
     <div class="statsblock">
       <h3>Critical Points</h3>
-      <ul class="criticalpoints">  </ul>
+      <ul class="criticalpoints"> </ul>
     </div>
     <div class="statsblock">
       <h3>Zeroes</h3>
-      <ul class="zeroes">  </ul>
+      <ul class="zeroes"> </ul>
     </div>
     <div class="statsblock">
-      <h3>Load/Edit</h3>
-      <button type="button" class="loadbutton">Load</button>
-          <a class="permalink">Permalink</a>
-          <textarea class="zsstring" style="width: 100%"></textarea>
+      <h3>Fixed Points</h3>
+      <ul class="fixedpoints"></ul>
+    </div>
   </div>
-  <div class="statsblock">
-    <h3>Fixed Points</h3>
-    <ul class="fixedpoints"></ul>
-  </div>
-  </div>
-  <br />
+  <hr />
   <div class="zeroesholder">
     <span class="zhlabel">Region Preimages</span>
     <div class="circle"></div>
@@ -141,13 +190,7 @@
     <div class="rangepath" style="width: 100%; height: 100%; position: absolute; top: 0px; left: 0px;">
     </div>
   </div>
-  <div style="display: inline-block; width: 200px" class="statsblock">
-    <h3>Find Preimages</h3>
-    <input class="rangepoint"></input>
-    <button type="button" class="findpreimages">Find Preimages</button>
-    <ul class="foundpreimages">
-    </ul>
-  </div>
+
   <div style="display: none; float:left; width: 200px;" class="statsblock">
     <h3>Ordered Ct. Angles</h3>
     <ul class="criticalangles"></ul>

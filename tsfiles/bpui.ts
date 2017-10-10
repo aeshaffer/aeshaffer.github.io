@@ -75,7 +75,7 @@ class BPWidget {
     doguessellipse: JQuerySingletonWrapper<HTMLInputElement>;
     plotinterp: JQuerySingletonWrapper<HTMLInputElement>;
     plotpolygon: JQuerySingletonWrapper<HTMLInputElement>;
-    hidecps: JQuerySingletonWrapper<HTMLInputElement>;
+    showcps: JQuerySingletonWrapper<HTMLInputElement>;
     showfps: JQuerySingletonWrapper<HTMLInputElement>;
     replotondrop: JQuerySingletonWrapper<HTMLInputElement>;
 
@@ -152,7 +152,7 @@ class BPWidget {
         this.doguessellipse = g(".doguessellipse");
         this.plotinterp = g(".plotinterp");
         this.plotpolygon = g(".plotpolygon");
-        this.hidecps = g(".hidecps");
+        this.showcps = g(".showcps");
         this.showfps = g(".showfps");
         this.replotondrop = g(".replotondrop");
 
@@ -328,8 +328,8 @@ class BPWidget {
         this.fixedpointsUL.empty();
         for (var fp of cpi.fps) {
             var li = $("<li>");
-            li.text(dc(fp) + " Norm:" + round5(fp.abs().x));
-            li.attr("title", " Check:" + dc(bpeval(zs, fp)));
+            li.text(dcomplex(fp) + " Norm:" + round5(fp.abs().x));
+            li.attr("title", " Check:" + dcomplex(bpeval(zs, fp)));
             this.fixedpointsUL.append(li);
         }
     }
@@ -773,10 +773,11 @@ class BPWidget {
         var ctx = setupCTX(this.rblines.element, this.plotDims().windowN);
 
         if (this.parseSkip() == 1) {
+            var plotpolygon = this.plotpolygon.is(":checked");
             var drawsolid = this.solidtangents.is(":checked");
             this.drawtangents(ctx, ajpct, drawsolid);
 
-            if (drawsolid && this.plotpolygon.is(":checked")) {
+            if (drawsolid && plotpolygon) {
                 // Get tangent segments.
                 var intersections = getTangentSegments(this.zs, ajpct);
                 var ints = getSortedByCenter(intersections);
@@ -992,9 +993,9 @@ class BPWidget {
             that.clearplots.click();
         })
 
-        if (this.hidecps != null) {
-            this.hidecps.change(function () {
-                if ($(this).is(":checked")) {
+        if (this.showcps != null) {
+            this.showcps.change(function () {
+                if (!$(this).is(":checked")) {
                     $("body").addClass("hidecps");
                 } else {
                     $("body").removeClass("hidecps");
