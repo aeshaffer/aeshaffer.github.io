@@ -621,15 +621,19 @@ class BPWidget {
         // Draw lines connecting the intersections
         // Not quite correct, since we want the curve to be tangent to the segments,
         // but I think for a large enough sampling it comes close enough.  
-        ctx.beginPath();
-        ctx.strokeStyle = "#f00";
-        ctx.lineWidth = 4.0 / this.plotDims().graphN;
-        ctx.moveTo(ints[0].x, ints[0].y);
-        for (var i = 0; i < ints.length; i++) {
-            ctx.lineTo(ints[i].x, ints[i].y);
+        function f(c: string, w: number) {
+            ctx.beginPath();
+            ctx.strokeStyle = c;
+            ctx.lineWidth = w;
+            ctx.moveTo(ints[0].x, ints[0].y);
+            for (var i = 0; i < ints.length; i++) {
+                ctx.lineTo(ints[i].x, ints[i].y);
+            }
+            ctx.closePath();
+            ctx.stroke();
         }
-        ctx.closePath();
-        ctx.stroke();
+        f("black", 6 / this.plotDims().graphN);
+        f("red", 4 / this.plotDims().graphN);
     }
 
     guessellipse(ctx, ints) {
@@ -658,7 +662,7 @@ class BPWidget {
 
 
 
-    drawtangents(ctx, ajpct, drawsolid) {
+    drawtangents(ctx: CanvasRenderingContext2D, ajpct, drawsolid) {
         var tpts = numeric.linspace(0, 2 * Math.PI - 2 * Math.PI / ajpct, ajpct); // [0, Math.PI];
         for (var ti = 0; ti < tpts.length; ti++) {
             var pts = getTanPoints(this.zs, tpts[ti]);
@@ -677,12 +681,32 @@ class BPWidget {
                     ctx.strokeStyle = "#000";
                 } else {
                     ctx.strokeStyle = "#00f";
-                    ctx.lineTo(pts[i].ztan.x, fixy(pts[i].ztan).y);
+                    var tanPt = fixy(pts[i].ztan);
+                    ctx.lineTo(tanPt.x, tanPt.y);
                     ctx.stroke();
+
+                    var theta = pts[i].z2.sub(pts[i].z1).angle();
+                    var nubbin = rt2c(10 * ctx.lineWidth, theta + Math.PI / 2);
+                    var nubbinend = tanPt.add(nubbin);
+
+                    ctx.beginPath();
+                    ctx.moveTo(tanPt.x, tanPt.y);
+                    ctx.lineTo(nubbinend.x, nubbinend.y);
+                    ctx.stroke();
+
+                    // ctx.beginPath();
+                    // ctx.arc(tanPt.x, tanPt.y, 6 * ctx.lineWidth, theta, theta+Math.PI);
+                    // ctx.fillStyle = "black";
+                    // ctx.fill();
+
+                    // ctx.beginPath();
+                    // ctx.arc(tanPt.x, tanPt.y, 4 * ctx.lineWidth, theta, theta+Math.PI);
+                    // ctx.fillStyle = "red";
+                    // ctx.fill();
 
                     ctx.beginPath();
                     ctx.strokeStyle = "#0f0";
-                    ctx.moveTo(pts[i].ztan.x, fixy(pts[i].ztan).y);
+                    ctx.moveTo(tanPt.x, tanPt.y);
                 }
                 ctx.lineTo(pts[i].z2.x, fixy(pts[i].z2).y);
                 ctx.stroke();
@@ -1132,7 +1156,7 @@ class BPWidget {
         var t0 = performance.now();
         this.fastReplot(this.zs, N, this.cpi, th);
         var t1 = performance.now();
-        this.addPerformanceLog(this.zs.length, N, t1-t0);
+        this.addPerformanceLog(this.zs.length, N, t1 - t0);
     }
 }
 
