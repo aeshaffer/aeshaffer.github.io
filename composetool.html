@@ -19,25 +19,67 @@
   <script type="text/javascript" src="./tsjs/lmellipse.js"></script>
   <script type="text/javascript" src="./tsjs/composetool.js"></script>
   <script type="text/javascript">
-      $(composeSetup);
-    </script>
-    <style type="text/css">
-      #outerzeroesdiv, #innerzeroesdiv, #composeddiv {
-      width: 300px;
-      margin: 0px 20px;
+    $(composeSetup);
+  </script>
+  <style type="text/css">
+    .container {
+      width: 990px;
+      margin: 0px auto;
+      position: relative;
+    }
+
+    #outerzeroesdiv,
+    #innerzeroesdiv,
+    #composeddiv {
+      width: 320px;
+      margin: 0px 5px;
       float: left;
-      }
-      #outerzeroesdiv a, #innerzeroesdiv a, #composeddiv a {
+    }
+
+    #outerzeroesdiv a,
+    #innerzeroesdiv a,
+    #composeddiv a {
       float: right;
       margin-right: 10px;
-      }
-      textarea { 
+    }
+
+    textarea {
       width: 100%;
-      }
-    </style>
-  </head>
-  <body>
-    
+    }
+
+    .outerzero {
+      border: 1px solid black;
+    }
+
+    .innerpreimage {
+      padding-left: 10px;
+    }
+
+    h3 {
+      margin-left: 10px;
+    }
+
+    #preimages {
+      clear: both;
+      width: 640px;
+      
+      position: absolute; bottom: 0px;
+            text-align: center;
+    }
+
+    #composeddrawoptions {
+      width: 320px;
+      float: left;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Blaschke Product Compose Tool</h1>
+
+  <div class="container">
+
     <div>
       <button type="button" id="testbutton">Load Sample Data</button>
       <button type="button" id="plotallbutton">Plot All</button>
@@ -52,7 +94,7 @@
       </div>
       <div class="zeroesholder outerholder regionsholder">
       </div>
-      <textarea id="innerzs" class="zsstring" ></textarea>
+      <textarea id="innerzs" class="zsstring"></textarea>
     </div>
 
     <div id="outerzeroesdiv">
@@ -63,7 +105,7 @@
       </div>
       <textarea id="outerzs" class="zsstring"></textarea><br/>
     </div>
-    
+
     <div id="composeddiv">
       <h3>B=C&#x25cb;D <a href="" id="permalink" target="_blank">Open in Applet</a></h3>
       <div class="zeroesholder composedholder rainbowholder">
@@ -71,35 +113,40 @@
       <div class="zeroesholder outerholder regionsholder">
       </div>
       <textarea id="composedzs" class="zsstring"></textarea>
-      <div>
-	Skip Points: <input class="skippoints" value="1" style="width: 50px;"/><br/>
-	Auto Identify Points: <input class="autolinespoints" value="2" style="width: 50px;"/><br/>
-	Auto Re-Draw:<input class="reidonrplot" value="false" type="checkbox"/>    <br />
-	Solid Lines:<input class="solidtangents" checked type="checkbox" /><br />
-	Guess Ellipse:<input class="doguessellipse" checked type="checkbox" /><br />
-	<button type="button" class="clearlines">Clear Lines</button>
-	<button type="button" class="autolinesgo">Redraw Lines</button>
-	<button type="button" class="animatelines">Animate Lines</button>
+
+      <div id="composeddrawoptions">
+        Skip Points: <input class="skippoints" value="1" style="width: 50px;" /><br/> Auto Identify Points: <input class="autolinespoints"
+          value="2" style="width: 50px;" /><br/> Auto Re-Draw:<input class="reidonrplot" value="false" type="checkbox" /> <br
+        /> Solid Lines:<input class="solidtangents" checked type="checkbox" /><br /> Guess Ellipse:<input class="doguessellipse"
+          checked type="checkbox" /><br />
+        <button type="button" class="clearlines">Clear Lines</button>
+        <button type="button" class="autolinesgo">Redraw Lines</button>
+        <button type="button" class="animatelines">Animate Lines</button>
       </div>
     </div>
-        
 
-    
+    <br style="clear: both;" />
+
     <div style="border: 1px solid black; float: left; width: 300px; display: none;">
       Overlay
       <div style="position: relative; width: 300px; height: 300px;">
-	<canvas id="inneroverlay" style="width: 300px; height: 300px; top: 0px; position: absolute; opacity:.5" width="300" height="300"></canvas>
-	<canvas id="overlay" style="width: 300px; height: 300px; top: 0px; position: absolute; opacity:.5" width="300" height="300"></canvas>
+        <canvas id="inneroverlay" style="width: 300px; height: 300px; top: 0px; position: absolute; opacity:.5" width="300" height="300"></canvas>
+        <canvas id="overlay" style="width: 300px; height: 300px; top: 0px; position: absolute; opacity:.5" width="300" height="300"></canvas>
       </div>
     </div>
-    
-    <table id="preimages" style="clear: both;">
+
+    <table id="preimages">
       <thead>
-	<th>Outer Zero</th>
-	<th id="ipimgs">Inner Preimages</th>
+        <th>Outer Zero<br/> (C(z<sub>0</sub>) = 0)</th>
+        <th id="ipimgs">Inner Preimages <br/> (D(z
+          <sub>1</sub>) = z<sub>0</sub> &rArr; C&#x25cb;D(z<sub>1</sub>) = 0)</th>
       </thead>
       <tbody>
       </tbody>
-    </table>      
-  </body>
+    </table>
+
+
+  </div>
+</body>
+
 </html>

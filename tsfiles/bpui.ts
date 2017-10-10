@@ -916,17 +916,17 @@ class BPWidget {
 
         if (this.clearpreimages != null) {
             this.clearpreimages.on("click",
-                function (e) {
-                    cssscatter(that.regions.parent(".zeroesholder"),
-                        that.plotDims().graphN,
-                        [], "pi", true);
-                    cssscatter(that.rainbow.parent(".zeroesholder"),
-                        that.plotDims().graphN,
-                        [], "pi", true);
-                    cssscatter(that.range.siblings(".rangepath"),
-                        that.plotDims().graphN,
-                        [], "path", true);
-                }
+                // function (e) {
+                //     cssscatter(that.regions.parent(".zeroesholder"),
+                //         that.plotDims().graphN,
+                //         [], "pi", true);
+                //     cssscatter(that.rainbow.parent(".zeroesholder"),
+                //         that.plotDims().graphN,
+                //         [], "pi", true);
+                //     cssscatter(that.range.siblings(".rangepath"),
+                //         that.plotDims().graphN,
+                //         [], "path", true);
+                // }
             );
         }
         this.showpreimages.on("change", function (e) {

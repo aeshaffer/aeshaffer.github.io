@@ -40,12 +40,12 @@ function doCompose() {
     for (var i = 0; i < composedobjs.length; i++) {
         var o = composedobjs[i];
         var tr = $("<tr>");
-        var td1 = $("<td>");
+        var td1 = $("<td class='outerzero'>");
         td1.text(dc(o.outerzero));
         tr.append(td1);
         for (var j = 0; j < o.preimages.length; j++) {
             var pimg = o.preimages[j];
-            var td2 = $("<td>");
+            var td2 = $("<td class='innerpreimage'>");
             td2.text(dc(pimg));
             tr.append(td2);
         }
@@ -97,10 +97,11 @@ $(function () {
         doCompose();
     });
     $("#testbutton").on("click", function () {
-        $("#outerzs").val(["-0.5,-0.5", "0,0.75", "0,0", "0.5,0"].join("\n"));
-        $("#innerzs").val(["-0.5,-0.5", "0,0.75", "0,0", "0.5,0"].join("\n"));
+        $("#outerzs").val(["0,0.75", "0,0", "0.5,0"].join("\n"));
+        $("#innerzs").val(["-0.5,-0.5", "0,0"].join("\n"));
         $("#outerzs").change();
         $("#innerzs").change();
+        doCompose();
         handleFinish();
     });
 });

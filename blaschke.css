@@ -160,3 +160,8 @@ canvas, .circle, .zeroesholder {
 .workingbutton {
     background-color: red;
 }
+
+.rainbowholder {
+    margin: 0px auto;
+    display: block;
+}

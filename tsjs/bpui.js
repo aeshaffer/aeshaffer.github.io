@@ -854,11 +854,7 @@ var BPWidget = /** @class */ (function () {
         this.clearlines.on("click", function () { that.doclearlines(); });
         // $("#regions").on("click", cf);
         if (this.clearpreimages != null) {
-            this.clearpreimages.on("click", function (e) {
-                cssscatter(that.regions.parent(".zeroesholder"), that.plotDims().graphN, [], "pi", true);
-                cssscatter(that.rainbow.parent(".zeroesholder"), that.plotDims().graphN, [], "pi", true);
-                cssscatter(that.range.siblings(".rangepath"), that.plotDims().graphN, [], "path", true);
-            });
+            this.clearpreimages.on("click");
         }
         this.showpreimages.on("change", function (e) {
             var v = $(e.target).val();
