@@ -1106,8 +1106,23 @@ class BPWidget {
 
         if (this.screenshot != null) {
             this.screenshot.click(function () {
-                var rainbowcanvas = (<HTMLCanvasElement>(that.rainbow.element));
-                window.open("./screenshot.html", "width=" + rainbowcanvas.width + "height=" + rainbowcanvas.height);
+                var composedcanvas = <HTMLCanvasElement>$("#composedscreenshot")[0];
+                var url = composeScreenshot(that.rainbow.element,
+                    that.rblines.element,
+                    composedcanvas,
+                    <HTMLCanvasElement>$("#screenshotrainbow")[0],
+                    <HTMLCanvasElement>$("#screenshotlines")[0],
+                    that);
+                // Hurgle burgle IE.
+                if (window.navigator.msSaveBlob != null) {
+                    window.navigator.msSaveBlob(composedcanvas.msToBlob(), 'screenshot.png')
+                } else {
+                    var x = window.open();
+                    var img = "<html><head><title>Screenshot</title></head><body><a download='Screenshot.png' href='" + url + "'>Download</a><br /><img src='" + url + "' /></body></html>";
+                    x.document.open();
+                    x.document.write(img);
+                    x.document.close();
+                }
             })
         }
 

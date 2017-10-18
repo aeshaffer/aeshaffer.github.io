@@ -203,7 +203,7 @@ var CircleInversion;
             r.maxX = 2.0 * w / h;
         }
         //console.log(h, w, r.minX, r.maxX, r.minY, r.maxY);
-        ctx2.resetTransform();
+        ctx2.setTransform(1, 0, 0, 1, 0, 0);
         ctx2.transform(cvs2.width / 2, 0, 0, -cvs2.height / 2, cvs2.width / 2, cvs2.height / 2);
         ctx2.scale(2 / (r.maxX - r.minX), 2 / (r.maxY - r.minY));
         ctx2.translate(-(r.maxX + r.minX) / 2, -(r.maxY + r.minY) / 2);
@@ -242,7 +242,8 @@ var CircleInversion;
         $("#canvas").click(function (e) {
             var posX = $(this).offset().left, posY = $(this).offset().top;
             var z = positionToC2(r, { left: e.pageX - posX, top: e.pageY - posY });
-            $("#pointA").css(cToPosition2(r, c(z.x, -z.y)));
+            $("#pointA").css(cToPosition2(r, c(z.x, z.y)));
+            updateA();
         });
         window.requestAnimationFrame(drawAndRAF);
         setInterval(draw, 1000);

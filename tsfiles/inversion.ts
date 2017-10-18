@@ -260,7 +260,8 @@ namespace CircleInversion {
             var posX = $(this).offset().left,
                 posY = $(this).offset().top;
             var z = positionToC2(r, { left: e.pageX - posX, top: e.pageY - posY })
-            $("#pointA").css(cToPosition2(r, c(z.x, -z.y)));
+            $("#pointA").css(cToPosition2(r, c(z.x, z.y)));
+            updateA();            
         });
 
         window.requestAnimationFrame(drawAndRAF);
