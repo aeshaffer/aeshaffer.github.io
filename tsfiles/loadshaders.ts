@@ -1,8 +1,7 @@
-// our shaders base path
-loadShaders.base = "";
 
-// our shaders loader
-function loadShaders(gl, shadertype, shaders, callback) {
+
+function loadShaders(gl: WebGLRenderingContext, shadertype: string, shaders: any[], callback): WebGLShader[]
+{
     // (C) WebReflection - Mit Style License
     function onreadystatechange() {
         var
@@ -33,8 +32,8 @@ function loadShaders(gl, shadertype, shaders, callback) {
         xhr;
         i--;
     ) {
-        (xhr = new XMLHttpRequest).i = i;
-        xhr.open("get", loadShaders.base + shaders[i] + ".c", asynchronous);
+        (xhr = new XMLHttpRequest)["i"] = i;
+        xhr.open("get", "" + shaders[i] + ".c", asynchronous);
         if (asynchronous) {
             xhr.onreadystatechange = onreadystatechange;
         }
