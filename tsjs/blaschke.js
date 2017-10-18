@@ -45,8 +45,8 @@ function bpgridevalArrayInner(bpe, N, as, rowcallback) {
                 imagparts[addr] = bpz.y;
             }
             else {
-                realparts[addr] = NaN;
-                imagparts[addr] = NaN;
+                realparts[addr] = -10;
+                imagparts[addr] = -10;
             }
         }
         if (typeof (rowcallback) == "function") {

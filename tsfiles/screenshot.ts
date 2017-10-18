@@ -10,11 +10,11 @@ function resizeAndCopy(mine, openers) {
 	return mine;
 }
 
-function drawCircles(ssctx, zs, r, s) {
+function drawCircles(ssctx, zs, r) {
 	for (var i = 0; i < zs.length; i++) {
 		var z = zs[i];
 		ssctx.beginPath();
-		ssctx.arc(z.x * s, z.y * s, r, 0, 2.0 * Math.PI);
+		ssctx.arc(z.x, z.y, r, 0, 2.0 * Math.PI);
 		ssctx.stroke();
 		ssctx.fill();
 	}
@@ -30,48 +30,58 @@ $(function () {
 		var rainbow = <HTMLCanvasElement>window.opener.$("canvas.rainbow")[0];
 		var lines = <HTMLCanvasElement>window.opener.$("canvas.rblines")[0];
 		var ss = <HTMLCanvasElement>$("#screenshot")[0];
-		ss.width = rainbow.width + 2 * margin;
-		ss.height = rainbow.height + 2 * margin;
+		ss.width = lines.width + 2 * margin;
+		ss.height = lines.height + 2 * margin;
 
+		// Copy the canvas image data into local canvases.
 		var mylines = resizeAndCopy($("#lines")[0], lines);
 		var myrainbow = resizeAndCopy($("#rainbow")[0], rainbow);
 
 		var ssctx = ss.getContext("2d");
+		// Redraw the images, scaled.
 		ssctx.drawImage(myrainbow,
 			margin, margin,
-			rainbow.width, rainbow.height);
+			lines.width, lines.height);
 		ssctx.drawImage(mylines,
 			margin, margin,
-			rainbow.width, rainbow.height);
+			lines.width, lines.height);
+
 		var zs = window.opener.bpwidget.zs;
-		var zsdelta = new numeric.T(margin, margin);
-		//zs = zs.map(function(z) { return xy2c(z).add(zsdelta);});	
 		var cpi = window.opener.bpwidget.cpi;
-		var s = rainbow.width / 2.0;
+
+		// Circle 
+		// Move to the center of the canvas		
 		ssctx.translate((ss.width) / 2.0, ss.height / 2.0);
-		ssctx.scale(1.0, -1.0);
+		// Scale so that the *lines* width is 1 unit.
+		var s = lines.width / 2.0;
+		ssctx.scale(s, -s);
+		var unitsPerPixel = 1.0 / s;
 		ssctx.lineWidth = 1;
-		var r = 5;
-		var lw = 1;
-		if (rainbow.width >= 900) { r = 10; lw = 2; }
+		var rdelta = 2 * unitsPerPixel;
+		var r = 5.0 * unitsPerPixel;
+		var lw = 1 * unitsPerPixel;
+		if (lines.width >= 900) {
+			r *= 2;
+			lw *= 2;
+		}
 
 		ssctx.lineWidth = lw;
 		ssctx.strokeStyle = "white";
 		ssctx.fillStyle = "white";
-		drawCircles(ssctx, zs, r + 2, s);
+		drawCircles(ssctx, zs, r + rdelta);
 
 		ssctx.strokeStyle = "black";
 		ssctx.fillStyle = "white";
-		drawCircles(ssctx, zs, r, s);
+		drawCircles(ssctx, zs, r);
 
 		// if (!window.opener.bpwidget.hidecps.is(":checked")) {
 		// 	ssctx.strokeStyle = "black";
 		// 	ssctx.fillStyle = "grey";
 		// 	drawCircles(ssctx, cpi.cps, r, s);
 		// }
-		ssctx.lineWidth = 2;
+		ssctx.lineWidth = 4 * lw;
 		ssctx.beginPath();
-		ssctx.arc(0, 0, (rainbow.width) / 2.0, 0, 2.0 * Math.PI);
+		ssctx.arc(0, 0, 1, 0, 2.0 * Math.PI);
 		ssctx.stroke();
 		$("#download").attr("href", ss.toDataURL("image/png"));
 	}

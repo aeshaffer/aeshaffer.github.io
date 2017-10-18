@@ -1045,6 +1045,9 @@ var BPWidget = /** @class */ (function () {
                 var averageflopsPerMS = this.performanceHistory.map(function (x) { return x.flopsPerMS(); }).sum() / this.performanceHistory.length;
                 adaptiveN = Math.sqrt(1000 * averageflopsPerMS / this.zs.length);
                 adaptiveN = Math.round(Math.min(this.plotDims().N, adaptiveN));
+                if (adaptiveN % 2 == 0) {
+                    adaptiveN++;
+                }
             }
             return adaptiveN;
         }

@@ -213,3 +213,7 @@ canvas, .circle, .zeroesholder {
 #tabs {
     font-size: 12pt;
 }
+
+#regionsholders {
+    text-align: center;
+}
