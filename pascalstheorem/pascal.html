@@ -1,3 +1,4 @@
+<!DOCTYPE HTML>
 <html>
 
 <head>
@@ -10,6 +11,7 @@
     <script src="../tsjs/ellipseutils.js" type="text/javascript"></script>
     <script src="../tsjs/lmellipse.js" type="text/javascript"></script>
     <script src="../tsjs/bpuiutils.js" type="text/javascript"></script>
+    <link rel="stylesheet" type="text/css" href="../common.css" />
 
     <style type="text/css">
         .cpt {
@@ -56,28 +58,27 @@
         }
 
         #canvasandpoints {
-            border: 1px solid black; margin: 0px auto; position: relative;
+            border: 1px solid black;
+            margin: 0px auto;
+            position: relative;
         }
     </style>
 </head>
 
 <body>
-    <h1>Pascal's Theorem</h1>
-    <p>Try moving the points A, B, C, D, E and F by dragging the circles on the screen.  
-        As you move the points A-E, an ellipse is drawn which passes through those points. 
-        As you move the point F, note the intersections
-        between the line <span class="segment">AF</span> and the line <span class="segment">DC</span>,         
-        between the line <span class="segment">DE</span> and the line <span class="segment">AB</span>, and
-        between the line <span class="segment">BC</span> and the line <span class="segment">EF</span>.
-        (Notice that these are lines, not line segments - the part of the line 
-        "outside" the line segment is displayed dotted, if necessary.)
-
-        If F is not on the ellipse, then these three points of intersection will form a nondegenerate triangle.
-        
-        If F is on the ellipse, all three of those intersections will be collinear.  
-        (The orange triangle will degenerate to a line segment.)  
-        
-        Try moving F along the ellipse and see what happens.        
+    <div id="header">
+        <h1>Pascal's Theorem</h1>
+        <div id="links">
+            <a href="../index.html">Back to Index</a>
+        </div>
+    </div>
+    <p>Try moving the points A, B, C, D, E and F by dragging the circles on the screen. As you move the points A-E, an ellipse
+        is drawn which passes through those points. As you move the point F, note the intersections between the line
+        <span class="segment">AF</span> and the line <span class="segment">DC</span>, between the line <span class="segment">DE</span>        and the line <span class="segment">AB</span>, and between the line <span class="segment">BC</span> and the line
+        <span class="segment">EF</span>. (Notice that these are lines, not line segments - the part of the line "outside"
+        the line segment is displayed dotted, if necessary.) If F is not on the ellipse, then these three points of intersection
+        will form a nondegenerate triangle. If F is on the ellipse, all three of those intersections will be collinear. (The
+        orange triangle will degenerate to a line segment.) Try moving F along the ellipse and see what happens.
     </p>
     <div>
         <button id="insideexample">Example 1</button>

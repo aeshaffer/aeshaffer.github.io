@@ -193,23 +193,6 @@ canvas, .circle, .zeroesholder {
     padding-bottom: 15px;
 }
 
-#header {
-    position: relative;
-    border-bottom: 1px solid black;
-    margin-bottom: 15px;
-}
-
-#links {
-    position: absolute;
-    top: 0px;
-    right: 0px;
-    margin: 20px;
-}
-
-#links a {
-    margin: 0px 10px;
-}
-
 #buttons {
     margin: 15px 0px;
 }

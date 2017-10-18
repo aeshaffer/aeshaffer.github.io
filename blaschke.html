@@ -3,6 +3,7 @@
 
 <head>
   <link rel="stylesheet" type="text/css" href="blaschke.css" />
+  <link rel="stylesheet" type="text/css" href="common.css" />
   <link rel="stylesheet" type="text/css" href="./jquery-ui-1.11.1/jquery-ui.css" />
   <link rel="stylesheet" type="text/css" href="./jquery-ui-1.11.1/jquery-ui.structure.min.css" />
   <link rel="stylesheet" type="text/css" href="./jquery-ui-1.11.1/jquery-ui.theme.min.css" />
@@ -20,7 +21,8 @@
   <script type="text/javascript" src="./tsjs/bpui.js"></script>
   <script type="text/javascript" src="./tsjs/ellipseutils.js"></script>
   <script type="text/javascript" src="./tsjs/interpolation2.js"></script>
-
+  <script type="text/javascript" src="./tsjs/screenshot.js"></script>
+  
   <script type="text/javascript">
     var bpwidget;
     $(function () {
@@ -172,6 +174,12 @@
     <ul class="regionsstatus">
       <li></li>
     </ul>
+  </div>
+  <div style="display: none">
+      <canvas id="composedscreenshot"></canvas>
+      <br />
+      <canvas id="screenshotrainbow"></canvas>
+      <canvas id="screenshotlines"></canvas>
   </div>
 
   <hr style="clear: both;" />

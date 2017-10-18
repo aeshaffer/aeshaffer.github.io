@@ -1,9 +1,12 @@
+<!DOCTYPE html>
 <html>
-<head><title>Screenshot</title>
-  <script type="text/javascript" src="./numeric-1.2.3.js" ></script>
+
+<head>
+  <title>Screenshot</title>
+  <script type="text/javascript" src="./numeric-1.2.3.js"></script>
   <script type="text/javascript" src="./jquery-2.1.1.js"></script>
   <script type="text/javascript" src="./jquery-ui-1.11.1/jquery-ui.js"></script>
-  <script type="text/javascript" src="./tsjs/polynomials.js" ></script>
+  <script type="text/javascript" src="./tsjs/polynomials.js"></script>
   <script type="text/javascript" src="./tsjs/ellipse.js"></script>
   <script type="text/javascript" src="./tsjs/lmellipse.js"></script>
   <script type="text/javascript" src="./tsjs/hsvToRGB.js"></script>
@@ -16,12 +19,17 @@
 
   <script type="text/javascript" src="./tsjs/interpolation2.js"></script>
   <script type="text/javascript" src="./tsjs/screenshot.js"></script>
+  <script type="text/javascript">
+    $(screenshot);
+  </script>
 </head>
+
 <body>
-<a id="download" download="blaschke.png">Download</a><br/>
-<canvas id="screenshot"></canvas>
-<br />
-<canvas id="rainbow"></canvas>
-<canvas id="lines"></canvas>
+  <a id="download" download="blaschke.png">Download</a><br/>
+  <canvas id="screenshot"></canvas>
+  <br />
+  <canvas id="rainbow"></canvas>
+  <canvas id="lines"></canvas>
 </body>
+
 </html>
