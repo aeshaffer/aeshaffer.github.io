@@ -200,7 +200,8 @@ function ccmd(z: C): string {
 }
 
 function dcomplex(z: C) {
-    return dc(z) + " (arg=" + round2(normalizeangle(z.angle())) + ")";
+    var theta = "\u03B8";
+    return dc(z) + " (" + theta + "=" + round2(normalizeangle(z.angle())) + ")";
 }
 
 var pi = 3.1415;

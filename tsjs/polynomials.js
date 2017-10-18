@@ -169,7 +169,8 @@ function ccmd(z) {
     return "c(" + round5(z.x) + ", " + round5(y) + ")";
 }
 function dcomplex(z) {
-    return dc(z) + " (arg=" + round2(normalizeangle(z.angle())) + ")";
+    var theta = "\u03B8";
+    return dc(z) + " (" + theta + "=" + round2(normalizeangle(z.angle())) + ")";
 }
 var pi = 3.1415;
 var nzero = new numeric.T(0, 0);

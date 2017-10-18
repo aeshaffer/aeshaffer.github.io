@@ -470,9 +470,12 @@ class BPWidget {
     };
 
     plotDims(): PlotDimensions {
-        var N = parseFloat(this.pixels.val());
-        var zoom = parseFloat(this.graphzoom.val());
-        var windowscaleval = parseFloat(this.windowscale.val());
+        // Always make sure the pixel size is
+        // odd so that when we draw the rainbow into it,
+        // the fuzziness is symmetrical.
+        var N = 1 + 2 * parseInt(this.pixels.val());
+        var zoom = parseInt(this.graphzoom.val());
+        var windowscaleval = parseInt(this.windowscale.val());
         var windowN = zoom * N * 1.0 / windowscaleval;
         var graphN = zoom * N;
         return { N: N, zoom: zoom, windowN: windowN, graphN: graphN };
@@ -507,11 +510,14 @@ class BPWidget {
             if (th == 0) { return 1; }
             if (isNaN(bad.midpt)) { return 1; }
             if (isNaN(bpz.x) || isNaN(bpz.y)) { return 1; }
-            var th = raythreshold;
-            var ad = anglediff(bad.midpt - bpz.angle());
-            var aad = Math.abs(ad);
-            var val = (1.0 / (4.0 * th)) * aad;
-            if (val > 1) { return 1; } else { return val; }
+            if (raythreshold == 0) { return 1; }
+            else {
+                var th = raythreshold;
+                var ad = anglediff(bad.midpt - bpz.angle());
+                var aad = Math.abs(ad);
+                var val = (1.0 / (4.0 * th)) * aad;
+                if (val > 1) { return 1; } else { return val; }
+            }
         }
 
         var rbidata = new Uint8Array(4 * N * N);
@@ -1009,7 +1015,7 @@ class BPWidget {
         });
 
         this.pixels.change(function () {
-            if (parseFloat(that.pixels.val()) > 900) {
+            if (parseFloat(that.pixels.val()) > 450) {
                 $("body").addClass("bigdots");
             } else {
                 $("body").removeClass("bigdots");
@@ -1108,6 +1114,8 @@ class BPWidget {
         this.plotbutton.click(function () {
             that.resizeRescatterAndReplotMe();
         });
+
+        that.resizeRescatterAndReplotMe();
     };
 
 
@@ -1138,7 +1146,7 @@ class BPWidget {
         pl.N = N;
         pl.timeInMS = timeInMS;
         this.performanceHistory.push(pl);
-        console.log(pl.N + "\t" + pl.degree + "\t" + pl.timeInMS);
+        console.log("N:\t" + pl.N + "\t Degree:" + pl.degree + "\t Time:" + pl.timeInMS);
         if (this.performanceHistory.length > 10) {
             var startIndex = this.performanceHistory.length - 10;
             this.performanceHistory = this.performanceHistory.slice(startIndex);

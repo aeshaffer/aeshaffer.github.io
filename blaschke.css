@@ -32,8 +32,16 @@ ul.criticalpoints, ul.zeroes, ul.criticalvalues, ul.criticalangles {
 }
 
 ul.criticalvalues li, ul.criticalpoints li, ul.zeroes li {
-    width: 200px;
+    width: 50%;
     float: left;
+    font-size: smaller;
+}
+
+ul.fixedpoints {
+    margin: 0px;
+    font-size: smaller;
+    list-style: none;
+    padding: 0px;
 }
 
 div.statsblock h3 {
@@ -42,7 +50,7 @@ div.statsblock h3 {
 
 div.statsblock {
     display: inline-block;
-    width: 400px; /* float: left; */
+    width: 49%; /* float: left; */
     vertical-align: top;
 }
 
@@ -164,4 +172,44 @@ canvas, .circle, .zeroesholder {
 .rainbowholder {
     margin: 0px auto;
     display: block;
+}
+
+#statsblocks {
+    display: inline-block; vertical-align: top;
+}
+
+.statsblock h3 {
+    margin: 5px 0px;
+}
+
+#leftcolumn {
+    width: 49%;
+    float: left;
+    padding-bottom: 15px;
+}
+#rightcolumn {
+    width: 49%;
+    float: left;
+    padding-bottom: 15px;
+}
+
+#header {
+    position: relative;
+    border-bottom: 1px solid black;
+    margin-bottom: 15px;
+}
+
+#links {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    margin: 20px;
+}
+
+#buttons {
+    margin: 15px 0px;
+}
+
+#tabs {
+    font-size: 12pt;
 }

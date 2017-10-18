@@ -37,10 +37,10 @@ function bpgridevalArrayInner(bpe, N, as, rowcallback) {
     var bpz;
     for (var yi = 0; yi < N; yi++) {
         for (var xi = 0; xi < N; xi++) {
+            var addr = N * yi + xi;
             z = c(xs[xi], ys[yi]);
-            if (z.abs().x <= 1) {
+            if (z.norm2() <= 1) {
                 bpz = bpe(z);
-                var addr = N * yi + xi;
                 realparts[addr] = bpz.x;
                 imagparts[addr] = bpz.y;
             }
@@ -91,7 +91,7 @@ function getBPFExpr(as, ignorefactor) {
 function getBPF(as, ignorefactor) {
     if (ignorefactor === void 0) { ignorefactor = null; }
     var f = eval(getBPFExpr(as, ignorefactor));
-    return f;
+    return (function (z) { return fixy(f(z)); });
 }
 function bpeval0(as, z) {
     var f = getBPF(as);
