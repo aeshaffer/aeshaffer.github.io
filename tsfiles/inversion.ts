@@ -222,7 +222,7 @@ namespace CircleInversion {
 
         //console.log(h, w, r.minX, r.maxX, r.minY, r.maxY);
 
-        ctx2.resetTransform();
+        ctx2.setTransform(1, 0, 0, 1, 0, 0);
         ctx2.transform(cvs2.width / 2, 0, 0, -cvs2.height / 2, cvs2.width / 2, cvs2.height / 2);
         ctx2.scale(2 / (r.maxX - r.minX), 2 / (r.maxY - r.minY));
         ctx2.translate(-(r.maxX + r.minX) / 2, -(r.maxY + r.minY) / 2);
