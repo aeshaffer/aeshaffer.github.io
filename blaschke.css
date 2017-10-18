@@ -206,6 +206,10 @@ canvas, .circle, .zeroesholder {
     margin: 20px;
 }
 
+#links a {
+    margin: 0px 10px;
+}
+
 #buttons {
     margin: 15px 0px;
 }

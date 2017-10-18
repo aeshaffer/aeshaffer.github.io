@@ -20,13 +20,13 @@
   <script type="text/javascript" src="./tsjs/ellipseutils.js"></script>
   <script type="text/javascript" src="./tsjs/interpolation2.js"></script>
 
-  <script type="text/javascript" src="./js/imagewarp.js"></script>
+  <script type="text/javascript" src="./tsjs/imagewarp.js"></script>
 
   <script type="text/javascript">
-    var bpwidget;
     $(function () {
       bpwidget = new BPWidget($("html"), true);
       bpwidget.wireup();
+      setupImageWarp(bpwidget);
     });
   </script>
 </head>
@@ -105,7 +105,7 @@
   <div>
     Show Advanced Options:<input type="checkbox" class="showadvanced" value="false" />
     <span class="advanced">
-      Rendered Size: <input class="pixels" value="400" />
+      Rendered Size: <input class="pixels" value="200" />
       Zoom Size: <input class="graphzoom" value="1" />
       Window Scale: <input class="windowscale" value="1" />
     </span>
