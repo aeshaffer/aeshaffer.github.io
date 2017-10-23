@@ -166,11 +166,11 @@ function setupImageWarp(bpwidget) {
         };
         request.send(null);
     }
-    $("#gogoose").click(function () { goUrl("./goose.png"); });
+    //	$("#gogoose").click(function () { goUrl("./goose.png"); });
     $("#goantique").click(function () { goUrl("./antique.png"); });
     $("#goclock2").click(function () { goUrl("./clock2.jpg"); });
     $("#gorainbow").click(function () { goUrl("./Rainbow.png"); });
-    $("#goandrew").click(function () { goUrl("./andrew2.png"); });
+    //	$("#goandrew").click(function () { goUrl("./andrew2.png"); });
     $("#goloadimage").click(function () {
         var url = $("#loadimage").val();
         goUrl(url);
