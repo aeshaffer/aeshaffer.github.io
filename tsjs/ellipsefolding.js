@@ -128,7 +128,7 @@ var EllipseFolding;
             var foldts = new Array();
             if (f1c.sub(f2c).norm2() < sigma) {
                 var N = numfolds;
-                for (var i = 0; i < N; i++) {
+                for (var i = 1; i < N; i++) {
                     // start at a point on the major axis and on the circle.
                     // the rotate by fractions of the circle.
                     var l = rt2c(sigma, (2 * Math.PI / N) * i);
@@ -237,6 +237,24 @@ var EllipseFolding;
             ctx.lineTo(f2c.x, f2c.y);
             ctx.stroke();
             ctx.restore();
+            ctx.save();
+            ctx.lineWidth = ctx.lineWidth / 4;
+            ctx.beginPath();
+            ctx.strokeStyle = "green";
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(f1c.x, f1c.y);
+            ctx.stroke();
+            ctx.restore();
+            var tangentpoint = lineLineIntersectionZZ(tangentcircleintersections[0], tangentcircleintersections[1], p, f1c);
+            // Draw line from point on circle to other focus.
+            ctx.save();
+            ctx.lineWidth = ctx.lineWidth / 4;
+            ctx.beginPath();
+            ctx.strokeStyle = "green";
+            ctx.moveTo(tangentpoint.x, tangentpoint.y);
+            ctx.lineTo(f2c.x, f2c.y);
+            ctx.stroke();
+            ctx.restore();
             // Draw right-angle marker at intersection between chord and focus-circle line.
             var chordlineint = lineLineIntersectionZZ(p, f2c, tangentcircleintersections[0], tangentcircleintersections[1]);
             ctx.strokeStyle = "green";
@@ -263,38 +281,40 @@ var EllipseFolding;
         ctx.stroke();
         ctx.beginPath();
         // Draw ellipse.
-        var majoraxisvector = f1c.sub(f2c);
-        var majoraxisunitvector = majoraxisvector.div(majoraxisvector.norm2());
-        var sigmac = c(sigma, 0);
-        var ftomaj = majoraxisunitvector.mul((sigma - f1c.sub(f2c).norm2()) / 2);
-        var l = f1c.add(ftomaj);
-        l = fz(l);
-        var r = f2c.sub(ftomaj);
-        r = fz(r);
-        var center = f1c.add(f2c).div(2);
-        var f2mf1 = f1c.sub(f2c).norm2();
-        var minoraxislen = Math.sqrt(sigma * sigma - f2mf1 * f2mf1) / 2.0;
-        var minoraxisunitvector = majoraxisunitvector.mul(c(0, 1));
-        var t2 = center.add(minoraxisunitvector.mul(minoraxislen));
-        var b = center.sub(minoraxisunitvector.mul(minoraxislen));
-        ctx.beginPath();
-        r = fz(r);
-        ctx.moveTo(r.x, r.y);
-        var ts = divideCircle(64);
-        var ps = new Array(ts.length);
-        for (var i = 0; i < ts.length; i++) {
-            var theta = ts[i];
-            var p = center.add(t2.sub(center).mul(Math.sin(theta)).add(r.sub(center).mul(Math.cos(theta))));
-            p = fz(p);
-            ps[i] = p;
-            ctx.lineTo(p.x, p.y);
+        if (!$("#hideellipse").is(":checked")) {
+            var majoraxisvector = f1c.sub(f2c);
+            var majoraxisunitvector = majoraxisvector.div(majoraxisvector.norm2());
+            var sigmac = c(sigma, 0);
+            var ftomaj = majoraxisunitvector.mul((sigma - f1c.sub(f2c).norm2()) / 2);
+            var l = f1c.add(ftomaj);
+            l = fz(l);
+            var r = f2c.sub(ftomaj);
+            r = fz(r);
+            var center = f1c.add(f2c).div(2);
+            var f2mf1 = f1c.sub(f2c).norm2();
+            var minoraxislen = Math.sqrt(sigma * sigma - f2mf1 * f2mf1) / 2.0;
+            var minoraxisunitvector = majoraxisunitvector.mul(c(0, 1));
+            var t2 = center.add(minoraxisunitvector.mul(minoraxislen));
+            var b = center.sub(minoraxisunitvector.mul(minoraxislen));
+            ctx.beginPath();
+            r = fz(r);
+            ctx.moveTo(r.x, r.y);
+            var ts = divideCircle(64);
+            var ps = new Array(ts.length);
+            for (var i = 0; i < ts.length; i++) {
+                var theta = ts[i];
+                var p = center.add(t2.sub(center).mul(Math.sin(theta)).add(r.sub(center).mul(Math.cos(theta))));
+                p = fz(p);
+                ps[i] = p;
+                ctx.lineTo(p.x, p.y);
+            }
+            ctx.closePath();
+            ctx.stroke();
         }
-        ctx.closePath();
-        ctx.stroke();
-        for (var i = 0; i < ts.length; i++) {
-            var p2 = ps[i];
-            sigma - f1c.sub(p2).norm2();
-        }
+        // for (var i = 0; i < ts.length; i++) {
+        //     var p2 = ps[i];
+        //     sigma - f1c.sub(p2).norm2();
+        // }
         /*
         
                 ctx.beginPath();
