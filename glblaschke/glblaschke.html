@@ -9,8 +9,8 @@
   <script src="../tsjs/polynomials.js" type="text/javascript"></script>
   <script src="../tsjs/blaschke.js" type="text/javascript"></script>
   <script src="../tsjs/bpuiutils.js" type="text/javascript"></script>
-  <script src="../tsjs/bpui.js" type="text/javascript"></script>  
-  <script src="../tsjs/ellipseutils.js" type="text/javascript" ></script>
+  <script src="../tsjs/bpui.js" type="text/javascript"></script>
+  <script src="../tsjs/ellipseutils.js" type="text/javascript"></script>
   <script src="../jquery-2.1.1.min.js" type="text/javascript"></script>
   <script src="../tsjs/loadshaders.js" type="text/javascript"></script>
   <script src="../tsjs/webgl-demo.js" type="text/javascript"></script>
@@ -18,30 +18,38 @@
     #glcanvaswrapper {
       cursor: crosshair;
       background-color: blue;
-      width: 640px; height: 640px; position: relative;
-      }
-      .moving {
+      width: 640px;
+      height: 640px;
+      position: relative;
+    }
+
+    .moving {
       background-color: green;
-      }
-    </style>
-  </head>
-  
-  <body onload="start()">
-    <input type="checkbox" id="plotcps" checked="checked"></input>Plot CPS
-    <input type="file" id="uploadfile"></input>
-    <button type="button" id="goupload">Load</button>
-    <br />
-    <div class="canvaswrapper" id="glcanvaswrapper" >
-      <canvas id="cvcanvas"  width="640" height="640" style="position: absolute; left: 0px; top: 0px;">
-      </canvas>
-      <canvas id="glcanvas" width="640" height="640">
-	Your browser doesn't appear to support the HTML5 <code>&lt;canvas&gt;</code> element.
-      </canvas>
-    </div>
-    <div style="display: none;">
-      <canvas id="origcanvas"></canvas>
-      <canvas id="squarecanvas"></canvas>
-      <canvas id="sourcecanvas" width="512" height="512"></canvas>
-    </div>
-  </body>
+    }
+  </style>
+</head>
+
+<body onload="start()">
+  <h1>WebGL Blaschke Product Explorer (Experimental)</h1>
+  <div id="links">
+    <a href="../index.html">Return to Index</a>
+  </div>
+  <input type="checkbox" id="plotcps" checked="checked"></input>Plot CPS
+  <input type="file" id="uploadfile"></input>
+  <button type="button" id="goupload">Load</button>
+  <br />
+  <div class="canvaswrapper" id="glcanvaswrapper">
+    <canvas id="cvcanvas" width="640" height="640" style="position: absolute; left: 0px; top: 0px;">
+    </canvas>
+    <canvas id="glcanvas" width="640" height="640">
+      Your browser doesn't appear to support the HTML5 <code>&lt;canvas&gt;</code> element.
+    </canvas>
+  </div>
+  <div style="display: none;">
+    <canvas id="origcanvas"></canvas>
+    <canvas id="squarecanvas"></canvas>
+    <canvas id="sourcecanvas" width="512" height="512"></canvas>
+  </div>
+</body>
+
 </html>
