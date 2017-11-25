@@ -777,16 +777,27 @@ class BPWidget {
         this.doclearlines();
         var time = new Date();
         var timepct = (time.getTime() - timeZero.getTime()) / 5000.0;
-        var theta = Math.PI * 2 * timepct;
+        var theta = widget.zs.length * Math.PI * 2 * timepct;
         var tanpoints = getTanPoints(this.zs, theta);
         var piangles = tanpoints.map(x => x.z1.angle());
-        widget.drawPILinesInner(widget.rblines.element, piangles, 1, null, true, theta);
+
+        // Draw all the tangent lines
 
         var N = this.plotDims().windowN;
         var ctx = setupCTX(widget.rblines.element, N);
         for (var x of alltanpoints) {
             widget.drawtangentsinner(ctx, x[0].theta, x, true);
         }
+        ctx.restore();
+
+        // Draw the animated tangent line.
+
+        widget.drawPILinesInner(widget.rblines.element, piangles, 1, null, true, theta);
+        
+        // Draw circles at the point of tangency.
+
+        var N = this.plotDims().windowN;
+        var ctx = setupCTX(widget.rblines.element, N);
 
         for (var tp of tanpoints) {
             ctx.beginPath();
