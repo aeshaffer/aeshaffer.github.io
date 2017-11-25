@@ -317,12 +317,13 @@ var Z1Z2ZTan = /** @class */ (function () {
 }());
 // Get lists of preimages of exp(i*t), along with the point of
 // intersection.
-function getTanPoints(as, t) {
+function getTanPoints(as, t, skip) {
+    if (skip === void 0) { skip = 1; }
     var preimages = preimage(as, rt2c(1, t));
     preimages = preimages.sort(function (i, j) {
         return normalizeangle(i.angle()) - normalizeangle(j.angle());
     });
-    return getTanPointsForPIs(as, preimages, t);
+    return getTanPointsForPIs(as, preimages, t, skip);
 }
 function getTanPointsWithSkip(as, t, skip) {
     var preimages = preimage(as, rt2c(1, t));
@@ -339,19 +340,20 @@ function getTanPointsWithSkip(as, t, skip) {
     }
     return retval;
 }
-function getTanPointsForPIs(as, preimages, theta) {
+function getTanPointsForPIs(as, preimages, theta, skip) {
+    if (skip === void 0) { skip = 1; }
     var ts = preimages.map(function (z) { return z.angle(); });
     var bps = getBPTheta(as, ts);
     var retval = new Array(preimages.length);
     for (var i = 0; i < preimages.length; i++) {
-        var j = (i + 1) % preimages.length;
+        var j = (i + skip) % preimages.length;
         var z1 = preimages[i];
         var z2 = preimages[j];
         var bp1 = bps[i].abs();
         var bp2 = bps[j].abs();
         var l = bp2.div(bp2.add(bp1));
         var ztan = z1.add(z2.sub(z1).mul(l));
-        retval[i] = { "z1": z1, "z2": z2, "ztan": ztan, "theta": theta };
+        retval[i] = { "z1": z1, "z2": z2, "ztan": ztan, "lambdaangle": theta };
     }
     return retval;
 }

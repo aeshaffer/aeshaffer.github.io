@@ -188,7 +188,7 @@ function setupImageWarp(bpwidget: BPWidget) {
 	}
 //	$("#gogoose").click(function () { goUrl("./goose.png"); });
 	$("#goantique").click(function () { goUrl("./antique.png"); });
-	$("#goclock2").click(function () { goUrl("./clock2.jpg"); });
+	$("#goclock2").click(function () { goUrl("./modernclock.jpg"); });
 	$("#gorainbow").click(function () { goUrl("./Rainbow.png"); });
 //	$("#goandrew").click(function () { goUrl("./andrew2.png"); });
 	$("#goloadimage").click(function () {

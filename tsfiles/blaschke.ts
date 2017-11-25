@@ -353,17 +353,17 @@ class Z1Z2ZTan {
     z1: C;
     z2: C;
     ztan: C;
-    theta: number;
+    lambdaangle: number;
 }
 
 // Get lists of preimages of exp(i*t), along with the point of
 // intersection.
-function getTanPoints(as: BPZeroes, t: number): Array<Z1Z2ZTan> {
+function getTanPoints(as: BPZeroes, t: number, skip: number = 1): Array<Z1Z2ZTan> {
     var preimages = preimage(as, rt2c(1, t));
     preimages = preimages.sort(function (i, j) {
         return normalizeangle(i.angle()) - normalizeangle(j.angle());
     });
-    return getTanPointsForPIs(as, preimages, t);
+    return getTanPointsForPIs(as, preimages, t, skip);
 }
 
 function getTanPointsWithSkip(as: BPZeroes, t: number, skip: number): Z1Z2ZTan[][] {
@@ -382,19 +382,19 @@ function getTanPointsWithSkip(as: BPZeroes, t: number, skip: number): Z1Z2ZTan[]
     return retval;
 }
 
-function getTanPointsForPIs(as: BPZeroes, preimages: Array<C>, theta: number): Array<Z1Z2ZTan> {
+function getTanPointsForPIs(as: BPZeroes, preimages: Array<C>, theta: number, skip: number = 1): Array<Z1Z2ZTan> {
     var ts = preimages.map(function (z) { return z.angle(); });
     var bps = getBPTheta(as, ts);
     var retval = new Array<Z1Z2ZTan>(preimages.length);
     for (var i = 0; i < preimages.length; i++) {
-        var j = (i + 1) % preimages.length;
+        var j = (i + skip) % preimages.length;
         var z1 = preimages[i];
         var z2 = preimages[j];
         var bp1 = bps[i].abs();
         var bp2 = bps[j].abs();
         var l = bp2.div(bp2.add(bp1));
         var ztan = z1.add(z2.sub(z1).mul(l));
-        retval[i] = { "z1": z1, "z2": z2, "ztan": ztan, "theta": theta};
+        retval[i] = { "z1": z1, "z2": z2, "ztan": ztan, "lambdaangle": theta};
     }
     return retval;
 }
