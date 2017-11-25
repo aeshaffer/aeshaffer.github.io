@@ -89,11 +89,13 @@ function setupCanvases(sel) {
 }
 var _nudge = null;
 function getNudge(div) {
-    if (_nudge == null) {
-        _nudge = div.width() / 2;
-        var s = div.css("border-left-width").replace("px", "");
+    // if(_nudge == null) {
+    _nudge = div.width() / 2;
+    var s = div.css("border-left-width").replace("px", "");
+    if (s != "") {
         _nudge += parseFloat(s);
     }
+    // }
     return _nudge;
 }
 function cssscatter(cw, canvaswidth, pts, cssclass, doclear) {

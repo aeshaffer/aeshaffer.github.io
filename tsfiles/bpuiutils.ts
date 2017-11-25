@@ -92,11 +92,13 @@ function setupCanvases(sel: JQuery) {
 var _nudge : number = null;
 
 function getNudge(div) {
-    if(_nudge == null) {
+   // if(_nudge == null) {
         _nudge = div.width() / 2;
         var s : string = div.css("border-left-width").replace("px", "");
-        _nudge += parseFloat(s);
-    }
+        if(s != "") {
+            _nudge += parseFloat(s);            
+        }
+   // }
     return _nudge;
 }
 

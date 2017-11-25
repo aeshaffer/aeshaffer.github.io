@@ -71,7 +71,8 @@ class BPWidget {
     rglines: JQuerySingletonWrapper<HTMLCanvasElement>;
 
     reidonrplot: JQuerySingletonWrapper<HTMLInputElement>;
-    solidtangents: JQuerySingletonWrapper<HTMLInputElement>;
+    highlightcurve: JQuerySingletonWrapper<HTMLInputElement>;
+    halftangents: JQuerySingletonWrapper<HTMLInputElement>;
     doguessellipse: JQuerySingletonWrapper<HTMLInputElement>;
     plotinterp: JQuerySingletonWrapper<HTMLInputElement>;
     plotpolygon: JQuerySingletonWrapper<HTMLInputElement>;
@@ -149,7 +150,8 @@ class BPWidget {
         this.rglines = g(".rglines");
 
         this.reidonrplot = g(".reidonrplot");
-        this.solidtangents = g(".solidtangents");
+        this.highlightcurve = g(".highlightcurve");
+        this.halftangents = g(".halftangents");
         this.doguessellipse = g(".doguessellipse");
         this.plotinterp = g(".plotinterp");
         this.plotpolygon = g(".plotpolygon");
@@ -694,20 +696,24 @@ class BPWidget {
         }
     }
 
-    drawtangents(ctx: CanvasRenderingContext2D, ajpct: number, drawsolid: boolean) {
+    drawtangents(ctx: CanvasRenderingContext2D, ajpct: number, drawsolid: boolean, drawhalf: boolean) {
         var tpts = numeric.linspace(0, 2 * Math.PI - 2 * Math.PI / ajpct, ajpct); // [0, Math.PI];
         for (var ti = 0; ti < tpts.length; ti++) {
             var pts = getTanPoints(this.zs, tpts[ti]);
-            this.drawtangentsinner(ctx, ti, pts, drawsolid);
+            this.drawtangentsinner(ctx, ti, pts, drawsolid, drawhalf);
         }
     }
 
-    drawtangentsinner(ctx: CanvasRenderingContext2D, ti: number, pts: Z1Z2ZTan[], drawsolid: boolean) {
+    /// Drawsolid: draw black lines or draw green/blue lines?
+    drawtangentsinner(ctx: CanvasRenderingContext2D, ti: number, pts: Z1Z2ZTan[],
+        drawsolid: boolean, drawhalf: boolean) {
         if ($("body").hasClass("bigdots")) {
             ctx.lineWidth = 10.0 / this.plotDims().graphN;
         } else {
             ctx.lineWidth = 1.0 / this.plotDims().graphN;
         }
+        var nubbinwidth = 10 * ctx.lineWidth;
+        if (drawhalf) ctx.lineWidth *= 4;
 
         for (var i = 0; i < pts.length; i++) {
 
@@ -716,37 +722,50 @@ class BPWidget {
 
             if (drawsolid) {
                 ctx.strokeStyle = "#000";
+                ctx.lineTo(pts[i].z2.x, fixy(pts[i].z2).y);
+                ctx.stroke();
             } else {
-                ctx.strokeStyle = "#00f";
                 var tanPt = fixy(pts[i].ztan);
+
+                // Highlight in white.
+                if (drawhalf) {
+                    ctx.save();
+                    ctx.lineWidth *= 1 + .5;
+                    ctx.strokeStyle = hsvToRgbString(tanglehue(pts[0].theta), 1, .5);
+                    ctx.lineTo(tanPt.x, tanPt.y);
+                    ctx.stroke();
+                    ctx.moveTo(pts[i].z1.x, fixy(pts[i].z1).y);
+                    ctx.restore();
+                }
+
+                if (drawhalf) {
+                    ctx.strokeStyle = hsvToRgbString(tanglehue(pts[0].theta), 1, 1);
+                } else {
+                    ctx.strokeStyle = "#00f";
+                }
+
                 ctx.lineTo(tanPt.x, tanPt.y);
                 ctx.stroke();
 
                 var theta = pts[i].z2.sub(pts[i].z1).angle();
-                var nubbin = rt2c(10 * ctx.lineWidth, theta + Math.PI / 2);
-                var nubbinend = tanPt.add(nubbin);
+                var nubbin = rt2c(nubbinwidth, theta + Math.PI / 2);
+                var nubbinend1 = tanPt.add(nubbin);
+                var nubbinend2 = tanPt.sub(nubbin.mul(.5));
 
                 ctx.beginPath();
                 ctx.moveTo(tanPt.x, tanPt.y);
-                ctx.lineTo(nubbinend.x, nubbinend.y);
+                ctx.lineTo(nubbinend1.x, nubbinend1.y);
                 ctx.stroke();
 
-                // ctx.beginPath();
-                // ctx.arc(tanPt.x, tanPt.y, 6 * ctx.lineWidth, theta, theta+Math.PI);
-                // ctx.fillStyle = "black";
-                // ctx.fill();
-
-                // ctx.beginPath();
-                // ctx.arc(tanPt.x, tanPt.y, 4 * ctx.lineWidth, theta, theta+Math.PI);
-                // ctx.fillStyle = "red";
-                // ctx.fill();
-
                 ctx.beginPath();
-                ctx.strokeStyle = "#0f0";
                 ctx.moveTo(tanPt.x, tanPt.y);
+
+                // Draw the rest of the segment.
+                if (!drawhalf) {
+                    ctx.strokeStyle = "#0f0";
+                    ctx.lineTo(pts[i].z2.x, fixy(pts[i].z2).y);
+                }
             }
-            ctx.lineTo(pts[i].z2.x, fixy(pts[i].z2).y);
-            ctx.stroke();
         }
     }
 
@@ -786,14 +805,14 @@ class BPWidget {
         var N = this.plotDims().windowN;
         var ctx = setupCTX(widget.rblines.element, N);
         for (var x of alltanpoints) {
-            widget.drawtangentsinner(ctx, x[0].theta, x, true);
+            widget.drawtangentsinner(ctx, x[0].theta, x, true, false);
         }
         ctx.restore();
 
         // Draw the animated tangent line.
 
         widget.drawPILinesInner(widget.rblines.element, piangles, 1, null, true, theta);
-        
+
         // Draw circles at the point of tangency.
 
         var N = this.plotDims().windowN;
@@ -886,18 +905,22 @@ class BPWidget {
     autojoinpoints() {
         this.doclearlines();
 
+        var highlightcurve = this.highlightcurve.is(":checked");
+        var halftangents = this.halftangents != null && this.halftangents.is(":checked");
         var ajpct = parseInt(this.autolinespoints.val(), 10);
-        this.joinpis(ajpct);
+
+        if (this.parseSkip() != 1 || !halftangents || highlightcurve) {
+            // Why is this so much slower?
+            this.joinpis(ajpct);
+        }
 
         // Setup another context
         var ctx = setupCTX(this.rblines.element, this.plotDims().windowN);
 
         if (this.parseSkip() == 1) {
-            var plotpolygon = this.plotpolygon.is(":checked");
-            var drawsolid = this.solidtangents.is(":checked");
-            this.drawtangents(ctx, ajpct, drawsolid);
+            this.drawtangents(ctx, ajpct, highlightcurve, halftangents);
 
-            if (drawsolid && plotpolygon) {
+            if (highlightcurve) {
                 // Get tangent segments.
                 var intersections = getTangentSegments(this.zs, ajpct);
                 var ints = getSortedByCenter(intersections);
@@ -1020,7 +1043,9 @@ class BPWidget {
         this.rglines.on("click", joinpoints);
 
         this.animatelines.on("click", function () { that.setupanimatetangents(); })
-        this.glidelines.on("click", function () { that.setupglidetangents(); })
+        if (this.glidelines != null) {
+            this.glidelines.on("click", function () { that.setupglidetangents(); })
+        }
 
         this.autolinesgo.on("click", function () { that.autojoinpoints(); });
         // this.timesPI.on("click", function() {
