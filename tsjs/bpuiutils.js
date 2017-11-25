@@ -87,19 +87,20 @@ function setupCanvases(sel) {
         + '<canvas class="rblines graph lines"></canvas>';
     sel.append($(html));
 }
-var _nudge = null;
 function getNudge(div) {
-    // if(_nudge == null) {
-    _nudge = div.width() / 2;
-    var s = div.css("border-left-width").replace("px", "");
-    if (s != "") {
-        _nudge += parseFloat(s);
-    }
-    // }
+    var _nudge = div.outerWidth() / 2;
     return _nudge;
 }
-function cssscatter(cw, canvaswidth, pts, cssclass, doclear) {
-    var moveexisting = pts.length == cw.find("." + cssclass).length;
+// TODO: Replace jQuery with raw JavaScript
+// instead of .find, get all elements of the CSS class
+// and order they by zero ID, then we don't have to keep calling .find.
+function cssscatter(w, cw, canvaswidth, pts, cssclass, doclear) {
+    var existing0 = cw[0].getElementsByClassName(cssclass);
+    var existing = new Array(existing0.length);
+    for (var i = 0; i < existing0.length; i++) {
+        existing[i] = existing0[i];
+    }
+    var moveexisting = pts.length == existing.length;
     if (!moveexisting) {
         if (doclear == undefined || doclear) {
             cw.find("." + cssclass).remove();
@@ -107,6 +108,7 @@ function cssscatter(cw, canvaswidth, pts, cssclass, doclear) {
     }
     var offset = canvaswidth / 2;
     //console.log("Rescattering ", cw, cssclass, " at ", canvaswidth, offset);
+    var nudge;
     for (var i = 0; i < pts.length; i++) {
         var z = pts[i];
         var x = z.x;
@@ -121,9 +123,16 @@ function cssscatter(cw, canvaswidth, pts, cssclass, doclear) {
             div.attr("zeroid", i);
         }
         else {
-            div = cw.find("." + cssclass + "[zeroid='" + i + "']");
+            div = $(existing[i]);
         }
-        var nudge = getNudge(div);
+        if (nudge == null) {
+            if (w != null) {
+                nudge = w.getNudge(div);
+            }
+            else {
+                nudge = getNudge(div);
+            }
+        }
         div.css("top", Math.round(offset - offset * y - nudge));
         div.css("left", Math.round(offset + offset * x - nudge));
         /*

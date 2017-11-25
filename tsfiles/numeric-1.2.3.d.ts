@@ -3,24 +3,29 @@ declare module numeric {
         x: number;
         y: number;
         constructor(x: number, y: number)
-        Cadd(z2: T): T;
         add(z2: T): T;
         sub(z2: T): T;
-        Csub(z2: T): T;
         mul(z2: T): T;
         mul(z2: number): T;
-        Cmul(z2: T): T;
         div(z2: T): T;
-        Cdiv(z2: T): T;
         div(x2: number): T;
         dot(z2: T): T;
         angle(): number;
-        pow(n: number): T;
         abs(): T;
         exp(): T;
         conj(): T;
         unit(): T;
         norm2(): number;
+
+        pow(n: number): T;
+        
+        Cdiv(z2: T): T;
+        Cdiv(z2: number): T;
+        Cadd(z2: T): T;
+        Csub(z2: T): T;
+        Cmul(z2: T): T;
+        Cmul(z2: number): T;
+        Cnorm2(): number;
     }
 
     class EIG {

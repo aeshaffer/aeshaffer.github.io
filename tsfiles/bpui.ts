@@ -109,6 +109,8 @@ class BPWidget {
     findpreimages: JQuerySingletonWrapper<HTMLButtonElement>;
     foundpreimages: JQuerySingletonWrapper<HTMLUListElement>;
 
+    _nudge: number;
+
     zs: BPZeroes;
     cpi: CPInfo;
     bpzs: BPZeroes;
@@ -210,6 +212,13 @@ class BPWidget {
         this.setup();
     };
 
+    clearTables() {
+        this.zeroes.empty();
+        this.criticalpoints.empty();
+        this.criticalvalues.empty();
+        this.fixedpointsUL.empty();
+    }
+
     displayTables(zs: BPZeroes, cpi: CPInfo) {
         if (this.criticalpoints == null || this.criticalvalues == null) {
             return;
@@ -225,8 +234,10 @@ class BPWidget {
         }
 
         this.updateCVAnglesTable(cpi);
-        this.updateFPSTable(this.zs, cpi);
+        this.updateFPSTable(this.zs, cpi);        
+    }
 
+    updateQueryStringAndZeroesTextbox(zs: BPZeroes) {
         var oldval = this.zsstring.val();
         var zsquerystring = zsQueryString(this.zs);
         var zscode = zsString(this.zs);
@@ -237,7 +248,8 @@ class BPWidget {
         }
         var wl = window.location.href.replace(window.location.search, "");
         this.permalink.attr("href", wl + "?" + zsquerystring);
-    };
+    }
+
 
     updateCPCVSTable(cpi: CPInfo) {
 
@@ -339,6 +351,7 @@ class BPWidget {
     }
 
     dropzero(zdiv) {
+        this.rescatter(true);
         if (this.replotondrop.is(":checked")) {
             this.justReplotme(true);
         }
@@ -346,7 +359,7 @@ class BPWidget {
 
     updatezero(zdiv) {
         try {
-            var nudge = getNudge($(zdiv));
+            var nudge = this.getNudge($(zdiv));
             var zeroid = $(zdiv).attr("zeroid");
             var zeroid_num = parseInt(zeroid, 10);
             var cw = $(zdiv).parent(".zeroesholder");
@@ -373,14 +386,14 @@ class BPWidget {
                     this.zs.splice(zeroid_num, 1);
                 }
 
-                this.rescatter();
+                this.rescatter(false);
             }
         } catch (err) {
             alert(err);
         }
     };
 
-    rescatter() {
+    rescatter(dotables: boolean = true) {
 
         if (this.reidonrplot.is(":checked")) {
             this.autojoinpoints();
@@ -395,14 +408,18 @@ class BPWidget {
         var cvangles = this.cpi.cvangles;
         var fps = this.cpi.plottableFPS();
 
-        this.displayTables(this.zs, this.cpi);
-
+        if (dotables) {
+            this.displayTables(this.zs, this.cpi);
+        } else {
+            this.clearTables();
+        }
+        this.updateQueryStringAndZeroesTextbox(this.zs);
         var cw = this.rainbow.parent(".zeroesholder");
         var cwidth = this.plotDims().graphN;
 
         var rng = this.range.parent(".zeroesholder");
         var cvs2 = mapCVs(this.cpi);
-        cssscatter(rng, cwidth, cvs2, "cv");
+        cssscatter(this, rng, cwidth, cvs2, "cv");
 
         // Put the panel after all the plotted points
         // so it gets our click events.
@@ -414,29 +431,29 @@ class BPWidget {
         this.attachrangeMD(preimages);
 
         var rgns = this.regions.parent(".zeroesholder");
-        cssscatter(rgns, cwidth, cps, "cp");
-        cssscatter(rgns, cwidth, this.cpi.plottableFPS(), "fp");
-        cssscatter(rgns, cwidth, this.zs, "zero");
+        cssscatter(this, rgns, cwidth, cps, "cp");
+        cssscatter(this, rgns, cwidth, this.cpi.plottableFPS(), "fp");
+        cssscatter(this, rgns, cwidth, this.zs, "zero");
 
         if (this.plotinterp.is(":checked")) {
             if (this.skippoints.val() != "") {
                 var innerguess = parseInt(this.skippoints.val(), 10);
                 if (innerguess == 1 || innerguess == this.zs.length ||
                     this.zs.length % innerguess != 0) {
-                    cssscatter(cw, cwidth, [], "innerzero", true);
+                    cssscatter(this, cw, cwidth, [], "innerzero", true);
                 } else {
                     var innertest = algorithmtest(this.zs, innerguess);
-                    var innertestdivs = cssscatter(cw, cwidth, innertest.zeroes, "innerzero");
+                    var innertestdivs = cssscatter(this, cw, cwidth, innertest.zeroes, "innerzero");
                     console.log("PQ Zeroes:", innertest.pqzeroes);
                 }
             }
         } else {
-            cssscatter(cw, cwidth, [], "innerzero", true);
+            cssscatter(this, cw, cwidth, [], "innerzero", true);
         }
 
 
-        cssscatter(cw, cwidth, this.cpi.plottableFPS(), "fp");
-        var zerodivs = cssscatter(cw, cwidth, this.zs, "zero");
+        cssscatter(this, cw, cwidth, this.cpi.plottableFPS(), "fp");
+        var zerodivs = cssscatter(this, cw, cwidth, this.zs, "zero");
         var that = this;
         zerodivs.addClass("draggable")
             .addClass("ui-draggable")
@@ -460,7 +477,7 @@ class BPWidget {
             }
         }
 
-        cssscatter(cw, cwidth, this.cpi.cps, "cp");
+        cssscatter(this, cw, cwidth, this.cpi.cps, "cp");
         for (var i = 0; i < this.cpi.cps.length; i++) {
             var pt = cw.find(".cp" + i);
             var cp = this.cpi.cps[i];
@@ -470,7 +487,7 @@ class BPWidget {
     }
     resizeCanvasesRescatter() {
         this.resizeCanvases();
-        this.rescatter();
+        this.rescatter(true);
     };
 
     plotDims(): PlotDimensions {
@@ -625,25 +642,25 @@ class BPWidget {
 
     drawPILineInner(ctx: CanvasRenderingContext2D, t0: number,
         skippedangles: number[], totalLength: number, drawnLength: number) {
-        var t1 = null;
+        var t1: number = null;
         (ctx.moveTo).apply(ctx, ttp(t0));
-        var t0z;
-        var t1z;
+        var t0z: numeric.T;
+        var t1z: numeric.T;
         for (var i = 1; i < skippedangles.length + 1; i++) {
             t1 = skippedangles[i % skippedangles.length];
             t0z = t2c(t0);
             t1z = t2c(t1);
-            var lineLength = t1z.sub(t0z).abs().x;
+            var lineLength = t1z.Csub(t0z).Cnorm2();
             if (drawnLength + lineLength > totalLength) {
                 // Draw in the same direction with whatever length we have left over.
-                var z = t0z.add(t1z.sub(t0z).div(lineLength).mul(totalLength - drawnLength));
+                var z = t0z.Cadd(t1z.Csub(t0z).Cdiv(lineLength).Cmul(totalLength - drawnLength));
                 t1z = z;
-                console.log("Drawing from" + dc(t0z) + " to " + dc(t1z) + " length " + lineLength);
+                //console.log("Drawing from" + dc(t0z) + " to " + dc(t1z) + " length " + lineLength);
                 (ctx.lineTo).apply(ctx, c2xyArray(z));
                 drawnLength = totalLength;
                 break;
             } else {
-                console.log("Drawing from" + dc(t0z) + " to " + dc(t1z) + " length " + lineLength);
+                //console.log("Drawing from" + dc(t0z) + " to " + dc(t1z) + " length " + lineLength);
                 (ctx.lineTo).apply(ctx, ttp(t1));
                 drawnLength += lineLength;
                 t0 = t1;
@@ -973,7 +990,7 @@ class BPWidget {
     addZero(z) {
         if (z.abs().x <= 1) {
             this.zs.push(z);
-            this.rescatter();
+            this.rescatter(true);
             this.dropzero(null);
         }
     }
@@ -997,14 +1014,14 @@ class BPWidget {
                     var preimages = preimage(that.zs, z);
                     var v = that.showpreimages.val();
                     if (v == "both") {
-                        var pidivs = cssscatter(that.rainbow.parent(".zeroesholder"),
+                        var pidivs = cssscatter(this, that.rainbow.parent(".zeroesholder"),
                             that.plotDims().graphN, preimages, "pi", false);
                     }
                     if (v == "regions" || v == "both") {
-                        var pidivs = cssscatter(that.regions.parent(".zeroesholder"),
+                        var pidivs = cssscatter(this, that.regions.parent(".zeroesholder"),
                             that.plotDims().graphN, preimages, "pi", false);
                     }
-                    var idivs = cssscatter(that.range.siblings(".rangepath"),
+                    var idivs = cssscatter(this, that.range.siblings(".rangepath"),
                         that.plotDims().graphN, [z0], "path", false);
                     console.log("Scattering preimages.");
                 }
@@ -1088,6 +1105,23 @@ class BPWidget {
 
     };
 
+    getNudge(div) {
+        if (this._nudge == null) {
+            this._nudge = getNudge(div);
+        }
+        return this._nudge;
+    }
+
+    fixdots() {
+        this._nudge = null;
+        if (parseFloat(this.pixels.val()) > 200) {
+            $("body").addClass("bigdots");
+        } else {
+            $("body").removeClass("bigdots");
+        }
+        this.clearplots.click();
+    }
+
     setup() {
 
         var urlZS = window.location.search.replace(/^\?/, '');
@@ -1130,14 +1164,7 @@ class BPWidget {
             }
         });
 
-        this.pixels.change(function () {
-            if (parseFloat(that.pixels.val()) > 450) {
-                $("body").addClass("bigdots");
-            } else {
-                $("body").removeClass("bigdots");
-            }
-            that.clearplots.click();
-        })
+        this.pixels.change(function () { that.fixdots(); })
 
         if (this.showcps != null) {
             this.showcps.change(function () {
@@ -1161,7 +1188,7 @@ class BPWidget {
 
         this.showadvanced.change();
 
-        this.skippoints.change(function () { that.rescatter(); });
+        this.skippoints.change(function () { that.rescatter(true); });
         this.windowscale.change(function () { that.resizeCanvasesRescatter(); });
         this.graphzoom.change(function () { that.resizeCanvasesRescatter(); });
 
@@ -1172,7 +1199,7 @@ class BPWidget {
                 that.progress.append(" COPY:" + ((new Date()).getTime() - event.data.senddate));
                 that.resizeCanvases();
                 that.progress.append(" RC:" + ((new Date()).getTime() - event.data.senddate));
-                that.rescatter();
+                that.rescatter(true);
                 that.progress.append(" RE:" + ((new Date()).getTime() - event.data.senddate));
                 workerRainbow(that.rainbowworker, event.data.rpip, that.plotDims().N, that.cpi.cvangles);
                 that.progress.append(" WRB:" + ((new Date()).getTime() - event.data.senddate));
@@ -1315,7 +1342,7 @@ class EasyResizeWidget extends BPWidget {
         var that = this;
         this.zsstring.change(function () {
             that.zs = parseZsString(that.zsstring.val());
-            that.rescatter();
+            that.rescatter(true);
         });
         var setdims = function (i, e) {
             e.width = that.plotDims().windowN;

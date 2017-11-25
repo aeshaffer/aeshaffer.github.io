@@ -93,10 +93,10 @@ function recalcBP(cvlines) {
         }
     }
     if ($("#plotcps").is(":checked")) {
-        cssscatter($(".canvaswrapper"), 640, bproots.cps, "cp", true);
+        cssscatter(null, $(".canvaswrapper"), 640, bproots.cps, "cp", true);
     }
     else {
-        cssscatter($(".canvaswrapper"), 640, [], "cp", true);
+        cssscatter(null, $(".canvaswrapper"), 640, [], "cp", true);
     }
 }
 $(function () {

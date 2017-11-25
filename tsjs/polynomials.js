@@ -61,6 +61,10 @@ function fixy(z) { return c(z.x, z.y == undefined ? 0 : z.y); }
 function gcd_rec(a, b) {
     return b ? gcd_rec(b, a % b) : Math.abs(a);
 }
+numeric.T.prototype.Cnorm2 = function () {
+    var y = this.y == undefined ? 0 : this.y;
+    return Math.sqrt(this.x * this.x + this.y * this.y);
+};
 numeric.T.prototype.Cadd = function (z2) {
     if (!(z2 instanceof numeric.T))
         z2 = new numeric.T(z2, 0);
@@ -121,7 +125,7 @@ numeric.T.prototype.pow = function (n) {
     else {
         var retval = none;
         for (var i = 0; i < n; i++) {
-            retval = retval.mul(this);
+            retval = retval.Cmul(this);
         }
         return retval;
     }
@@ -152,7 +156,7 @@ function xy2c(xy) {
     return new numeric.T(xy.x, fixy(xy).y);
 }
 function rt2c(r, t) {
-    return ni.mul(t).exp().mul(r);
+    return c(r * Math.cos(t), r * Math.sin(t));
 }
 function c(x, y) {
     return new numeric.T(x, y);
@@ -161,7 +165,9 @@ function c2xyArray(z) {
     return [z.x, z.y];
 }
 // Theta to exp[i*t]
-function t2c(t) { return fixy(rt2c(1, t)); }
+function t2c(t) {
+    return c(Math.cos(t), Math.sin(t));
+}
 function ttcp(t) {
     return c(numeric.cos(t), numeric.sin(t));
 }
@@ -237,7 +243,7 @@ function polymult(coeffs1, coeffs2) {
         for (var j = 0; j < coeffs2.length; j++) {
             if (coeffs3[i + j] == undefined)
                 coeffs3[i + j] = nzero;
-            coeffs3[i + j] = coeffs3[i + j].add(coeffs1[i].mul(coeffs2[j]));
+            coeffs3[i + j] = coeffs3[i + j].Cadd(coeffs1[i].Cmul(coeffs2[j]));
         }
     }
     return coeffs3;
@@ -245,7 +251,7 @@ function polymult(coeffs1, coeffs2) {
 function dcoeffs(cs) {
     var retval = new Array();
     for (var i = 0; i < cs.length - 1; i++) {
-        retval[i] = c(i + 1, 0).mul(cs[i + 1]);
+        retval[i] = c(i + 1, 0).Cmul(cs[i + 1]);
     }
     return retval;
 }
@@ -253,7 +259,7 @@ function dcoeffs(cs) {
 function coeffs(zs) {
     var xcoeffs = [none];
     for (var i = 0; i < zs.length; i++) {
-        var t = [c(-1, 0).mul(zs[i]), none];
+        var t = [c(-1, 0).Cmul(zs[i]), none];
         xcoeffs = polymult(xcoeffs, t);
     }
     return xcoeffs;
@@ -262,22 +268,23 @@ function cps(zs) {
     var dcs = dcoeffs(coeffs(zs));
     return polyroots(dcs);
 }
-function zpowers(z, n) {
-    var zpowers = new Array();
-    var zn = none;
-    zpowers.push(zn);
-    for (var i = 0; i < n; i++) {
-        zn = zn.Cmul(z);
-        zpowers.push(zn);
-    }
-    return zpowers;
-}
+// function zpowers(z: C, n: number): Array<numeric.T> {
+//     var zpowers = new Array<numeric.T>();
+//     var zn = none;
+//     zpowers.push(zn);
+//     for (var i = 0; i < n; i++) {
+//         zn = zn.Cmul(z);
+//         zpowers.push(zn);
+//     }
+//     return zpowers;
+// }
 function peval(coeffs, z) {
     var retval = nzero;
-    var zs = zpowers(z, coeffs.length);
+    // var zs = zpowers(z, coeffs.length);
+    var zn = none;
     for (var i = 0; i < coeffs.length; i++) {
-        var zn = zs[i];
         var term = zn.Cmul(coeffs[i]);
+        zn = zn.Cmul(z);
         retval = retval.Cadd(term);
     }
     return retval;
@@ -353,10 +360,10 @@ function polyroots(incs) {
         for (var i = 0; i < roots.length; i++) {
             var p = roots[i];
             var x = f(p);
-            abssum += x.norm2();
+            abssum += x.Cnorm2();
             for (var j = 0; j < roots.length; j++) {
                 if (i != j) {
-                    var x2 = fixy(x.Cdiv(p.Csub(roots[j])));
+                    var x2 = x.Cdiv(p.Csub(roots[j]));
                     if (isNaN(x2.x) || isNaN(x2.y)) {
                         throw "";
                     }
@@ -366,9 +373,10 @@ function polyroots(incs) {
             roots[i] = p.Csub(x);
         }
         n++;
-        if (abssum < .00001) {
+        if (abssum < .0001) {
             return roots;
         }
+        // console.log("Sum of values at iteration ", n, " ", abssum);
     }
     return roots;
 }

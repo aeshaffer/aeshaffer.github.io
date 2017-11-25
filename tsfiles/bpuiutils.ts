@@ -44,20 +44,20 @@ function zsQueryStringFromString(s: string) {
 function parseCRLFZsString(s: string) {
     var zs = s.trim().replace(/[\r\n|]+/g, "|").split("|");
     var partses = zs.map(pair => pair.split(","));
-    if(partses.every(parts => parts.length == 2)) {
+    if (partses.every(parts => parts.length == 2)) {
         var retval = partses.map(parts => c(parseFloat(parts[0]), parseFloat(parts[1])));
-        return retval;        
+        return retval;
     } else {
         throw "Couldn't parse" + s;
     }
 }
 
 function parseZsString(s: string, key?: string): C[] {
-    if(s == "") {
+    if (s == "") {
         return new Array<C>(0);
     }
-    else if(s.indexOf("=") == -1) {
-       return parseCRLFZsString(s);
+    else if (s.indexOf("=") == -1) {
+        return parseCRLFZsString(s);
     } else {
         var k = (key == undefined ? "z" : key);
         if (s.indexOf("&") == 0) {
@@ -89,34 +89,34 @@ function setupCanvases(sel: JQuery) {
     sel.append($(html));
 }
 
-var _nudge : number = null;
-
 function getNudge(div) {
-   // if(_nudge == null) {
-        _nudge = div.width() / 2;
-        var s : string = div.css("border-left-width").replace("px", "");
-        if(s != "") {
-            _nudge += parseFloat(s);            
-        }
-   // }
+    var _nudge = div.outerWidth() / 2;
     return _nudge;
 }
 
-function cssscatter(cw : JQuery, canvaswidth: number, pts: Array<C>, cssclass: string, doclear?: boolean): JQuery {
-    var moveexisting = pts.length == cw.find("." + cssclass).length;
+// TODO: Replace jQuery with raw JavaScript
+// instead of .find, get all elements of the CSS class
+// and order they by zero ID, then we don't have to keep calling .find.
+function cssscatter(w: BPWidget, cw: JQuery, canvaswidth: number, pts: Array<C>, cssclass: string, doclear?: boolean): JQuery {
+    var existing0 = cw[0].getElementsByClassName(cssclass);
+    var existing = new Array<HTMLDivElement>(existing0.length);
+    for (var i = 0; i < existing0.length; i++) { existing[i] = <HTMLDivElement>existing0[i]; }
+
+    var moveexisting = pts.length == existing.length;
     if (!moveexisting) {
         if (doclear == undefined || doclear) {
             cw.find("." + cssclass).remove();
         }
     }
+
     var offset = canvaswidth / 2;
     //console.log("Rescattering ", cw, cssclass, " at ", canvaswidth, offset);
-
+    var nudge: number;
     for (var i = 0; i < pts.length; i++) {
         var z = pts[i];
         var x = z.x;
         var y = z.y == undefined ? 0 : z.y;
-        var div;
+        var div : JQuery;
         if (!moveexisting) {
             div = $("<div />");
             cw.append(div);
@@ -126,9 +126,15 @@ function cssscatter(cw : JQuery, canvaswidth: number, pts: Array<C>, cssclass: s
             div.addClass(cssclass + i);
             div.attr("zeroid", i);
         } else {
-            div = cw.find("." + cssclass + "[zeroid='" + i + "']");
+            div = $(existing[i]);
         }
-        var nudge = getNudge(div);
+        if (nudge == null) {
+            if (w != null) {
+                nudge = w.getNudge(div);
+            } else {
+                nudge = getNudge(div);
+            }
+        }
         div.css("top", Math.round(offset - offset * y - nudge));
         div.css("left", Math.round(offset + offset * x - nudge));
         /*
@@ -202,7 +208,7 @@ function resize(g: JQuery, pd: PlotDimensions) {
     var cw = g.parent(".zeroesholder");
     resizeCW(cw, pd);
 
-    var graph = <HTMLCanvasElement>$(g)[0] ;
+    var graph = <HTMLCanvasElement>$(g)[0];
     if (graph == undefined) { return; }
     /*
       var oldImgData = graph.toDataURL("image/png");
@@ -237,7 +243,7 @@ function rpipToBpzs(rpip: RPIP): zsAndBPValues {
 
 function bindCPClick(pt: JQuery, cp, that) {
     var cp2 = cp;
-    pt.bind("click", function() { showClick(cp2, that); });
+    pt.bind("click", function () { showClick(cp2, that); });
 }
 
 function setupCTX(lines: HTMLCanvasElement, N: number) {
@@ -298,12 +304,12 @@ function rgbToHex(rgb: number[]) {
 function closestToPoint(ints: C[], cent: C) {
     // Find the point that's closest to the center of the major axis.
     var closesttocent = ints.slice();
-    closesttocent.sort(function(a, b) { return a.sub(cent).abs().x - b.sub(cent).abs().x; })
+    closesttocent.sort(function (a, b) { return a.sub(cent).abs().x - b.sub(cent).abs().x; })
     return closesttocent[0];
 }
 
-function drawEllipse(ctx: CanvasRenderingContext2D, cent: C, 
-    majorAxisVector: C, minorAxisVector: C, strokeStyle: string, odd?: number ) {
+function drawEllipse(ctx: CanvasRenderingContext2D, cent: C,
+    majorAxisVector: C, minorAxisVector: C, strokeStyle: string, odd?: number) {
     if (odd == undefined) { odd = 0; }
 
     /* 
@@ -362,15 +368,16 @@ function clearCanvasInner(cxt: CanvasRenderingContext2D, preserveTransform: bool
 }
 
 function clearAllGraphs() {
-    clearCanvas($(".graph"));    
+    clearCanvas($(".graph"));
 }
 
 function clearCanvas(selector: JQuery) {
     if (selector != null) {
-        selector.each(function(i, e) { 
-            var e2 = (<HTMLCanvasElement>e); 
-            clearCanvasInner(e2.getContext("2d"), false);});
-    }    
+        selector.each(function (i, e) {
+            var e2 = (<HTMLCanvasElement>e);
+            clearCanvasInner(e2.getContext("2d"), false);
+        });
+    }
 }
 
 function showClick(z: C, that: any) {
@@ -383,19 +390,19 @@ function showClick(z: C, that: any) {
 // Zoom in on the critical values.
 function mapCVs(cpi: CPInfo) {
     var cvs = cpi.cvs;
-    var cvnorms = $.map(cvs, function(e, i) { return e.abs().x; });
+    var cvnorms = $.map(cvs, function (e, i) { return e.abs().x; });
     var maxcvabs = Math.max.apply(null, cvnorms);
     var mincvabs = Math.min.apply(null, cvnorms);
     var f = zinterp(mincvabs, maxcvabs, .25, .75);
     return cvs.map(
-        function(z, i) {
+        function (z, i) {
             return f(z);
         });
 }
 
-function mapZinCVs(z: C, cpi: CPInfo) : C{
+function mapZinCVs(z: C, cpi: CPInfo): C {
     var cvs = cpi.cvs;
-    var cvnorms = $.map(cvs, function(e, i) { return e.abs().x; });
+    var cvnorms = $.map(cvs, function (e, i) { return e.abs().x; });
     var maxcvabs = Math.max.apply(null, cvnorms);
     var mincvabs = Math.min.apply(null, cvnorms);
     var znorm = z.abs().x;

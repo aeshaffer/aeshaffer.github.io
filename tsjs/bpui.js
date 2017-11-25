@@ -223,6 +223,12 @@ var BPWidget = /** @class */ (function () {
         this.setup();
     };
     ;
+    BPWidget.prototype.clearTables = function () {
+        this.zeroes.empty();
+        this.criticalpoints.empty();
+        this.criticalvalues.empty();
+        this.fixedpointsUL.empty();
+    };
     BPWidget.prototype.displayTables = function (zs, cpi) {
         if (this.criticalpoints == null || this.criticalvalues == null) {
             return;
@@ -236,6 +242,8 @@ var BPWidget = /** @class */ (function () {
         }
         this.updateCVAnglesTable(cpi);
         this.updateFPSTable(this.zs, cpi);
+    };
+    BPWidget.prototype.updateQueryStringAndZeroesTextbox = function (zs) {
         var oldval = this.zsstring.val();
         var zsquerystring = zsQueryString(this.zs);
         var zscode = zsString(this.zs);
@@ -247,7 +255,6 @@ var BPWidget = /** @class */ (function () {
         var wl = window.location.href.replace(window.location.search, "");
         this.permalink.attr("href", wl + "?" + zsquerystring);
     };
-    ;
     BPWidget.prototype.updateCPCVSTable = function (cpi) {
         this.criticalpoints.empty();
         this.criticalvalues.empty();
@@ -336,13 +343,14 @@ var BPWidget = /** @class */ (function () {
         }
     };
     BPWidget.prototype.dropzero = function (zdiv) {
+        this.rescatter(true);
         if (this.replotondrop.is(":checked")) {
             this.justReplotme(true);
         }
     };
     BPWidget.prototype.updatezero = function (zdiv) {
         try {
-            var nudge = getNudge($(zdiv));
+            var nudge = this.getNudge($(zdiv));
             var zeroid = $(zdiv).attr("zeroid");
             var zeroid_num = parseInt(zeroid, 10);
             var cw = $(zdiv).parent(".zeroesholder");
@@ -370,7 +378,7 @@ var BPWidget = /** @class */ (function () {
                 else {
                     this.zs.splice(zeroid_num, 1);
                 }
-                this.rescatter();
+                this.rescatter(false);
             }
         }
         catch (err) {
@@ -378,7 +386,8 @@ var BPWidget = /** @class */ (function () {
         }
     };
     ;
-    BPWidget.prototype.rescatter = function () {
+    BPWidget.prototype.rescatter = function (dotables) {
+        if (dotables === void 0) { dotables = true; }
         if (this.reidonrplot.is(":checked")) {
             this.autojoinpoints();
             clearCanvas(this.rainbow.inner);
@@ -390,12 +399,18 @@ var BPWidget = /** @class */ (function () {
         var cvs = this.cpi.cvs;
         var cvangles = this.cpi.cvangles;
         var fps = this.cpi.plottableFPS();
-        this.displayTables(this.zs, this.cpi);
+        if (dotables) {
+            this.displayTables(this.zs, this.cpi);
+        }
+        else {
+            this.clearTables();
+        }
+        this.updateQueryStringAndZeroesTextbox(this.zs);
         var cw = this.rainbow.parent(".zeroesholder");
         var cwidth = this.plotDims().graphN;
         var rng = this.range.parent(".zeroesholder");
         var cvs2 = mapCVs(this.cpi);
-        cssscatter(rng, cwidth, cvs2, "cv");
+        cssscatter(this, rng, cwidth, cvs2, "cv");
         // Put the panel after all the plotted points
         // so it gets our click events.
         var preimages = rng.find(".preimagepanel");
@@ -404,28 +419,28 @@ var BPWidget = /** @class */ (function () {
         rng.append(preimages);
         this.attachrangeMD(preimages);
         var rgns = this.regions.parent(".zeroesholder");
-        cssscatter(rgns, cwidth, cps, "cp");
-        cssscatter(rgns, cwidth, this.cpi.plottableFPS(), "fp");
-        cssscatter(rgns, cwidth, this.zs, "zero");
+        cssscatter(this, rgns, cwidth, cps, "cp");
+        cssscatter(this, rgns, cwidth, this.cpi.plottableFPS(), "fp");
+        cssscatter(this, rgns, cwidth, this.zs, "zero");
         if (this.plotinterp.is(":checked")) {
             if (this.skippoints.val() != "") {
                 var innerguess = parseInt(this.skippoints.val(), 10);
                 if (innerguess == 1 || innerguess == this.zs.length ||
                     this.zs.length % innerguess != 0) {
-                    cssscatter(cw, cwidth, [], "innerzero", true);
+                    cssscatter(this, cw, cwidth, [], "innerzero", true);
                 }
                 else {
                     var innertest = algorithmtest(this.zs, innerguess);
-                    var innertestdivs = cssscatter(cw, cwidth, innertest.zeroes, "innerzero");
+                    var innertestdivs = cssscatter(this, cw, cwidth, innertest.zeroes, "innerzero");
                     console.log("PQ Zeroes:", innertest.pqzeroes);
                 }
             }
         }
         else {
-            cssscatter(cw, cwidth, [], "innerzero", true);
+            cssscatter(this, cw, cwidth, [], "innerzero", true);
         }
-        cssscatter(cw, cwidth, this.cpi.plottableFPS(), "fp");
-        var zerodivs = cssscatter(cw, cwidth, this.zs, "zero");
+        cssscatter(this, cw, cwidth, this.cpi.plottableFPS(), "fp");
+        var zerodivs = cssscatter(this, cw, cwidth, this.zs, "zero");
         var that = this;
         zerodivs.addClass("draggable")
             .addClass("ui-draggable")
@@ -446,7 +461,7 @@ var BPWidget = /** @class */ (function () {
                     .draggable('disable');
             }
         }
-        cssscatter(cw, cwidth, this.cpi.cps, "cp");
+        cssscatter(this, cw, cwidth, this.cpi.cps, "cp");
         for (var i = 0; i < this.cpi.cps.length; i++) {
             var pt = cw.find(".cp" + i);
             var cp = this.cpi.cps[i];
@@ -456,7 +471,7 @@ var BPWidget = /** @class */ (function () {
     };
     BPWidget.prototype.resizeCanvasesRescatter = function () {
         this.resizeCanvases();
-        this.rescatter();
+        this.rescatter(true);
     };
     ;
     BPWidget.prototype.plotDims = function () {
@@ -616,18 +631,18 @@ var BPWidget = /** @class */ (function () {
             t1 = skippedangles[i % skippedangles.length];
             t0z = t2c(t0);
             t1z = t2c(t1);
-            var lineLength = t1z.sub(t0z).abs().x;
+            var lineLength = t1z.Csub(t0z).Cnorm2();
             if (drawnLength + lineLength > totalLength) {
                 // Draw in the same direction with whatever length we have left over.
-                var z = t0z.add(t1z.sub(t0z).div(lineLength).mul(totalLength - drawnLength));
+                var z = t0z.Cadd(t1z.Csub(t0z).Cdiv(lineLength).Cmul(totalLength - drawnLength));
                 t1z = z;
-                console.log("Drawing from" + dc(t0z) + " to " + dc(t1z) + " length " + lineLength);
+                //console.log("Drawing from" + dc(t0z) + " to " + dc(t1z) + " length " + lineLength);
                 (ctx.lineTo).apply(ctx, c2xyArray(z));
                 drawnLength = totalLength;
                 break;
             }
             else {
-                console.log("Drawing from" + dc(t0z) + " to " + dc(t1z) + " length " + lineLength);
+                //console.log("Drawing from" + dc(t0z) + " to " + dc(t1z) + " length " + lineLength);
                 (ctx.lineTo).apply(ctx, ttp(t1));
                 drawnLength += lineLength;
                 t0 = t1;
@@ -903,7 +918,7 @@ var BPWidget = /** @class */ (function () {
     BPWidget.prototype.addZero = function (z) {
         if (z.abs().x <= 1) {
             this.zs.push(z);
-            this.rescatter();
+            this.rescatter(true);
             this.dropzero(null);
         }
     };
@@ -926,12 +941,12 @@ var BPWidget = /** @class */ (function () {
                 var preimages = preimage(that.zs, z);
                 var v = that.showpreimages.val();
                 if (v == "both") {
-                    var pidivs = cssscatter(that.rainbow.parent(".zeroesholder"), that.plotDims().graphN, preimages, "pi", false);
+                    var pidivs = cssscatter(this, that.rainbow.parent(".zeroesholder"), that.plotDims().graphN, preimages, "pi", false);
                 }
                 if (v == "regions" || v == "both") {
-                    var pidivs = cssscatter(that.regions.parent(".zeroesholder"), that.plotDims().graphN, preimages, "pi", false);
+                    var pidivs = cssscatter(this, that.regions.parent(".zeroesholder"), that.plotDims().graphN, preimages, "pi", false);
                 }
-                var idivs = cssscatter(that.range.siblings(".rangepath"), that.plotDims().graphN, [z0], "path", false);
+                var idivs = cssscatter(this, that.range.siblings(".rangepath"), that.plotDims().graphN, [z0], "path", false);
                 console.log("Scattering preimages.");
             }
         });
@@ -996,6 +1011,22 @@ var BPWidget = /** @class */ (function () {
         this.showpreimages.change();
     };
     ;
+    BPWidget.prototype.getNudge = function (div) {
+        if (this._nudge == null) {
+            this._nudge = getNudge(div);
+        }
+        return this._nudge;
+    };
+    BPWidget.prototype.fixdots = function () {
+        this._nudge = null;
+        if (parseFloat(this.pixels.val()) > 200) {
+            $("body").addClass("bigdots");
+        }
+        else {
+            $("body").removeClass("bigdots");
+        }
+        this.clearplots.click();
+    };
     BPWidget.prototype.setup = function () {
         var urlZS = window.location.search.replace(/^\?/, '');
         this.zs = parseZsString(urlZS);
@@ -1032,15 +1063,7 @@ var BPWidget = /** @class */ (function () {
                 $(".advanced").hide();
             }
         });
-        this.pixels.change(function () {
-            if (parseFloat(that.pixels.val()) > 450) {
-                $("body").addClass("bigdots");
-            }
-            else {
-                $("body").removeClass("bigdots");
-            }
-            that.clearplots.click();
-        });
+        this.pixels.change(function () { that.fixdots(); });
         if (this.showcps != null) {
             this.showcps.change(function () {
                 if (!$(this).is(":checked")) {
@@ -1062,7 +1085,7 @@ var BPWidget = /** @class */ (function () {
             });
         }
         this.showadvanced.change();
-        this.skippoints.change(function () { that.rescatter(); });
+        this.skippoints.change(function () { that.rescatter(true); });
         this.windowscale.change(function () { that.resizeCanvasesRescatter(); });
         this.graphzoom.change(function () { that.resizeCanvasesRescatter(); });
         var wom = function (event) {
@@ -1072,7 +1095,7 @@ var BPWidget = /** @class */ (function () {
                 that.progress.append(" COPY:" + ((new Date()).getTime() - event.data.senddate));
                 that.resizeCanvases();
                 that.progress.append(" RC:" + ((new Date()).getTime() - event.data.senddate));
-                that.rescatter();
+                that.rescatter(true);
                 that.progress.append(" RE:" + ((new Date()).getTime() - event.data.senddate));
                 workerRainbow(that.rainbowworker, event.data.rpip, that.plotDims().N, that.cpi.cvangles);
                 that.progress.append(" WRB:" + ((new Date()).getTime() - event.data.senddate));
@@ -1210,7 +1233,7 @@ var EasyResizeWidget = /** @class */ (function (_super) {
         var that = _this;
         _this.zsstring.change(function () {
             that.zs = parseZsString(that.zsstring.val());
-            that.rescatter();
+            that.rescatter(true);
         });
         var setdims = function (i, e) {
             e.width = that.plotDims().windowN;

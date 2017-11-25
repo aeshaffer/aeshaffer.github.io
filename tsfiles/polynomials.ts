@@ -70,6 +70,10 @@ function gcd_rec(a: number, b: number): number {
     return b ? gcd_rec(b, a % b) : Math.abs(a);
 }
 
+numeric.T.prototype.Cnorm2 = function () {
+    var y = this.y == undefined ? 0 : this.y;
+    return Math.sqrt(this.x*this.x + this.y*this.y);
+}
 
 numeric.T.prototype.Cadd = function (z2) {
     if (!(z2 instanceof numeric.T)) z2 = new numeric.T(z2, 0);
@@ -130,7 +134,7 @@ numeric.T.prototype.pow = function (n) {
     } else {
         var retval = none;
         for (var i = 0; i < n; i++) {
-            retval = retval.mul(this);
+            retval = retval.Cmul(this);
         }
         return retval;
     }
@@ -171,7 +175,7 @@ function xy2c(xy): C {
 }
 
 function rt2c(r: number, t: number): C {
-    return ni.mul(t).exp().mul(r);
+    return c(r*Math.cos(t), r*Math.sin(t));
 }
 
 function c(x: number, y: number): C {
@@ -183,7 +187,9 @@ function c2xyArray(z: C) {
 }
 
 // Theta to exp[i*t]
-function t2c(t: number): C { return fixy(rt2c(1, t)); }
+function t2c(t: number): C { 
+    return c(Math.cos(t), Math.sin(t));
+}
 
 function ttcp(t: number): C {
     return c(numeric.cos(t), numeric.sin(t));
@@ -274,7 +280,7 @@ function polymult(coeffs1: polynomial, coeffs2: polynomial): polynomial {
     for (var i = 0; i < coeffs1.length; i++) {
         for (var j = 0; j < coeffs2.length; j++) {
             if (coeffs3[i + j] == undefined) coeffs3[i + j] = nzero;
-            coeffs3[i + j] = coeffs3[i + j].add(coeffs1[i].mul(coeffs2[j]));
+            coeffs3[i + j] = coeffs3[i + j].Cadd(coeffs1[i].Cmul(coeffs2[j]));
         }
     }
     return coeffs3;
@@ -283,7 +289,7 @@ function polymult(coeffs1: polynomial, coeffs2: polynomial): polynomial {
 function dcoeffs(cs: polynomial): polynomial {
     var retval = new Array<numeric.T>();
     for (var i = 0; i < cs.length - 1; i++) {
-        retval[i] = c(i + 1, 0).mul(cs[i + 1]);
+        retval[i] = c(i + 1, 0).Cmul(cs[i + 1]);
     }
     return retval;
 }
@@ -292,7 +298,7 @@ function dcoeffs(cs: polynomial): polynomial {
 function coeffs(zs: Array<numeric.T>): polynomial {
     var xcoeffs = [none];
     for (var i = 0; i < zs.length; i++) {
-        var t = [c(-1, 0).mul(zs[i]), none];
+        var t = [c(-1, 0).Cmul(zs[i]), none];
         xcoeffs = polymult(xcoeffs, t);
     }
     return xcoeffs;
@@ -303,24 +309,24 @@ function cps(zs: Array<numeric.T>): Array<numeric.T> {
     return polyroots(dcs);
 }
 
-function zpowers(z: C, n: number): Array<numeric.T> {
-    var zpowers = new Array<numeric.T>();
-    var zn = none;
-    zpowers.push(zn);
-    for (var i = 0; i < n; i++) {
-        zn = zn.Cmul(z);
-        zpowers.push(zn);
-    }
-    return zpowers;
-}
+// function zpowers(z: C, n: number): Array<numeric.T> {
+//     var zpowers = new Array<numeric.T>();
+//     var zn = none;
+//     zpowers.push(zn);
+//     for (var i = 0; i < n; i++) {
+//         zn = zn.Cmul(z);
+//         zpowers.push(zn);
+//     }
+//     return zpowers;
+// }
 
 function peval(coeffs: polynomial, z: C) {
     var retval = nzero;
-    var zs = zpowers(z, coeffs.length);
-
+    // var zs = zpowers(z, coeffs.length);
+    var zn = none;
     for (var i = 0; i < coeffs.length; i++) {
-        var zn = zs[i];
         var term = zn.Cmul(coeffs[i]);
+        zn = zn.Cmul(z);
         retval = retval.Cadd(term);
     }
     return retval;
@@ -400,10 +406,10 @@ function polyroots(incs: polynomial): Array<numeric.T> {
         for (var i = 0; i < roots.length; i++) {
             var p = roots[i];
             var x = f(p);
-            abssum += x.norm2();
+            abssum += x.Cnorm2();
             for (var j = 0; j < roots.length; j++) {
                 if (i != j) {
-                    var x2 = fixy(x.Cdiv(p.Csub(roots[j])));
+                    var x2 = x.Cdiv(p.Csub(roots[j]));
                     if (isNaN(x2.x) || isNaN(x2.y)) {
                         throw "";
                     }
@@ -413,9 +419,10 @@ function polyroots(incs: polynomial): Array<numeric.T> {
             roots[i] = p.Csub(x);
         }
         n++;
-        if (abssum < .00001) {
+        if (abssum < .0001) {
             return roots;
         }
+        // console.log("Sum of values at iteration ", n, " ", abssum);
     }
     return roots;
 }
