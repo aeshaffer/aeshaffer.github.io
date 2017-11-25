@@ -98,6 +98,8 @@ function getNudge(div) {
 // instead of .find, get all elements of the CSS class
 // and order they by zero ID, then we don't have to keep calling .find.
 function cssscatter(w: BPWidget, cw: JQuery, canvaswidth: number, pts: Array<C>, cssclass: string, doclear?: boolean): JQuery {
+    // Happens if we don't have that widget on, say, composetool.
+    if (cw == null || cw.length == 0) { return; }
     var existing0 = cw[0].getElementsByClassName(cssclass);
     var existing = new Array<HTMLDivElement>(existing0.length);
     for (var i = 0; i < existing0.length; i++) { existing[i] = <HTMLDivElement>existing0[i]; }
@@ -116,7 +118,7 @@ function cssscatter(w: BPWidget, cw: JQuery, canvaswidth: number, pts: Array<C>,
         var z = pts[i];
         var x = z.x;
         var y = z.y == undefined ? 0 : z.y;
-        var div : JQuery;
+        var div: JQuery;
         if (!moveexisting) {
             div = $("<div />");
             cw.append(div);

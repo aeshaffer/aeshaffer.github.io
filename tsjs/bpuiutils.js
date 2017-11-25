@@ -95,6 +95,10 @@ function getNudge(div) {
 // instead of .find, get all elements of the CSS class
 // and order they by zero ID, then we don't have to keep calling .find.
 function cssscatter(w, cw, canvaswidth, pts, cssclass, doclear) {
+    // Happens if we don't have that widget on, say, composetool.
+    if (cw == null || cw.length == 0) {
+        return;
+    }
     var existing0 = cw[0].getElementsByClassName(cssclass);
     var existing = new Array(existing0.length);
     for (var i = 0; i < existing0.length; i++) {
