@@ -193,6 +193,7 @@ var BPWidget = /** @class */ (function () {
         this.clearlines = g(".clearlines");
         this.autolinesgo = g(".autolinesgo");
         this.animatelines = g(".animatelines");
+        this.glidelines = g(".glidelines");
         //this.timesPI = g(".timesPI");
         //this.plottheta = g(".plottheta");
         this.clearpreimages = g(".clearpreimages");
@@ -560,7 +561,9 @@ var BPWidget = /** @class */ (function () {
         //drawPILinesInner(rglines, piangles, skip);
     };
     ;
-    BPWidget.prototype.drawPILinesInner = function (lines, piangles, skip, timepct) {
+    BPWidget.prototype.drawPILinesInner = function (lines, piangles, skip, timepct, bold, theta) {
+        if (bold === void 0) { bold = false; }
+        if (theta === void 0) { theta = null; }
         var N = this.plotDims().windowN;
         var ctx = setupCTX(lines, N);
         var frontier = [];
@@ -574,33 +577,27 @@ var BPWidget = /** @class */ (function () {
             var skippedangles = skippedangleses[j];
             var totalLength = timepct * getPolylength(skippedangles.map(t2c));
             var t0 = skippedangles[0];
-            var t1 = null;
-            ctx.beginPath();
-            (ctx.moveTo).apply(ctx, ttp(t0));
-            var t0z;
-            var t1z;
-            for (var i = 1; i < skippedangles.length + 1; i++) {
-                t1 = skippedangles[i % skippedangles.length];
-                t0z = t2c(t0);
-                t1z = t2c(t1);
-                var lineLength = t1z.sub(t0z).abs().x;
-                if (drawnLength + lineLength > totalLength) {
-                    // Draw in the same direction with whatever length we have left over.
-                    var z = t0z.add(t1z.sub(t0z).div(lineLength).mul(totalLength - drawnLength));
-                    t1z = z;
-                    console.log("Drawing from" + dc(t0z) + " to " + dc(t1z) + " length " + lineLength);
-                    (ctx.lineTo).apply(ctx, c2xyArray(z));
-                    drawnLength = totalLength;
-                    break;
-                }
-                else {
-                    console.log("Drawing from" + dc(t0z) + " to " + dc(t1z) + " length " + lineLength);
-                    (ctx.lineTo).apply(ctx, ttp(t1));
-                    drawnLength += lineLength;
-                    t0 = t1;
-                }
+            if (bold) {
+                ctx.save();
+                ctx.beginPath();
+                ctx.strokeStyle = "black";
+                ctx.lineWidth *= 4;
+                var t1z = this.drawPILineInner(ctx, t0, skippedangles, totalLength, drawnLength);
+                ctx.stroke();
+                ctx.restore();
+                ctx.save();
+                ctx.beginPath();
+                ctx.lineWidth *= 2;
+                ctx.strokeStyle = hsvToRgbString(tanglehue(theta), 1, 1);
+                var t1z = this.drawPILineInner(ctx, t0, skippedangles, totalLength, drawnLength);
+                ctx.stroke();
+                ctx.restore();
             }
-            ctx.stroke();
+            else {
+                ctx.beginPath();
+                var t1z = this.drawPILineInner(ctx, t0, skippedangles, totalLength, drawnLength);
+                ctx.stroke();
+            }
             frontier.push({ t: piangles[0], dot: t1z });
             // crossHairs(lines, N, skippedangles, drawnLength);
             //ctx.restore();
@@ -609,6 +606,34 @@ var BPWidget = /** @class */ (function () {
         return frontier;
     };
     ;
+    BPWidget.prototype.drawPILineInner = function (ctx, t0, skippedangles, totalLength, drawnLength) {
+        var t1 = null;
+        (ctx.moveTo).apply(ctx, ttp(t0));
+        var t0z;
+        var t1z;
+        for (var i = 1; i < skippedangles.length + 1; i++) {
+            t1 = skippedangles[i % skippedangles.length];
+            t0z = t2c(t0);
+            t1z = t2c(t1);
+            var lineLength = t1z.sub(t0z).abs().x;
+            if (drawnLength + lineLength > totalLength) {
+                // Draw in the same direction with whatever length we have left over.
+                var z = t0z.add(t1z.sub(t0z).div(lineLength).mul(totalLength - drawnLength));
+                t1z = z;
+                console.log("Drawing from" + dc(t0z) + " to " + dc(t1z) + " length " + lineLength);
+                (ctx.lineTo).apply(ctx, c2xyArray(z));
+                drawnLength = totalLength;
+                break;
+            }
+            else {
+                console.log("Drawing from" + dc(t0z) + " to " + dc(t1z) + " length " + lineLength);
+                (ctx.lineTo).apply(ctx, ttp(t1));
+                drawnLength += lineLength;
+                t0 = t1;
+            }
+        }
+        return t1z;
+    };
     BPWidget.prototype.drawponcelet = function (ctx, ints) {
         // Draw lines connecting the intersections
         // Not quite correct, since we want the curve to be tangent to the segments,
@@ -650,51 +675,96 @@ var BPWidget = /** @class */ (function () {
         var tpts = numeric.linspace(0, 2 * Math.PI - 2 * Math.PI / ajpct, ajpct); // [0, Math.PI];
         for (var ti = 0; ti < tpts.length; ti++) {
             var pts = getTanPoints(this.zs, tpts[ti]);
-            if ($("body").hasClass("bigdots")) {
-                ctx.lineWidth = 10.0 / this.plotDims().graphN;
+            this.drawtangentsinner(ctx, ti, pts, drawsolid);
+        }
+    };
+    BPWidget.prototype.drawtangentsinner = function (ctx, ti, pts, drawsolid) {
+        if ($("body").hasClass("bigdots")) {
+            ctx.lineWidth = 10.0 / this.plotDims().graphN;
+        }
+        else {
+            ctx.lineWidth = 1.0 / this.plotDims().graphN;
+        }
+        for (var i = 0; i < pts.length; i++) {
+            ctx.beginPath();
+            ctx.moveTo(pts[i].z1.x, fixy(pts[i].z1).y);
+            if (drawsolid) {
+                ctx.strokeStyle = "#000";
             }
             else {
-                ctx.lineWidth = 1.0 / this.plotDims().graphN;
-            }
-            for (var i = 0; i < pts.length; i++) {
-                ctx.beginPath();
-                ctx.moveTo(pts[i].z1.x, fixy(pts[i].z1).y);
-                if (drawsolid) {
-                    ctx.strokeStyle = "#000";
-                }
-                else {
-                    ctx.strokeStyle = "#00f";
-                    var tanPt = fixy(pts[i].ztan);
-                    ctx.lineTo(tanPt.x, tanPt.y);
-                    ctx.stroke();
-                    var theta = pts[i].z2.sub(pts[i].z1).angle();
-                    var nubbin = rt2c(10 * ctx.lineWidth, theta + Math.PI / 2);
-                    var nubbinend = tanPt.add(nubbin);
-                    ctx.beginPath();
-                    ctx.moveTo(tanPt.x, tanPt.y);
-                    ctx.lineTo(nubbinend.x, nubbinend.y);
-                    ctx.stroke();
-                    // ctx.beginPath();
-                    // ctx.arc(tanPt.x, tanPt.y, 6 * ctx.lineWidth, theta, theta+Math.PI);
-                    // ctx.fillStyle = "black";
-                    // ctx.fill();
-                    // ctx.beginPath();
-                    // ctx.arc(tanPt.x, tanPt.y, 4 * ctx.lineWidth, theta, theta+Math.PI);
-                    // ctx.fillStyle = "red";
-                    // ctx.fill();
-                    ctx.beginPath();
-                    ctx.strokeStyle = "#0f0";
-                    ctx.moveTo(tanPt.x, tanPt.y);
-                }
-                ctx.lineTo(pts[i].z2.x, fixy(pts[i].z2).y);
+                ctx.strokeStyle = "#00f";
+                var tanPt = fixy(pts[i].ztan);
+                ctx.lineTo(tanPt.x, tanPt.y);
                 ctx.stroke();
+                var theta = pts[i].z2.sub(pts[i].z1).angle();
+                var nubbin = rt2c(10 * ctx.lineWidth, theta + Math.PI / 2);
+                var nubbinend = tanPt.add(nubbin);
+                ctx.beginPath();
+                ctx.moveTo(tanPt.x, tanPt.y);
+                ctx.lineTo(nubbinend.x, nubbinend.y);
+                ctx.stroke();
+                // ctx.beginPath();
+                // ctx.arc(tanPt.x, tanPt.y, 6 * ctx.lineWidth, theta, theta+Math.PI);
+                // ctx.fillStyle = "black";
+                // ctx.fill();
+                // ctx.beginPath();
+                // ctx.arc(tanPt.x, tanPt.y, 4 * ctx.lineWidth, theta, theta+Math.PI);
+                // ctx.fillStyle = "red";
+                // ctx.fill();
+                ctx.beginPath();
+                ctx.strokeStyle = "#0f0";
+                ctx.moveTo(tanPt.x, tanPt.y);
             }
+            ctx.lineTo(pts[i].z2.x, fixy(pts[i].z2).y);
+            ctx.stroke();
         }
     };
     BPWidget.prototype.joinpis = function (ajpct) {
         var thetas = spacedAngles(ajpct);
         for (var i = 0; i < thetas.length; i++) {
             this.drawPILines(thetas[i]);
+        }
+    };
+    BPWidget.prototype.setupglidetangents = function () {
+        this.doclearlines();
+        var ajpct = parseInt(this.autolinespoints.val(), 10);
+        var widget = this;
+        var tpts = numeric.linspace(0, 2 * Math.PI - 2 * Math.PI / ajpct, ajpct); // [0, Math.PI];
+        var alltanpoints = new Array(tpts.length);
+        for (var ti = 0; ti < tpts.length; ti++) {
+            alltanpoints[ti] = getTanPoints(this.zs, tpts[ti]);
+        }
+        this.doclearlines();
+        window.requestAnimationFrame(function () { widget.glideframe(widget, new Date(), alltanpoints); });
+    };
+    BPWidget.prototype.glideframe = function (widget, timeZero, alltanpoints) {
+        this.doclearlines();
+        var time = new Date();
+        var timepct = (time.getTime() - timeZero.getTime()) / 5000.0;
+        var theta = Math.PI * 2 * timepct;
+        var tanpoints = getTanPoints(this.zs, theta);
+        var piangles = tanpoints.map(function (x) { return x.z1.angle(); });
+        widget.drawPILinesInner(widget.rblines.element, piangles, 1, null, true, theta);
+        var N = this.plotDims().windowN;
+        var ctx = setupCTX(widget.rblines.element, N);
+        for (var _i = 0, alltanpoints_1 = alltanpoints; _i < alltanpoints_1.length; _i++) {
+            var x = alltanpoints_1[_i];
+            widget.drawtangentsinner(ctx, x[0].theta, x, true);
+        }
+        for (var _a = 0, tanpoints_1 = tanpoints; _a < tanpoints_1.length; _a++) {
+            var tp = tanpoints_1[_a];
+            ctx.beginPath();
+            ctx.fillStyle = "black";
+            ctx.arc(tp.ztan.x, tp.ztan.y, .025, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.fillStyle = hsvToRgbString(tanglehue(theta), 1, 1);
+            ctx.arc(tp.ztan.x, tp.ztan.y, .02, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.restore();
+        if (timepct <= 1) {
+            window.requestAnimationFrame(function () { widget.glideframe(widget, timeZero, alltanpoints); });
         }
     };
     BPWidget.prototype.setupanimatetangents = function () {
@@ -870,6 +940,7 @@ var BPWidget = /** @class */ (function () {
         this.rblines.on("click", cf);
         this.rglines.on("click", joinpoints);
         this.animatelines.on("click", function () { that.setupanimatetangents(); });
+        this.glidelines.on("click", function () { that.setupglidetangents(); });
         this.autolinesgo.on("click", function () { that.autojoinpoints(); });
         // this.timesPI.on("click", function() {
         //     var t = parseFloat(that.theta.val());

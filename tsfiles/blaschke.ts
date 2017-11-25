@@ -353,6 +353,7 @@ class Z1Z2ZTan {
     z1: C;
     z2: C;
     ztan: C;
+    theta: number;
 }
 
 // Get lists of preimages of exp(i*t), along with the point of
@@ -362,7 +363,7 @@ function getTanPoints(as: BPZeroes, t: number): Array<Z1Z2ZTan> {
     preimages = preimages.sort(function (i, j) {
         return normalizeangle(i.angle()) - normalizeangle(j.angle());
     });
-    return getTanPointsForPIs(as, preimages);
+    return getTanPointsForPIs(as, preimages, t);
 }
 
 function getTanPointsWithSkip(as: BPZeroes, t: number, skip: number): Z1Z2ZTan[][] {
@@ -375,13 +376,13 @@ function getTanPointsWithSkip(as: BPZeroes, t: number, skip: number): Z1Z2ZTan[]
     for (var i = 0; i < polys.length; i++) {
         var polyangles = polys[i];
         var polyZs = polyangles.map(t2c);
-        var x = getTanPointsForPIs(as, polyZs);
+        var x = getTanPointsForPIs(as, polyZs, t);
         retval.push(x);
     }
     return retval;
 }
 
-function getTanPointsForPIs(as: BPZeroes, preimages: Array<C>): Array<Z1Z2ZTan> {
+function getTanPointsForPIs(as: BPZeroes, preimages: Array<C>, theta: number): Array<Z1Z2ZTan> {
     var ts = preimages.map(function (z) { return z.angle(); });
     var bps = getBPTheta(as, ts);
     var retval = new Array<Z1Z2ZTan>(preimages.length);
@@ -393,7 +394,7 @@ function getTanPointsForPIs(as: BPZeroes, preimages: Array<C>): Array<Z1Z2ZTan> 
         var bp2 = bps[j].abs();
         var l = bp2.div(bp2.add(bp1));
         var ztan = z1.add(z2.sub(z1).mul(l));
-        retval[i] = { "z1": z1, "z2": z2, "ztan": ztan };
+        retval[i] = { "z1": z1, "z2": z2, "ztan": ztan, "theta": theta};
     }
     return retval;
 }
