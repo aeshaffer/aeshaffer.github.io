@@ -22,7 +22,7 @@
   <script type="text/javascript" src="./tsjs/ellipseutils.js"></script>
   <script type="text/javascript" src="./tsjs/interpolation2.js"></script>
   <script type="text/javascript" src="./tsjs/screenshot.js"></script>
-  
+
   <script type="text/javascript">
     var bpwidget;
     $(function () {
@@ -65,7 +65,7 @@
         <label title="Re-draw lines connecting identified points as zeroes are dragged?">Auto Re-Draw Lines:<input class="reidonrplot" type="checkbox" checked="checked"/></label>
         <label title="Re-plot arg(B) when a zero is dropped?">Auto&nbsp;Replot:<input class="replotondrop" type="checkbox" checked/></label>
         <label>Highlight Curve:<input class="highlightcurve" type="checkbox" /></label>
-        <label>Half Lines:<input class="halftangents" type="checkbox" /></label>
+        <label>Color Lines:<input class="colorlines" type="checkbox" /></label>
         <label>Guess Ellipse:<input class="doguessellipse" type="checkbox"/></label>
         <br/>
       </div>
@@ -177,10 +177,10 @@
     </ul>
   </div>
   <div style="display: none">
-      <canvas id="composedscreenshot"></canvas>
-      <br />
-      <canvas id="screenshotrainbow"></canvas>
-      <canvas id="screenshotlines"></canvas>
+    <canvas id="composedscreenshot"></canvas>
+    <br />
+    <canvas id="screenshotrainbow"></canvas>
+    <canvas id="screenshotlines"></canvas>
   </div>
 
   <hr style="clear: both;" />

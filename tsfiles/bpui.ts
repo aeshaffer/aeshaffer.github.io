@@ -72,7 +72,7 @@ class BPWidget {
 
     reidonrplot: JQuerySingletonWrapper<HTMLInputElement>;
     highlightcurve: JQuerySingletonWrapper<HTMLInputElement>;
-    halftangents: JQuerySingletonWrapper<HTMLInputElement>;
+    colorlines: JQuerySingletonWrapper<HTMLInputElement>;
     doguessellipse: JQuerySingletonWrapper<HTMLInputElement>;
     plotinterp: JQuerySingletonWrapper<HTMLInputElement>;
     plotpolygon: JQuerySingletonWrapper<HTMLInputElement>;
@@ -153,7 +153,7 @@ class BPWidget {
 
         this.reidonrplot = g(".reidonrplot");
         this.highlightcurve = g(".highlightcurve");
-        this.halftangents = g(".halftangents");
+        this.colorlines = g(".colorlines");
         this.doguessellipse = g(".doguessellipse");
         this.plotinterp = g(".plotinterp");
         this.plotpolygon = g(".plotpolygon");
@@ -713,24 +713,31 @@ class BPWidget {
         }
     }
 
-    drawtangents(ctx: CanvasRenderingContext2D, ajpct: number, drawhalf: boolean, skip: number) {
+    drawtangents(ctx: CanvasRenderingContext2D, ajpct: number, colorhue: boolean, skip: number) {
         var tpts = numeric.linspace(0, 2 * Math.PI - 2 * Math.PI / ajpct, ajpct); // [0, Math.PI];
+        var tanpoints = new Array<Z1Z2ZTan[]>(tpts.length);
         for (var ti = 0; ti < tpts.length; ti++) {
             var pts = getTanPoints(this.zs, tpts[ti], skip);
-            this.drawtangentsinner(ctx, ti, pts, drawhalf);
+            tanpoints[ti] = pts;
+        }
+        for (var z2z2tan of tanpoints) {
+            this.drawtangentsinner(ctx, ti, z2z2tan, colorhue, true);
+        }
+        for (var z2z2tan of tanpoints) {
+            this.drawtangentsinner(ctx, ti, z2z2tan, colorhue, false);
         }
     }
 
     /// Drawsolid: draw black lines or draw green/blue lines?
     drawtangentsinner(ctx: CanvasRenderingContext2D, ti: number, pts: Z1Z2ZTan[],
-        drawhalf: boolean) {
+        colorhue: boolean, backhalf: boolean) {
         if ($("body").hasClass("bigdots")) {
             ctx.lineWidth = 10.0 / this.plotDims().graphN;
         } else {
             ctx.lineWidth = 2.0 / this.plotDims().graphN;
         }
         var nubbinwidth = 5 * ctx.lineWidth;
-        if (drawhalf) ctx.lineWidth *= 2;
+        // if (drawhalf) ctx.lineWidth *= 2;
 
         for (var i = 0; i < pts.length; i++) {
             var z1 = fixy(pts[i].z1);
@@ -738,45 +745,45 @@ class BPWidget {
             var tanPt = fixy(pts[i].ztan);
             var lambdaangle = pts[0].lambdaangle;
             var hue = tanglehue(lambdaangle);
+            var start: numeric.T;
+            var end: numeric.T;
+            if (backhalf) {
+                start = tanPt;
+                end = z2;
+            } else {
+                start = z1;
+                end = tanPt;
+            }
 
             // widen half line
-            if (drawhalf) {
+            if (colorhue) {
                 ctx.save();
-                ctx.lineWidth *= 1 + .5;
+                ctx.lineWidth *= 3;
                 ctx.strokeStyle = hsvToRgbString(hue, 1, .5);
                 ctx.beginPath();
-                ctx.moveTo(z1.x, z1.y);
-                ctx.lineTo(tanPt.x, tanPt.y);
+                ctx.moveTo(start.x, start.y);
+                ctx.lineTo(end.x, end.y);
                 ctx.stroke();
                 ctx.restore();
             }
 
-            // Segment from Z1 to tangent point in blue
+            // Segment from Z1 to tangent point in black
             // or the circle color
             ctx.beginPath();
-            ctx.moveTo(z1.x, z1.y);
-            ctx.strokeStyle = drawhalf ? hsvToRgbString(hue, 1, 1) : "#000";
-            ctx.lineTo(tanPt.x, tanPt.y);
+            ctx.moveTo(start.x, start.y);
+            ctx.strokeStyle = colorhue ? hsvToRgbString(hue, 1, 1) : "#000";
+            ctx.lineTo(end.x, end.y);
             ctx.stroke();
-
-            // Draw nubbin
-            ctx.beginPath();
-            ctx.moveTo(tanPt.x, tanPt.y);
-            var chordangle = z2.sub(z1).angle();
-            var nubbin = rt2c(nubbinwidth, chordangle + Math.PI / 2);
-            var nubbinend1 = tanPt.add(nubbin);
-            ctx.lineTo(nubbinend1.x, nubbinend1.y);
-            ctx.stroke();
-
-            // Draw the rest of the segment in green.
-            if (!drawhalf) {
+            if (backhalf) {
+                // Draw nubbin
                 ctx.beginPath();
                 ctx.moveTo(tanPt.x, tanPt.y);
-                ctx.strokeStyle = "#000";
-                ctx.lineTo(z2.x, z2.y);
+                var chordangle = z2.sub(z1).angle();
+                var nubbin = rt2c(nubbinwidth, chordangle + Math.PI / 2);
+                var nubbinend1 = tanPt.add(nubbin);
+                ctx.lineTo(nubbinend1.x, nubbinend1.y);
                 ctx.stroke();
             }
-
         }
     }
 
@@ -917,7 +924,7 @@ class BPWidget {
         this.doclearlines();
 
         var highlightcurve = this.highlightcurve.is(":checked");
-        var halftangents = this.halftangents != null && this.halftangents.is(":checked");
+        var colorlines = this.colorlines != null && this.colorlines.is(":checked");
         var autoJoinPointsCount = parseInt(this.autolinespoints.val(), 10);
 
         // if (this.parseSkip() != 1) {
@@ -927,7 +934,7 @@ class BPWidget {
 
         // Setup another context
         var ctx = setupCTX(this.rblines.element, this.plotDims().windowN);
-        this.drawtangents(ctx, autoJoinPointsCount, halftangents, this.parseSkip());
+        this.drawtangents(ctx, autoJoinPointsCount, colorlines, this.parseSkip());
 
         if (this.parseSkip() == 1) {
             if (highlightcurve) {
@@ -1158,7 +1165,7 @@ class BPWidget {
         });
 
         this.highlightcurve.change(function () { that.autojoinpoints(); });
-        this.halftangents.change(function () { that.autojoinpoints(); });
+        this.colorlines.change(function () { that.autojoinpoints(); });
 
         this.pixels.change(function () { that.fixdots(); })
 
