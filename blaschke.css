@@ -86,6 +86,8 @@ div.innerzero {
 div.zero {
     background-color: white;
     border: 1px solid black;
+    /* Put them in front of the critical points so you can move them. */
+    z-index: 20;
 }
 
 .rainbowholder .zero {
