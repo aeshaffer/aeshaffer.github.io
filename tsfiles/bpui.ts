@@ -493,7 +493,8 @@ class BPWidget {
 
     fastReplot(as, N, cpi, raythreshold) {
         var startBPGE = (new Date()).getTime();
-        var rpip = bpgridevalArray(N, as, null);
+        // var rpip = bpgridevalArray(N, as, null);
+        var rpip = bpEvalMaybeFast(N, as);
         var bpzs = rpipToBpzs(rpip);
         var endBPGE = (new Date()).getTime();
         this.progress.append("NWRP " + N + " " + as.length + " " + (endBPGE - startBPGE));

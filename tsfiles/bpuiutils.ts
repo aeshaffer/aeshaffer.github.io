@@ -89,11 +89,15 @@ function setupCanvases(sel: JQuery) {
     sel.append($(html));
 }
 
+var _nudge : number = null;
+
 function getNudge(div) {
-    var nudge = div.width() / 2;
-    var s : string = div.css("border-left-width").replace("px", "");
-    nudge += parseFloat(s);
-    return nudge;
+    if(_nudge == null) {
+        _nudge = div.width() / 2;
+        var s : string = div.css("border-left-width").replace("px", "");
+        _nudge += parseFloat(s);
+    }
+    return _nudge;
 }
 
 function cssscatter(cw : JQuery, canvaswidth: number, pts: Array<C>, cssclass: string, doclear?: boolean): JQuery {

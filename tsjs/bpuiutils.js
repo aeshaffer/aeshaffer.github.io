@@ -87,11 +87,14 @@ function setupCanvases(sel) {
         + '<canvas class="rblines graph lines"></canvas>';
     sel.append($(html));
 }
+var _nudge = null;
 function getNudge(div) {
-    var nudge = div.width() / 2;
-    var s = div.css("border-left-width").replace("px", "");
-    nudge += parseFloat(s);
-    return nudge;
+    if (_nudge == null) {
+        _nudge = div.width() / 2;
+        var s = div.css("border-left-width").replace("px", "");
+        _nudge += parseFloat(s);
+    }
+    return _nudge;
 }
 function cssscatter(cw, canvaswidth, pts, cssclass, doclear) {
     var moveexisting = pts.length == cw.find("." + cssclass).length;

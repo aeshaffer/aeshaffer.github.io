@@ -72,6 +72,156 @@ function lt(a) {
 }
 */
 
+function benchmark0() {
+    var as = [c(1, 0), c(2, 0), c(3, 0), c(4, 0), c(6, 0), c(7, 0)];
+    var N = 800;
+
+    var start = performance.now();
+    var retval = bpEvalMaybeFast(N, as);
+    var end = performance.now();
+    console.log(end - start);
+
+    var start2 = performance.now();
+    var bpf = getBPF(as);
+    var retval2 = bpgridevalArrayInner(bpf, N, as, null);
+    var end2 = performance.now();
+    console.log(end2 - start2);
+    return { retval, retval2 };
+}
+
+function bpevalMaybeFastWrapper(coeffs: polynomial, zs: C[]) {
+    var coeffsRP = new Float32Array(coeffs.map(z => z.x));
+    var coeffsIP = new Float32Array(coeffs.map(z => z.y == undefined ? 0 : z.y));
+    var zsRP = new Float32Array(zs.map(z => z.x));
+    var zsIP = new Float32Array(zs.map(z => z.y == undefined ? 0 : z.y));
+    var retval0 = polyvalMaybeFast(coeffsRP, coeffsIP, zsRP, zsIP);
+    var retval = new Array<C>(zs.length);
+    for (var i = 0; i < zs.length; i++) {
+        retval[i] = c(retval0.bpzRPs[i], retval0.bpzIPs[i]);
+    }
+    return retval;
+}
+
+function getZSRPIP(N: number) {
+    var xs = numeric.linspace(-1, 1, N);
+    var ys = numeric.linspace(1, -1, N);
+    var zs = new Array<C>(xs.length * ys.length);
+    for (var i = 0; i < xs.length; i++) {
+        for (var j = 0; j < ys.length; j++) {
+            zs[j * xs.length + i] = c(xs[i], ys[j]);
+        }
+    }
+    var zsRP = new Float32Array(zs.map(z => z.x));
+    var zsIP = new Float32Array(zs.map(z => z.y == undefined ? 0 : z.y));
+    return { zs, zsRP, zsIP };
+}
+
+function combineNumsDens(N: number, zs: C[], nums: PVMF, dens: any): RPIP {
+    var rps = new Float32Array(N*N);
+    var ips = new Float32Array(N*N);
+    for (var i = 0; i < nums.bpzRPs.length; i++) {
+        if (zs[i].norm2() > 1) {
+            rps[i] = -10;
+            ips[i] = -10;
+        } else {
+            var xn = nums.bpzRPs[i];
+            var yn = nums.bpzIPs[i];
+            var xd = dens.bpzRPs[i];
+            var yd = dens.bpzIPs[i];
+            // Calculate num/den
+            var rp = xn * xd + yn * yd;
+            var ip = yn * xd - xn * yd;
+            var dn = xd * xd + yd * yd;
+            rps[i] = rp / dn;
+            ips[i] = ip / dn;
+        }
+    }
+    return {realparts: rps, imagparts: ips};
+}
+
+function bpEvalMaybeFast(N: number, as: C[]): RPIP {
+    var zs = getZSRPIP(N);
+
+    var num = bpnum(as);
+    var numcoeffsRP = new Float32Array(num.map(z => z.x));
+    var numcoeffsIP = new Float32Array(num.map(z => z.y == undefined ? 0 : z.y));
+    var nums = polyvalMaybeFast(numcoeffsRP, numcoeffsIP, zs.zsRP, zs.zsIP);
+
+    var den = bpden(as);
+    var dencoeffsRP = new Float32Array(den.map(z => z.x));
+    var dencoeffsIP = new Float32Array(den.map(z => z.y == undefined ? 0 : z.y));
+    var dens = polyvalMaybeFast(dencoeffsRP, dencoeffsIP, zs.zsRP, zs.zsIP);
+
+    return combineNumsDens(N, zs.zs, nums, dens);
+}
+
+
+function polyvalMaybeFastWrapper(coeffs: polynomial, zs: C[]) {
+    var coeffsRP = new Float32Array(coeffs.map(z => z.x));
+    var coeffsIP = new Float32Array(coeffs.map(z => z.y == undefined ? 0 : z.y));
+    var zsRP = new Float32Array(zs.map(z => z.x));
+    var zsIP = new Float32Array(zs.map(z => z.y == undefined ? 0 : z.y));
+    var retval0 = polyvalMaybeFast(coeffsRP, coeffsIP, zsRP, zsIP);
+    var retval = new Array<C>(zs.length);
+    for (var i = 0; i < zs.length; i++) {
+        retval[i] = c(retval0.bpzRPs[i], retval0.bpzIPs[i]);
+    }
+    return retval;
+}
+
+class PVMF {
+    bpzRPs: Float32Array;
+    bpzIPs: Float32Array;
+}
+
+function polyvalMaybeFast(
+    coeffsRP: Float32Array, coeffsIP: Float32Array,
+    zsRP: Float32Array, zsIP: Float32Array): PVMF {
+    var degree = coeffsRP.length;
+    var bpzRPs = new Float32Array(zsRP.length);
+    var bpzIPs = new Float32Array(zsRP.length);
+    for (var zi = 0; zi < zsRP.length; zi++) {
+        var zRP = zsRP[zi];
+        var zIP = zsIP[zi];
+        var znRP = 1;
+        var znIP = 0;
+        bpzRPs[zi] = 0;
+        bpzIPs[zi] = 0;
+        for (var n = 0; n < degree; n++) {
+            bpzRPs[zi] += coeffsRP[n] * znRP - znIP * coeffsIP[n];
+            bpzIPs[zi] += coeffsIP[n] * znRP + znIP * coeffsRP[n];
+            var znRP0 = znRP * zRP - znIP * zIP;
+            var znIP0 = znRP * zIP + znIP * zRP;
+            znRP = znRP0;
+            znIP = znIP0;
+        }
+    }
+    return { bpzRPs, bpzIPs };
+}
+
+function bpevalMaybeFast(as: BPZeroes, zs: C[]): C[] {
+    var num = bpnum(as);
+    var den = bpden(as);
+    var numRP = num.map(z => z.x);
+    var numIP = num.map(z => fixy(z).y);
+    var denRP = den.map(z => z.x);
+    var denIP = den.map(z => fixy(z).y);
+    var bpzRP = new Float32Array(zs.length);
+    var bpzIP = new Float32Array(zs.length);
+
+    for (var i = 0; i < zs.length; i++) {
+        var z = zs[i];
+        var bpzR = 0;
+        var bpzI = 0;
+        var znR = 1;
+        var znI = 0;
+        for (var n = 0; n < numRP.length; n++) {
+
+        }
+    }
+    return null;
+}
+
 function getBPFExpr(as: BPZeroes, ignorefactor: boolean = null) {
     var asNums = new Array<string>();
     var asDens = new Array<string>()

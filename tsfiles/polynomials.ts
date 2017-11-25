@@ -70,6 +70,52 @@ function gcd_rec(a: number, b: number): number {
     return b ? gcd_rec(b, a % b) : Math.abs(a);
 }
 
+
+numeric.T.prototype.Cadd = function (z2) {
+    if (!(z2 instanceof numeric.T)) z2 = new numeric.T(z2, 0);
+    var x1rp = this.x;
+    var x1ip = this.y == undefined ? 0 : this.y;
+    var x2rp = z2.x;
+    var x2ip = z2.y == undefined ? 0 : z2.y;
+    var rp = x1rp + x2rp;
+    var ip = x1ip + x2ip;
+    return new numeric.T(rp, ip);
+}
+numeric.T.prototype.Csub = function (z2) {
+    if (!(z2 instanceof numeric.T)) z2 = new numeric.T(z2, 0);
+    var x1rp = this.x;
+    var x1ip = this.y == undefined ? 0 : this.y;
+    var x2rp = z2.x;
+    var x2ip = z2.y == undefined ? 0 : z2.y;
+    var rp = x1rp - x2rp;
+    var ip = x1ip - x2ip;
+    return new numeric.T(rp, ip);
+}
+
+
+numeric.T.prototype.Cmul = function (z2) {
+    if (!(z2 instanceof numeric.T)) z2 = new numeric.T(z2, 0);
+    var x1rp = this.x;
+    var x1ip = this.y == undefined ? 0 : this.y;
+    var x2rp = z2.x;
+    var x2ip = z2.y == undefined ? 0 : z2.y;
+    var rp = x1rp * x2rp - x1ip * x2ip;
+    var ip = x1ip * x2rp + x1rp * x2ip;
+    return new numeric.T(rp, ip);
+}
+
+numeric.T.prototype.Cdiv = function (den) {
+    if (!(den instanceof numeric.T)) den = new numeric.T(den, 0);
+    var xn = this.x;
+    var yn = this.y == undefined ? 0 : this.y;
+    var xd = den.x;
+    var yd = den.y == undefined ? 0 : den.y;
+    var rp = xn * xd + yn * yd;
+    var ip = yn * xd - xn * yd;
+    var dn = xd * xd + yd * yd;
+    return new numeric.T(rp / dn, ip / dn);
+}
+
 numeric.T.prototype.angle = function () {
     if (this.y == undefined) {
         return numeric.atan2(0, this.x);
@@ -120,7 +166,7 @@ function cgrid(N: number) {
     return retval;
 }
 
-function xy2c(xy) :C {
+function xy2c(xy): C {
     return new numeric.T(xy.x, fixy(xy).y);
 }
 
@@ -262,7 +308,7 @@ function zpowers(z: C, n: number): Array<numeric.T> {
     var zn = none;
     zpowers.push(zn);
     for (var i = 0; i < n; i++) {
-        zn = zn.mul(z);
+        zn = zn.Cmul(z);
         zpowers.push(zn);
     }
     return zpowers;
@@ -274,8 +320,8 @@ function peval(coeffs: polynomial, z: C) {
 
     for (var i = 0; i < coeffs.length; i++) {
         var zn = zs[i];
-        var term = zn.mul(coeffs[i]);
-        retval = retval.add(term);
+        var term = zn.Cmul(coeffs[i]);
+        retval = retval.Cadd(term);
     }
     return retval;
 }
@@ -336,7 +382,7 @@ function polyroots(incs: polynomial): Array<numeric.T> {
     }
     var deg = cs.length - 1;
     var leading = cs[cs.length - 1];
-    cs = polymult(cs, [none.div(leading)]).map(fixy);
+    cs = polymult(cs, [none.Cdiv(leading)]).map(fixy);
     var f = function (z: C) { return peval(cs, z); }
     var roots = new Array<numeric.T>();
     for (var i = 0; i < deg; i++) {
@@ -350,43 +396,26 @@ function polyroots(incs: polynomial): Array<numeric.T> {
     }
     var n = 0;
     while (n < 100) {
-        var dens = new Array();
-        var deltas = new Array();
-        var newroots = new Array();
-
-        if (console != undefined && console.log != undefined) {
-            
-                    // console.log("");
-                    // console.log("Roots: " + printzs(roots));
-            
-        }
-
+        var abssum = 0;
         for (var i = 0; i < roots.length; i++) {
             var p = roots[i];
             var x = f(p);
+            abssum += x.norm2();
             for (var j = 0; j < roots.length; j++) {
                 if (i != j) {
-                    var x2 = fixy(x.div(p.sub(roots[j])));
-                    if(isNaN(x2.x) || isNaN(x2.y)) {
+                    var x2 = fixy(x.Cdiv(p.Csub(roots[j])));
+                    if (isNaN(x2.x) || isNaN(x2.y)) {
                         throw "";
                     }
                     x = x2;
                 }
             }
-            /*
-                    if(console.log != undefined) {
-                    console.log(i + " P:" + printzs([p]) + " f(p):" + printzs([f(p)]) + " x:" + printzs([x]));
-                    }
-            */
-            roots[i] = p.sub(x);
-            // All of our zeroes are in the disk - keep things from going crazy.
-            // if(roots[i].abs().x > 2) {
-            //     roots[i] = roots[i].div(roots[i].abs());
-            // }
+            roots[i] = p.Csub(x);
         }
-
-        // roots = newroots;
         n++;
+        if (abssum < .00001) {
+            return roots;
+        }
     }
     return roots;
 }

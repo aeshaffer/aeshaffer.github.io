@@ -3,13 +3,17 @@ declare module numeric {
         x: number;
         y: number;
         constructor(x: number, y: number)
-        add(z2: T) : T;
-        sub(z2: T) : T;
-        mul(z2: T) : T;
-        mul(z2: number) : T;
-        div(z2: T) : T;
+        Cadd(z2: T): T;
+        add(z2: T): T;
+        sub(z2: T): T;
+        Csub(z2: T): T;
+        mul(z2: T): T;
+        mul(z2: number): T;
+        Cmul(z2: T): T;
+        div(z2: T): T;
+        Cdiv(z2: T): T;
         div(x2: number): T;
-        dot(z2: T) : T;        
+        dot(z2: T): T;
         angle(): number;
         pow(n: number): T;
         abs(): T;
@@ -18,20 +22,20 @@ declare module numeric {
         unit(): T;
         norm2(): number;
     }
-    
+
     class EIG {
-        lambda: {x: Array<number>; y: Array<number>};
-        E: {x: Array<Array<number>>; y: Array<Array<number>>};
+        lambda: { x: Array<number>; y: Array<number> };
+        E: { x: Array<Array<number>>; y: Array<Array<number>> };
     }
-    
-    function prettyPrint(w: any) : string;
-    
-    function linspace(a: number, b:number) : Array<number>;
-    function linspace(a: number, b:number, n:number) : Array<number>;    
+
+    function prettyPrint(w: any): string;
+
+    function linspace(a: number, b: number): Array<number>;
+    function linspace(a: number, b: number, n: number): Array<number>;
     function sqrt(x: number): number;
     function atan(x: number): number;
-    function atan(x: number, y:number): number;
-    function atan2(x: number, y:number): number;
+    function atan(x: number, y: number): number;
+    function atan2(x: number, y: number): number;
     function sin(x: number): number;
     function cos(x: number): number;
     function abs(x: number): number;
