@@ -13,9 +13,6 @@ var EllipseFolding;
             return z;
         }
     }
-    numeric.T.prototype.unit = function () {
-        return this.div(this.norm2());
-    };
     function divideCircle(N) {
         return numeric.linspace(0, 2 * Math.PI * (1 - 1.0 / N), N);
     }

@@ -87,6 +87,9 @@ numeric.T.prototype.Csub = function (z2) {
     var ip = x1ip - x2ip;
     return new numeric.T(rp, ip);
 };
+numeric.T.prototype.unit = function () {
+    return this.div(this.norm2());
+};
 numeric.T.prototype.Cmul = function (z2) {
     if (!(z2 instanceof numeric.T))
         z2 = new numeric.T(z2, 0);

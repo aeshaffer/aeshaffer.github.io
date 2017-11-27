@@ -74,6 +74,7 @@ class BPWidget {
     highlightcurve: JQuerySingletonWrapper<HTMLInputElement>;
     colorlines: JQuerySingletonWrapper<HTMLInputElement>;
     halflines: JQuerySingletonWrapper<HTMLInputElement>;
+    fillregions: JQuerySingletonWrapper<HTMLInputElement>;
     doguessellipse: JQuerySingletonWrapper<HTMLInputElement>;
     plotinterp: JQuerySingletonWrapper<HTMLInputElement>;
     plotpolygon: JQuerySingletonWrapper<HTMLInputElement>;
@@ -155,6 +156,7 @@ class BPWidget {
         this.reidonrplot = g(".reidonrplot");
         this.highlightcurve = g(".highlightcurve");
         this.colorlines = g(".colorlines");
+        this.fillregions = g(".fillregions");
         this.halflines = g(".halflines");
         this.doguessellipse = g(".doguessellipse");
         this.plotinterp = g(".plotinterp");
@@ -715,16 +717,26 @@ class BPWidget {
         }
     }
 
-    calcanddrawtangents(
-        ctx: CanvasRenderingContext2D, numangles: number,
-        colorhue: boolean, fulllines: boolean,
-        skip: number) {
+    calctangents(numangles: number, skip: number) {
         var tpts = numeric.linspace(0, 2 * Math.PI - 2 * Math.PI / numangles, numangles); // [0, Math.PI];
         var tanpoints = new Array<Z1Z2ZTan[]>(tpts.length);
         for (var ti = 0; ti < tpts.length; ti++) {
             var pts = getTanPoints(this.zs, tpts[ti], skip);
             tanpoints[ti] = pts;
         }
+        return tanpoints;
+    }
+
+    calcandfilltangents(ctx: CanvasRenderingContext2D, numangles: number, skip: number) {
+        var tanpoints = this.calctangents(numangles, skip);
+        this.filltangentsinner(ctx, tanpoints);
+    }
+
+    calcanddrawtangents(
+        ctx: CanvasRenderingContext2D, numangles: number,
+        colorhue: boolean, fulllines: boolean,
+        skip: number) {
+        var tanpoints = this.calctangents(numangles, skip);
         this.drawtangents(ctx, tanpoints, colorhue, fulllines);
     }
 
@@ -751,6 +763,65 @@ class BPWidget {
         for (var z2z2tan of tanpoints) {
             this.drawtangentsinner(ctx, z2z2tan, colorhue, false, false, null);
         }
+    }
+
+    filltangentsinner(ctx: CanvasRenderingContext2D,
+        allpts: Z1Z2ZTan[][]) {
+
+        var z1z2pts = allpts.reduce((a, b) => a.concat(b));
+        // var allpts2 = z1z2pts.concat(z1z2pts.map(x => new Z1Z2ZTan(x.z2, x.z1, x.ztan, x.lambdaangle)));
+        z1z2pts = z1z2pts.sort((a, b) => a.z1.angle() - b.z1.angle());
+        var allpts3 = z1z2pts;
+
+        for (var i = 0; i < allpts3.length; i++) {
+            ctx.lineWidth = 2.0 / this.plotDims().graphN;
+
+            var mytriple = allpts3[i];
+            var prevtriple = allpts3[(i - 1 + allpts3.length) % allpts3.length];
+            var nexttriple = allpts3[(i + 1) % allpts3.length];
+            ctx.fillStyle = hsvToRgbString(tanglehue(mytriple.lambdaangle), 1, 1);
+            var prevaverage = mytriple.z1.Cadd(prevtriple.z1).div(2);
+            var nextaverage = mytriple.z1.Cadd(nexttriple.z1).div(2);
+
+            var previntersection = lineLineIntersectionZZ(mytriple.z1, mytriple.ztan, prevtriple.z1, prevtriple.ztan);
+            var nextintersection = lineLineIntersectionZZ(mytriple.z1, mytriple.ztan, nexttriple.z1, nexttriple.ztan);
+
+            var prevtanaverage = mytriple.ztan.Cadd(previntersection).div(2);
+            var nexttanaverage = mytriple.ztan.Cadd(nextintersection).div(2);
+            // ctx.strokeStyle = "orange";//  hsvToRgbString(tanglehue(mypts[0].lambdaangle), 1, 1);
+            ctx.beginPath();
+            var lt = function(p: C) {
+                if(p.norm2() > 1.0001) {
+                    throw "";
+                }
+                ctx.lineTo(p.x, p.y);
+            };
+            ctx.moveTo(mytriple.z1.x, mytriple.z1.y);
+            lt(nextaverage.unit());
+
+            lt(nextintersection);
+            lt(mytriple.ztan);
+            lt(previntersection);
+
+            lt(prevaverage.unit());
+            lt(mytriple.z1);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(0, 0, 1, prevaverage.angle(), mytriple.z1.angle(), false);
+            ctx.arc(0, 0, 1, mytriple.z1.angle(), nextaverage.angle(), false);
+            ctx.fill();
+        }
+        // for (var i = 0; i < allpts3.length; i++) {
+        //     var mytriple = allpts3[i];
+        //     ctx.fillStyle = "black";
+        //     ctx.save();
+        //     ctx.translate(mytriple.z1.x * .8, mytriple.z1.y * .8);
+        //     ctx.scale(1, -1);
+        //     ctx.font = ".1pt Arial";
+        //     ctx.measureText(i.toString());
+        //     ctx.fillText(i.toString(), 0, 0);
+        //     ctx.restore();
+        // }
     }
 
     /// Drawsolid: draw black lines or draw green/blue lines?
@@ -953,6 +1024,7 @@ class BPWidget {
 
         var highlightcurve = this.highlightcurve.is(":checked");
         var colorlines = this.colorlines != null && this.colorlines.is(":checked");
+        var fillregions = this.fillregions != null && this.fillregions.is(":checked");
         var halflines = this.halflines != null && this.halflines.is(":checked");
         var autoJoinPointsCount = parseInt(this.autolinespoints.val(), 10);
 
@@ -963,7 +1035,11 @@ class BPWidget {
 
         // Setup another context
         var ctx = setupCTX(this.rblines.element, this.plotDims().windowN);
-        this.calcanddrawtangents(ctx, autoJoinPointsCount, colorlines, !halflines, this.parseSkip());
+        if(fillregions) {
+            this.calcandfilltangents(ctx, autoJoinPointsCount, this.parseSkip());            
+        } else {
+            this.calcanddrawtangents(ctx, autoJoinPointsCount, colorlines, !halflines, this.parseSkip());            
+        }
 
         if (this.parseSkip() == 1) {
             if (highlightcurve) {
@@ -1195,6 +1271,7 @@ class BPWidget {
 
         this.highlightcurve.change(function () { that.autojoinpoints(); });
         this.colorlines.change(function () { that.autojoinpoints(); });
+        this.fillregions.change(function () { that.autojoinpoints(); });
         this.halflines.change(function () { that.autojoinpoints(); });
 
         this.pixels.change(function () { that.fixdots(); })

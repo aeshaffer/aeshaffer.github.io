@@ -350,6 +350,9 @@ function getBPTheta(as: BPZeroes, ts: Array<number>): Array<numeric.T> {
 }
 
 class Z1Z2ZTan {
+    constructor(z1: C, z2: C, ztan: C, lambdaangle: number) {
+        this.z1 = z2, this.z2 = z2, this.ztan = ztan, this.lambdaangle = lambdaangle;
+    }
     z1: C;
     z2: C;
     ztan: C;

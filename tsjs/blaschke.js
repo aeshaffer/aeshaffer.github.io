@@ -311,7 +311,8 @@ function getBPTheta(as, ts) {
     return retval;
 }
 var Z1Z2ZTan = /** @class */ (function () {
-    function Z1Z2ZTan() {
+    function Z1Z2ZTan(z1, z2, ztan, lambdaangle) {
+        this.z1 = z2, this.z2 = z2, this.ztan = ztan, this.lambdaangle = lambdaangle;
     }
     return Z1Z2ZTan;
 }());
