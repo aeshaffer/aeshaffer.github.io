@@ -171,6 +171,7 @@ var BPWidget = /** @class */ (function () {
         this.reidonrplot = g(".reidonrplot");
         this.highlightcurve = g(".highlightcurve");
         this.colorlines = g(".colorlines");
+        this.halflines = g(".halflines");
         this.doguessellipse = g(".doguessellipse");
         this.plotinterp = g(".plotinterp");
         this.plotpolygon = g(".plotpolygon");
@@ -687,32 +688,55 @@ var BPWidget = /** @class */ (function () {
             drawDecoratedEllipse(ctx, cent, majorAxisVector, minorAxisVector);
         }
     };
-    BPWidget.prototype.drawtangents = function (ctx, ajpct, colorhue, skip) {
-        var tpts = numeric.linspace(0, 2 * Math.PI - 2 * Math.PI / ajpct, ajpct); // [0, Math.PI];
+    BPWidget.prototype.calcanddrawtangents = function (ctx, numangles, colorhue, fulllines, skip) {
+        var tpts = numeric.linspace(0, 2 * Math.PI - 2 * Math.PI / numangles, numangles); // [0, Math.PI];
         var tanpoints = new Array(tpts.length);
         for (var ti = 0; ti < tpts.length; ti++) {
             var pts = getTanPoints(this.zs, tpts[ti], skip);
             tanpoints[ti] = pts;
         }
-        for (var _i = 0, tanpoints_1 = tanpoints; _i < tanpoints_1.length; _i++) {
-            var z2z2tan = tanpoints_1[_i];
-            this.drawtangentsinner(ctx, ti, z2z2tan, colorhue, true);
+        this.drawtangents(ctx, tanpoints, colorhue, fulllines);
+    };
+    BPWidget.prototype.drawtangents = function (ctx, tanpoints, colorhue, fulllines) {
+        var totallines = tanpoints.length * this.zs.length;
+        // If we're coloring, the lines, then draw bolder lines underneath 
+        // so there's better constrast.
+        if (colorhue) {
+            if (fulllines) {
+                for (var _i = 0, tanpoints_1 = tanpoints; _i < tanpoints_1.length; _i++) {
+                    var z2z2tan = tanpoints_1[_i];
+                    this.drawtangentsinner(ctx, z2z2tan, colorhue, true, true, totallines);
+                }
+            }
+            for (var _a = 0, tanpoints_2 = tanpoints; _a < tanpoints_2.length; _a++) {
+                var z2z2tan = tanpoints_2[_a];
+                this.drawtangentsinner(ctx, z2z2tan, colorhue, false, true, totallines);
+            }
         }
-        for (var _a = 0, tanpoints_2 = tanpoints; _a < tanpoints_2.length; _a++) {
-            var z2z2tan = tanpoints_2[_a];
-            this.drawtangentsinner(ctx, ti, z2z2tan, colorhue, false);
+        if (fulllines) {
+            for (var _b = 0, tanpoints_3 = tanpoints; _b < tanpoints_3.length; _b++) {
+                var z2z2tan = tanpoints_3[_b];
+                this.drawtangentsinner(ctx, z2z2tan, colorhue, true, false, null);
+            }
+        }
+        for (var _c = 0, tanpoints_4 = tanpoints; _c < tanpoints_4.length; _c++) {
+            var z2z2tan = tanpoints_4[_c];
+            this.drawtangentsinner(ctx, z2z2tan, colorhue, false, false, null);
         }
     };
     /// Drawsolid: draw black lines or draw green/blue lines?
-    BPWidget.prototype.drawtangentsinner = function (ctx, ti, pts, colorhue, backhalf) {
+    BPWidget.prototype.drawtangentsinner = function (ctx, pts, colorhue, backhalf, background, totallines) {
         if ($("body").hasClass("bigdots")) {
             ctx.lineWidth = 10.0 / this.plotDims().graphN;
         }
         else {
             ctx.lineWidth = 2.0 / this.plotDims().graphN;
         }
-        var nubbinwidth = 5 * ctx.lineWidth;
-        // if (drawhalf) ctx.lineWidth *= 2;
+        var nubbinlength = 5 * ctx.lineWidth;
+        // For zero total lines, we're at 50% value.
+        // as totallines gets bigger, the border gets closer
+        // to the actual color (brighter)
+        var backgroundvalue = 1.0 - .5 * Math.pow(.5, totallines / 32.0);
         for (var i = 0; i < pts.length; i++) {
             var z1 = fixy(pts[i].z1);
             var z2 = fixy(pts[i].z2);
@@ -729,33 +753,36 @@ var BPWidget = /** @class */ (function () {
                 start = z1;
                 end = tanPt;
             }
-            // widen half line
-            if (colorhue) {
+            // draw wider line
+            if (background) {
                 ctx.save();
                 ctx.lineWidth *= 3;
-                ctx.strokeStyle = hsvToRgbString(hue, 1, .5);
+                var val = .5;
+                ctx.strokeStyle = hsvToRgbString(hue, 1, backgroundvalue);
                 ctx.beginPath();
                 ctx.moveTo(start.x, start.y);
                 ctx.lineTo(end.x, end.y);
                 ctx.stroke();
                 ctx.restore();
             }
-            // Segment from Z1 to tangent point in black
-            // or the circle color
-            ctx.beginPath();
-            ctx.moveTo(start.x, start.y);
-            ctx.strokeStyle = colorhue ? hsvToRgbString(hue, 1, 1) : "#000";
-            ctx.lineTo(end.x, end.y);
-            ctx.stroke();
-            if (backhalf) {
-                // Draw nubbin
+            else {
+                // Segment from Z1 to tangent point in black
+                // or the circle color
                 ctx.beginPath();
-                ctx.moveTo(tanPt.x, tanPt.y);
-                var chordangle = z2.sub(z1).angle();
-                var nubbin = rt2c(nubbinwidth, chordangle + Math.PI / 2);
-                var nubbinend1 = tanPt.add(nubbin);
-                ctx.lineTo(nubbinend1.x, nubbinend1.y);
+                ctx.moveTo(start.x, start.y);
+                ctx.strokeStyle = colorhue ? hsvToRgbString(hue, 1, 1) : "#000";
+                ctx.lineTo(end.x, end.y);
                 ctx.stroke();
+                if (backhalf) {
+                    // Draw nubbin
+                    ctx.beginPath();
+                    ctx.moveTo(tanPt.x, tanPt.y);
+                    var chordangle = z2.sub(z1).angle();
+                    var nubbin = rt2c(nubbinlength, chordangle + Math.PI / 2);
+                    var nubbinend1 = tanPt.add(nubbin);
+                    ctx.lineTo(nubbinend1.x, nubbinend1.y);
+                    ctx.stroke();
+                }
             }
         }
     };
@@ -787,18 +814,15 @@ var BPWidget = /** @class */ (function () {
         // Draw all the tangent lines
         var N = this.plotDims().windowN;
         var ctx = setupCTX(widget.rblines.element, N);
-        for (var _i = 0, alltanpoints_1 = alltanpoints; _i < alltanpoints_1.length; _i++) {
-            var x = alltanpoints_1[_i];
-            widget.drawtangentsinner(ctx, x[0].lambdaangle, x, true, false);
-        }
+        widget.drawtangents(ctx, alltanpoints, true, false);
         ctx.restore();
         // Draw the animated tangent line.
         widget.drawPILinesInner(widget.rblines.element, piangles, 1, null, true, theta);
         // Draw circles at the point of tangency.
         var N = this.plotDims().windowN;
         var ctx = setupCTX(widget.rblines.element, N);
-        for (var _a = 0, tanpoints_3 = tanpoints; _a < tanpoints_3.length; _a++) {
-            var tp = tanpoints_3[_a];
+        for (var _i = 0, tanpoints_5 = tanpoints; _i < tanpoints_5.length; _i++) {
+            var tp = tanpoints_5[_i];
             ctx.beginPath();
             ctx.fillStyle = "black";
             ctx.arc(tp.ztan.x, tp.ztan.y, .025, 0, Math.PI * 2);
@@ -869,6 +893,7 @@ var BPWidget = /** @class */ (function () {
         this.doclearlines();
         var highlightcurve = this.highlightcurve.is(":checked");
         var colorlines = this.colorlines != null && this.colorlines.is(":checked");
+        var halflines = this.halflines != null && this.halflines.is(":checked");
         var autoJoinPointsCount = parseInt(this.autolinespoints.val(), 10);
         // if (this.parseSkip() != 1) {
         //     // Why is this so much slower?
@@ -876,7 +901,7 @@ var BPWidget = /** @class */ (function () {
         // }
         // Setup another context
         var ctx = setupCTX(this.rblines.element, this.plotDims().windowN);
-        this.drawtangents(ctx, autoJoinPointsCount, colorlines, this.parseSkip());
+        this.calcanddrawtangents(ctx, autoJoinPointsCount, colorlines, !halflines, this.parseSkip());
         if (this.parseSkip() == 1) {
             if (highlightcurve) {
                 // Get tangent segments.
@@ -1073,6 +1098,7 @@ var BPWidget = /** @class */ (function () {
         });
         this.highlightcurve.change(function () { that.autojoinpoints(); });
         this.colorlines.change(function () { that.autojoinpoints(); });
+        this.halflines.change(function () { that.autojoinpoints(); });
         this.pixels.change(function () { that.fixdots(); });
         if (this.showcps != null) {
             this.showcps.change(function () {
