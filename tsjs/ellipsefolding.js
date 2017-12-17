@@ -105,6 +105,22 @@ var EllipseFolding;
         }
         return (sigma > 0 && numfolds > 0);
     }
+    function drawEllipse(ctx, r, center, t2) {
+        ctx.beginPath();
+        r = fz(r);
+        ctx.moveTo(r.x, r.y);
+        var ts = divideCircle(64);
+        var ps = new Array(ts.length);
+        for (var i = 0; i < ts.length; i++) {
+            var theta = ts[i];
+            var p = center.add(t2.sub(center).mul(Math.sin(theta)).add(r.sub(center).mul(Math.cos(theta))));
+            p = fz(p);
+            ps[i] = p;
+            ctx.lineTo(p.x, p.y);
+        }
+        ctx.closePath();
+        ctx.stroke();
+    }
     function draw() {
         if (!goodGlobals()) {
             $("#params").addClass("errorParams");
@@ -198,19 +214,22 @@ var EllipseFolding;
         else {
             var foldts = divideCircle(numfolds);
         }
+        function ls(ss, z1, z2) {
+            ctx.beginPath();
+            ctx.strokeStyle = ss;
+            ctx.moveTo(z1.x, z1.y);
+            ctx.lineTo(z2.x, z2.y);
+            ctx.stroke();
+        }
         // foldts.pop();
         for (var i = 0; i < foldts.length; i += 1) {
             var t = foldts[i];
             var p = f1c.add(rt2c(sigma, t));
-            ctx.strokeStyle = "#ff0000";
-            ctx.beginPath();
             var radius = p.sub(f1c);
             radius = radius.div(radius.norm2()).mul(.05);
             //ctx.moveTo(p.add(radius).x, p.add(radius).y);
             // Draw tickmark on circle
-            ctx.moveTo(p.x, p.y);
-            ctx.lineTo(p.add(radius).x, p.add(radius).y);
-            ctx.stroke();
+            ls("#ff0000", p, p.add(radius));
             // Find midpoint between circle point and the other focus.
             var mp = p.add(f2c).div(2);
             // The fold passes through this line, 
@@ -220,37 +239,21 @@ var EllipseFolding;
             d = d.div(d.norm2()).mul(sigma);
             var tangentcircleintersections = lineCircleIntersection(mp, d, f1c, sigma);
             // Draw fold
-            ctx.beginPath();
-            ctx.strokeStyle = "teal";
-            ctx.moveTo(tangentcircleintersections[0].x, tangentcircleintersections[0].y);
-            ctx.lineTo(tangentcircleintersections[1].x, tangentcircleintersections[1].y);
-            ctx.stroke();
+            ls("teal", tangentcircleintersections[0], tangentcircleintersections[1]);
             // Draw line from point on circle to other focus.
             ctx.save();
-            ctx.lineWidth = ctx.lineWidth / 4;
-            ctx.beginPath();
-            ctx.strokeStyle = "green";
-            ctx.moveTo(p.x, p.y);
-            ctx.lineTo(f2c.x, f2c.y);
-            ctx.stroke();
+            ctx.lineWidth = ctx.lineWidth / 2;
+            ls("green", p, f2c);
             ctx.restore();
             ctx.save();
-            ctx.lineWidth = ctx.lineWidth / 4;
-            ctx.beginPath();
-            ctx.strokeStyle = "green";
-            ctx.moveTo(p.x, p.y);
-            ctx.lineTo(f1c.x, f1c.y);
-            ctx.stroke();
+            ctx.lineWidth = ctx.lineWidth / 2;
+            ls("green", p, f1c);
             ctx.restore();
             var tangentpoint = lineLineIntersectionZZ(tangentcircleintersections[0], tangentcircleintersections[1], p, f1c);
             // Draw line from point on circle to other focus.
             ctx.save();
-            ctx.lineWidth = ctx.lineWidth / 4;
-            ctx.beginPath();
-            ctx.strokeStyle = "green";
-            ctx.moveTo(tangentpoint.x, tangentpoint.y);
-            ctx.lineTo(f2c.x, f2c.y);
-            ctx.stroke();
+            ctx.lineWidth = ctx.lineWidth / 2;
+            ls("green", tangentpoint, f2c);
             ctx.restore();
             // Draw right-angle marker at intersection between chord and focus-circle line.
             var chordlineint = lineLineIntersectionZZ(p, f2c, tangentcircleintersections[0], tangentcircleintersections[1]);
@@ -292,21 +295,7 @@ var EllipseFolding;
             var minoraxislen = Math.sqrt(sigma * sigma - f2mf1 * f2mf1) / 2.0;
             var minoraxisunitvector = majoraxisunitvector.mul(c(0, 1));
             var t2 = center.add(minoraxisunitvector.mul(minoraxislen));
-            var b = center.sub(minoraxisunitvector.mul(minoraxislen));
-            ctx.beginPath();
-            r = fz(r);
-            ctx.moveTo(r.x, r.y);
-            var ts = divideCircle(64);
-            var ps = new Array(ts.length);
-            for (var i = 0; i < ts.length; i++) {
-                var theta = ts[i];
-                var p = center.add(t2.sub(center).mul(Math.sin(theta)).add(r.sub(center).mul(Math.cos(theta))));
-                p = fz(p);
-                ps[i] = p;
-                ctx.lineTo(p.x, p.y);
-            }
-            ctx.closePath();
-            ctx.stroke();
+            drawEllipse(ctx, r, center, t2);
         }
         // for (var i = 0; i < ts.length; i++) {
         //     var p2 = ps[i];
