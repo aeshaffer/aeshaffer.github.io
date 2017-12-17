@@ -369,6 +369,32 @@ function getTanPoints(as: BPZeroes, t: number, skip: number = 1): Array<Z1Z2ZTan
     return getTanPointsForPIs(as, preimages, t, skip);
 }
 
+function calctangents(zs: numeric.T[], numangles: number, skip: number) {
+    var tpts = numeric.linspace(0, 2 * Math.PI - 2 * Math.PI / numangles, numangles); // [0, Math.PI];
+    var tanpoints = new Array<Z1Z2ZTan[]>(tpts.length);
+    for (var ti = 0; ti < tpts.length; ti++) {
+        var pts = getTanPoints(zs, tpts[ti], skip);
+        tanpoints[ti] = pts;
+    }
+    return tanpoints;
+}
+
+function calcinteresections(allpts3:Z1Z2ZTan[], i: number) {
+    var mytriple = allpts3[i];
+    var prevtriple = allpts3[(i - 1 + allpts3.length) % allpts3.length];
+    var nexttriple = allpts3[(i + 1) % allpts3.length];
+    var prevaverage = mytriple.z1.Cadd(prevtriple.z1).div(2);
+    var nextaverage = mytriple.z1.Cadd(nexttriple.z1).div(2);
+
+    var previntersection = lineLineIntersectionZZ(mytriple.z1, mytriple.ztan, prevtriple.z1, prevtriple.ztan);
+    var nextintersection = lineLineIntersectionZZ(mytriple.z1, mytriple.ztan, nexttriple.z1, nexttriple.ztan);
+
+    var prevtanaverage = mytriple.ztan.Cadd(previntersection).div(2);
+    var nexttanaverage = mytriple.ztan.Cadd(nextintersection).div(2);
+    return {previntersection, nextintersection, prevaverage, nextaverage, mytriple};
+}
+
+
 function getTanPointsWithSkip(as: BPZeroes, t: number, skip: number): Z1Z2ZTan[][] {
     var preimages = preimage(as, rt2c(1, t));
     preimages = preimages.sort(function (i, j) {

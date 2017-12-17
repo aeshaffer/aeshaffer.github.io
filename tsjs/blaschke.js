@@ -326,6 +326,27 @@ function getTanPoints(as, t, skip) {
     });
     return getTanPointsForPIs(as, preimages, t, skip);
 }
+function calctangents(zs, numangles, skip) {
+    var tpts = numeric.linspace(0, 2 * Math.PI - 2 * Math.PI / numangles, numangles); // [0, Math.PI];
+    var tanpoints = new Array(tpts.length);
+    for (var ti = 0; ti < tpts.length; ti++) {
+        var pts = getTanPoints(zs, tpts[ti], skip);
+        tanpoints[ti] = pts;
+    }
+    return tanpoints;
+}
+function calcinteresections(allpts3, i) {
+    var mytriple = allpts3[i];
+    var prevtriple = allpts3[(i - 1 + allpts3.length) % allpts3.length];
+    var nexttriple = allpts3[(i + 1) % allpts3.length];
+    var prevaverage = mytriple.z1.Cadd(prevtriple.z1).div(2);
+    var nextaverage = mytriple.z1.Cadd(nexttriple.z1).div(2);
+    var previntersection = lineLineIntersectionZZ(mytriple.z1, mytriple.ztan, prevtriple.z1, prevtriple.ztan);
+    var nextintersection = lineLineIntersectionZZ(mytriple.z1, mytriple.ztan, nexttriple.z1, nexttriple.ztan);
+    var prevtanaverage = mytriple.ztan.Cadd(previntersection).div(2);
+    var nexttanaverage = mytriple.ztan.Cadd(nextintersection).div(2);
+    return { previntersection: previntersection, nextintersection: nextintersection, prevaverage: prevaverage, nextaverage: nextaverage, mytriple: mytriple };
+}
 function getTanPointsWithSkip(as, t, skip) {
     var preimages = preimage(as, rt2c(1, t));
     preimages = preimages.sort(function (i, j) {

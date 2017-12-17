@@ -717,26 +717,18 @@ class BPWidget {
         }
     }
 
-    calctangents(numangles: number, skip: number) {
-        var tpts = numeric.linspace(0, 2 * Math.PI - 2 * Math.PI / numangles, numangles); // [0, Math.PI];
-        var tanpoints = new Array<Z1Z2ZTan[]>(tpts.length);
-        for (var ti = 0; ti < tpts.length; ti++) {
-            var pts = getTanPoints(this.zs, tpts[ti], skip);
-            tanpoints[ti] = pts;
-        }
-        return tanpoints;
-    }
-
     calcandfilltangents(ctx: CanvasRenderingContext2D, numangles: number, skip: number) {
-        var tanpoints = this.calctangents(numangles, skip);
+        var tanpoints = calctangents(this.zs, numangles, skip);
         this.filltangentsinner(ctx, tanpoints);
     }
+
+
 
     calcanddrawtangents(
         ctx: CanvasRenderingContext2D, numangles: number,
         colorhue: boolean, fulllines: boolean,
         skip: number) {
-        var tanpoints = this.calctangents(numangles, skip);
+        var tanpoints = calctangents(this.zs, numangles, skip);
         this.drawtangents(ctx, tanpoints, colorhue, fulllines);
     }
 
@@ -775,40 +767,31 @@ class BPWidget {
 
         for (var i = 0; i < allpts3.length; i++) {
             ctx.lineWidth = 2.0 / this.plotDims().graphN;
-
-            var mytriple = allpts3[i];
-            var prevtriple = allpts3[(i - 1 + allpts3.length) % allpts3.length];
-            var nexttriple = allpts3[(i + 1) % allpts3.length];
-            ctx.fillStyle = hsvToRgbString(tanglehue(mytriple.lambdaangle), 1, 1);
-            var prevaverage = mytriple.z1.Cadd(prevtriple.z1).div(2);
-            var nextaverage = mytriple.z1.Cadd(nexttriple.z1).div(2);
-
-            var previntersection = lineLineIntersectionZZ(mytriple.z1, mytriple.ztan, prevtriple.z1, prevtriple.ztan);
-            var nextintersection = lineLineIntersectionZZ(mytriple.z1, mytriple.ztan, nexttriple.z1, nexttriple.ztan);
-
-            var prevtanaverage = mytriple.ztan.Cadd(previntersection).div(2);
-            var nexttanaverage = mytriple.ztan.Cadd(nextintersection).div(2);
+            var intpts = calcinteresections(allpts3, i);
+            ctx.fillStyle = hsvToRgbString(tanglehue(intpts.mytriple.lambdaangle), 1, 1);
+            
+            
             // ctx.strokeStyle = "orange";//  hsvToRgbString(tanglehue(mypts[0].lambdaangle), 1, 1);
             ctx.beginPath();
-            var lt = function(p: C) {
-                if(p.norm2() > 1.0001) {
+            var lt = function (p: C) {
+                if (p.norm2() > 1.0001) {
                     throw "";
                 }
                 ctx.lineTo(p.x, p.y);
             };
-            ctx.moveTo(mytriple.z1.x, mytriple.z1.y);
-            lt(nextaverage.unit());
+            ctx.moveTo(intpts.mytriple.z1.x, intpts.mytriple.z1.y);
+            lt(intpts.nextaverage.unit());
 
-            lt(nextintersection);
-            lt(mytriple.ztan);
-            lt(previntersection);
+            lt(intpts.nextintersection);
+            lt(intpts.mytriple.ztan);
+            lt(intpts.previntersection);
 
-            lt(prevaverage.unit());
-            lt(mytriple.z1);
+            lt(intpts.prevaverage.unit());
+            lt(intpts.mytriple.z1);
             ctx.fill();
             ctx.beginPath();
-            ctx.arc(0, 0, 1, prevaverage.angle(), mytriple.z1.angle(), false);
-            ctx.arc(0, 0, 1, mytriple.z1.angle(), nextaverage.angle(), false);
+            ctx.arc(0, 0, 1, intpts.prevaverage.angle(), intpts.mytriple.z1.angle(), false);
+            ctx.arc(0, 0, 1, intpts.mytriple.z1.angle(), intpts.nextaverage.angle(), false);
             ctx.fill();
         }
         // for (var i = 0; i < allpts3.length; i++) {
@@ -1035,10 +1018,10 @@ class BPWidget {
 
         // Setup another context
         var ctx = setupCTX(this.rblines.element, this.plotDims().windowN);
-        if(fillregions) {
-            this.calcandfilltangents(ctx, autoJoinPointsCount, this.parseSkip());            
+        if (fillregions) {
+            this.calcandfilltangents(ctx, autoJoinPointsCount, this.parseSkip());
         } else {
-            this.calcanddrawtangents(ctx, autoJoinPointsCount, colorlines, !halflines, this.parseSkip());            
+            this.calcanddrawtangents(ctx, autoJoinPointsCount, colorlines, !halflines, this.parseSkip());
         }
 
         if (this.parseSkip() == 1) {
