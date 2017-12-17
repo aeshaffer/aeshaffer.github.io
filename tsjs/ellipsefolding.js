@@ -121,6 +121,103 @@ var EllipseFolding;
         ctx.closePath();
         ctx.stroke();
     }
+    function polygonFolds(f1c, f2c) {
+        var foldts = new Array();
+        if (f1c.sub(f2c).norm2() < sigma) {
+            var N = numfolds;
+            for (var i = 1; i < N; i++) {
+                // start at a point on the major axis and on the circle.
+                // the rotate by fractions of the circle.
+                var l = rt2c(sigma, (2 * Math.PI / N) * i);
+                var z = f1.add(f2.sub(f1).unit().mul(l));
+                for (var j = 0; j < 3; j++) {
+                    var tangentpts = ellipsetangent(z, f1c, f2c, sigma);
+                    var tangentcircleintersections = lineCircleIntersection(z, tangentpts[0].sub(z), f1, sigma);
+                    if (tangentcircleintersections.length == 2) {
+                        // Draw fold
+                        // ctx.save();
+                        // ctx.beginPath();
+                        // ctx.strokeStyle = "teal";
+                        // ctx.setLineDash([.01, .02]);
+                        // ctx.moveTo(tangentcircleintersections[0].x, tangentcircleintersections[0].y);
+                        // ctx.lineTo(tangentcircleintersections[1].x, tangentcircleintersections[1].y);
+                        // ctx.stroke();
+                        // ctx.restore();
+                        // translate everything so that the center of the ellipse is at the origin.
+                        var z0 = z.sub(f1.add(f2).div(2));
+                        var ti0 = tangentcircleintersections[0].sub(f1.add(f2).div(2));
+                        var ti1 = tangentcircleintersections[1].sub(f1.add(f2).div(2));
+                        ;
+                        // rotate so that z is on the real line.
+                        var ti01 = fixy(ti0.div(z0));
+                        var ti11 = fixy(ti1.div(z0));
+                        var tangentdirection = tangentcircleintersections[0].sub(tangentcircleintersections[1]).unit();
+                        // At this point, one of the tangent points is above the real line,
+                        // and the other is below it.  Take the point above for the next point.
+                        if (ti01.y > 0) {
+                            z = tangentcircleintersections[0];
+                        }
+                        else {
+                            z = tangentcircleintersections[1];
+                        }
+                        var tangentdirectionperp = tangentdirection.mul(t2c(Math.PI / 2));
+                        // Get the intersection between the chord
+                        // and a line from f2 perpendicular to the chord.
+                        var chordtof2line = lineLineIntersectionZD(f2, tangentdirectionperp, z, tangentdirection);
+                        // ctx.beginPath();
+                        // ctx.arc(chordtof2line.x, chordtof2line.y, .025, 0, 2*Math.PI, false);
+                        // ctx.stroke();
+                        // Then, find the points where the line from f2
+                        // to the intersection point with the chord 
+                        // hits the circle.
+                        var lci = lineCircleIntersection(f2, chordtof2line.sub(f2), f1, sigma);
+                        // Find which intersection between the line and the 
+                        // circle is in the same direction as the vector between f2 and
+                        // the chord.
+                        if (lci[0].sub(f2).div(chordtof2line.sub(f2)).x > 0) {
+                            foldts.push(lci[0].sub(f1).angle());
+                        }
+                        else {
+                            foldts.push(lci[1].sub(f1).angle());
+                        }
+                        // ctx.beginPath();
+                        // ctx.arc(lci[0].x, lci[0].y, .025, 0, 2*Math.PI, false);
+                        // ctx.stroke();
+                        // ctx.beginPath();
+                        // ctx.arc(lci[1].x, lci[1].y, .025, 0, 2*Math.PI, false);
+                        // ctx.stroke();
+                        // foldts.push(lci[1].sub(f1).angle());
+                        // ctx.moveTo(z.x, z.y);
+                        // ctx.lineTo(tangentpts[1].x, tangentpts[1].y);
+                        // ctx.stroke();      
+                    }
+                }
+            }
+        }
+        return foldts;
+    }
+    function calcFold(f1c, f2c, sigma, t) {
+        var p = f1c.add(rt2c(sigma, t));
+        var radius = p.sub(f1c);
+        radius = radius.div(radius.norm2()).mul(.05);
+        //ctx.moveTo(p.add(radius).x, p.add(radius).y);
+        // Find midpoint between circle point and the other focus.
+        var mp = p.add(f2c).div(2);
+        // The fold passes through this line, 
+        // perpendicular to the line between the circle point and the 
+        // other focus.
+        var d = p.sub(mp).mul(rt2c(1, Math.PI / 2));
+        d = d.div(d.norm2()).mul(sigma);
+        var tangentcircleintersections = lineCircleIntersection(mp, d, f1c, sigma);
+        var tangentpoint = lineLineIntersectionZZ(tangentcircleintersections[0], tangentcircleintersections[1], p, f1c);
+        // Draw right-angle marker at intersection between chord and focus-circle line.
+        var chordlineint = lineLineIntersectionZZ(p, f2c, tangentcircleintersections[0], tangentcircleintersections[1]);
+        var squarelength = sigma / 50.0;
+        var alongYellow = chordlineint.add(p.sub(f2c).unit().mul(squarelength));
+        var corner = alongYellow.add(tangentcircleintersections[0].sub(tangentcircleintersections[1]).unit().mul(squarelength));
+        var alongBlue = corner.sub(p.sub(f2c).unit().mul(squarelength));
+        return { radius: radius, p: p, tangentcircleintersections: tangentcircleintersections, tangentpoint: tangentpoint, alongYellow: alongYellow, alongBlue: alongBlue, corner: corner };
+    }
     function draw() {
         if (!goodGlobals()) {
             $("#params").addClass("errorParams");
@@ -138,81 +235,10 @@ var EllipseFolding;
         ctx.stroke();
         var foldts;
         if ($("#polygonfolds").is(":checked")) {
-            var foldts = new Array();
-            if (f1c.sub(f2c).norm2() < sigma) {
-                var N = numfolds;
-                for (var i = 1; i < N; i++) {
-                    // start at a point on the major axis and on the circle.
-                    // the rotate by fractions of the circle.
-                    var l = rt2c(sigma, (2 * Math.PI / N) * i);
-                    var z = f1.add(f2.sub(f1).unit().mul(l));
-                    for (var j = 0; j < 3; j++) {
-                        var tangentpts = ellipsetangent(z, f1c, f2c, sigma);
-                        var tangentcircleintersections = lineCircleIntersection(z, tangentpts[0].sub(z), f1, sigma);
-                        if (tangentcircleintersections.length == 2) {
-                            // Draw fold
-                            // ctx.save();
-                            // ctx.beginPath();
-                            // ctx.strokeStyle = "teal";
-                            // ctx.setLineDash([.01, .02]);
-                            // ctx.moveTo(tangentcircleintersections[0].x, tangentcircleintersections[0].y);
-                            // ctx.lineTo(tangentcircleintersections[1].x, tangentcircleintersections[1].y);
-                            // ctx.stroke();
-                            // ctx.restore();
-                            // translate everything so that the center of the ellipse is at the origin.
-                            var z0 = z.sub(f1.add(f2).div(2));
-                            var ti0 = tangentcircleintersections[0].sub(f1.add(f2).div(2));
-                            var ti1 = tangentcircleintersections[1].sub(f1.add(f2).div(2));
-                            ;
-                            // rotate so that z is on the real line.
-                            var ti01 = fixy(ti0.div(z0));
-                            var ti11 = fixy(ti1.div(z0));
-                            var tangentdirection = tangentcircleintersections[0].sub(tangentcircleintersections[1]).unit();
-                            // At this point, one of the tangent points is above the real line,
-                            // and the other is below it.  Take the point above for the next point.
-                            if (ti01.y > 0) {
-                                z = tangentcircleintersections[0];
-                            }
-                            else {
-                                z = tangentcircleintersections[1];
-                            }
-                            var tangentdirectionperp = tangentdirection.mul(t2c(Math.PI / 2));
-                            // Get the intersection between the chord
-                            // and a line from f2 perpendicular to the chord.
-                            var chordtof2line = lineLineIntersectionZD(f2, tangentdirectionperp, z, tangentdirection);
-                            // ctx.beginPath();
-                            // ctx.arc(chordtof2line.x, chordtof2line.y, .025, 0, 2*Math.PI, false);
-                            // ctx.stroke();
-                            // Then, find the points where the line from f2
-                            // to the intersection point with the chord 
-                            // hits the circle.
-                            var lci = lineCircleIntersection(f2, chordtof2line.sub(f2), f1, sigma);
-                            // Find which intersection between the line and the 
-                            // circle is in the same direction as the vector between f2 and
-                            // the chord.
-                            if (lci[0].sub(f2).div(chordtof2line.sub(f2)).x > 0) {
-                                foldts.push(lci[0].sub(f1).angle());
-                            }
-                            else {
-                                foldts.push(lci[1].sub(f1).angle());
-                            }
-                            // ctx.beginPath();
-                            // ctx.arc(lci[0].x, lci[0].y, .025, 0, 2*Math.PI, false);
-                            // ctx.stroke();
-                            // ctx.beginPath();
-                            // ctx.arc(lci[1].x, lci[1].y, .025, 0, 2*Math.PI, false);
-                            // ctx.stroke();
-                            // foldts.push(lci[1].sub(f1).angle());
-                            // ctx.moveTo(z.x, z.y);
-                            // ctx.lineTo(tangentpts[1].x, tangentpts[1].y);
-                            // ctx.stroke();      
-                        }
-                    }
-                }
-            }
+            foldts = polygonFolds(f1c, f2c);
         }
         else {
-            var foldts = divideCircle(numfolds);
+            foldts = divideCircle(numfolds);
         }
         function ls(ss, z1, z2) {
             ctx.beginPath();
@@ -224,49 +250,24 @@ var EllipseFolding;
         // foldts.pop();
         for (var i = 0; i < foldts.length; i += 1) {
             var t = foldts[i];
-            var p = f1c.add(rt2c(sigma, t));
-            var radius = p.sub(f1c);
-            radius = radius.div(radius.norm2()).mul(.05);
-            //ctx.moveTo(p.add(radius).x, p.add(radius).y);
+            var x = calcFold(f1c, f2c, sigma, t);
             // Draw tickmark on circle
-            ls("#ff0000", p, p.add(radius));
-            // Find midpoint between circle point and the other focus.
-            var mp = p.add(f2c).div(2);
-            // The fold passes through this line, 
-            // perpendicular to the line between the circle point and the 
-            // other focus.
-            var d = p.sub(mp).mul(rt2c(1, Math.PI / 2));
-            d = d.div(d.norm2()).mul(sigma);
-            var tangentcircleintersections = lineCircleIntersection(mp, d, f1c, sigma);
+            ls("#ff0000", x.p, x.p.add(x.radius));
             // Draw fold
-            ls("teal", tangentcircleintersections[0], tangentcircleintersections[1]);
+            ls("teal", x.tangentcircleintersections[0], x.tangentcircleintersections[1]);
             // Draw line from point on circle to other focus.
             ctx.save();
             ctx.lineWidth = ctx.lineWidth / 2;
-            ls("green", p, f2c);
-            ctx.restore();
-            ctx.save();
-            ctx.lineWidth = ctx.lineWidth / 2;
-            ls("green", p, f1c);
-            ctx.restore();
-            var tangentpoint = lineLineIntersectionZZ(tangentcircleintersections[0], tangentcircleintersections[1], p, f1c);
+            ls("green", x.p, f1c);
+            ls("green", x.p, f2c);
             // Draw line from point on circle to other focus.
-            ctx.save();
-            ctx.lineWidth = ctx.lineWidth / 2;
-            ls("green", tangentpoint, f2c);
+            ls("green", x.tangentpoint, f2c);
             ctx.restore();
-            // Draw right-angle marker at intersection between chord and focus-circle line.
-            var chordlineint = lineLineIntersectionZZ(p, f2c, tangentcircleintersections[0], tangentcircleintersections[1]);
             ctx.strokeStyle = "green";
             ctx.beginPath();
-            var squarelength = sigma / 50.0;
-            var alongYellow = chordlineint.add(p.sub(f2c).unit().mul(squarelength));
-            var corner = alongYellow.add(tangentcircleintersections[0].sub(tangentcircleintersections[1]).unit().mul(squarelength));
-            var alongBlue = corner.sub(p.sub(f2c).unit().mul(squarelength));
-            ctx.moveTo(alongYellow.x, alongYellow.y);
-            ctx.lineTo(corner.x, corner.y);
-            ctx.lineTo(alongBlue.x, alongBlue.y);
-            //            ctx.arc(chordline.x, chordline.y, .025, p.sub(f2c).angle(), Math.PI/2 + p.sub(f2c).angle(), false);     
+            ctx.moveTo(x.alongYellow.x, x.alongYellow.y);
+            ctx.lineTo(x.corner.x, x.corner.y);
+            ctx.lineTo(x.alongBlue.x, x.alongBlue.y);
             ctx.stroke();
         }
         // Draw circles around the foci.
