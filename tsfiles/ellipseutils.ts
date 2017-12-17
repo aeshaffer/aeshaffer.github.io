@@ -82,13 +82,13 @@ function lineCircleIntersection(lp: C, ld: C, cc: C, r: number) {
 function lineLineIntersectionZD(z0:C, d0: C, z1: C, d1: C) {
     var A = [[d0.x, -d1.x], 
              [d0.y, -d1.y]];
-    var v = [z1.sub(z0).x, fixy(z1.sub(z0)).y];         
+    var v = [z1.Csub(z0).x, fixy(z1.Csub(z0)).y];         
     var rt = numeric.solve(A, v);
-    return z0.add(d0.mul(rt[0]));
+    return z0.Cadd(d0.Cmul(rt[0]));
 }
 
 function lineLineIntersectionZZ(z00: C, z01: C, z10: C, z11: C) {
-    return lineLineIntersectionZD(z00, z00.sub(z01), z10, z10.sub(z11));
+    return lineLineIntersectionZD(z00, z00.Csub(z01), z10, z10.Csub(z11));
 }
 
 function resetInner(r: ranges, fudgefactor, ctx2, cvs2) {

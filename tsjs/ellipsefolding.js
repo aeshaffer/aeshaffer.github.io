@@ -50,6 +50,7 @@ var EllipseFolding;
             repositionDivs();
         });
         window.requestAnimationFrame(drawAndRAF);
+        $("#getSVG").click(function () { getSVG($("#cont")); });
         $("#go").click(drawAndRAF);
         function drawAndRAF() {
             draw();
@@ -197,9 +198,9 @@ var EllipseFolding;
         return foldts;
     }
     function calcFold(f1c, f2c, sigma, t) {
-        var p = f1c.add(rt2c(sigma, t));
-        var radius = p.sub(f1c);
-        radius = radius.div(radius.norm2()).mul(.05);
+        var p = fixy(f1c.add(rt2c(sigma, t)));
+        var radius = fixy(p.sub(f1c));
+        radius = fixy(radius.div(radius.norm2()).mul(.05));
         //ctx.moveTo(p.add(radius).x, p.add(radius).y);
         // Find midpoint between circle point and the other focus.
         var mp = p.add(f2c).div(2);
@@ -217,6 +218,107 @@ var EllipseFolding;
         var corner = alongYellow.add(tangentcircleintersections[0].sub(tangentcircleintersections[1]).unit().mul(squarelength));
         var alongBlue = corner.sub(p.sub(f2c).unit().mul(squarelength));
         return { radius: radius, p: p, tangentcircleintersections: tangentcircleintersections, tangentpoint: tangentpoint, alongYellow: alongYellow, alongBlue: alongBlue, corner: corner };
+    }
+    function text(c, r, s) {
+        var g2 = document.createElementNS('http://www.w3.org/2000/svg', "g");
+        g2.setAttribute("transform", "scale(1, -1)");
+        var fc1 = document.createElementNS('http://www.w3.org/2000/svg', "text");
+        fc1.setAttribute("x", c.x.toString());
+        var up = new numeric.T(0, r);
+        fc1.setAttribute("y", (fixy(c).Cadd(up)).y.toString());
+        fc1.setAttribute("font-size", ".1");
+        fc1.appendChild(document.createTextNode(s));
+        g2.appendChild(fc1);
+        return g2;
+    }
+    function circle(c, r) {
+        var fc1 = document.createElementNS('http://www.w3.org/2000/svg', "circle");
+        fc1.setAttribute("cx", c.x.toString());
+        fc1.setAttribute("cy", (fixy(c)).y.toString());
+        fc1.setAttribute("r", r.toString());
+        fc1.setAttribute("fill", "none");
+        return fc1;
+    }
+    function encode_as_link() {
+        // Add some critical information
+        $("#cont svg").attr({ version: '1.1', xmlns: "http://www.w3.org/2000/svg" });
+        var svg = $("#cont svg").parent().html(), b64 = btoa(svg), download = $("#download"), html = download.html();
+        download.attr("href", 'data:image/svg+xml;base64,' + b64);
+    }
+    function getSVG(cont) {
+        var f1prime = nzero;
+        var f2prime = f2.Csub(f1);
+        var foldts;
+        if ($("#polygonfolds").is(":checked")) {
+            foldts = polygonFolds(f1prime, f2prime);
+        }
+        else {
+            foldts = divideCircle(numfolds);
+        }
+        var svg = document.createElementNS('http://www.w3.org/2000/svg', "svg");
+        svg.setAttribute("width", "1000");
+        svg.setAttribute("height", "1000");
+        svg.setAttribute("viewBox", "0 0 1 1");
+        svg.setAttribute("stroke-width", ".004px");
+        svg.setAttribute("style", "stroke:rgb(0,0,0)");
+        cont.empty().append(svg);
+        var g = document.createElementNS('http://www.w3.org/2000/svg', "g");
+        g.setAttribute("transform", "translate(.5,.5) scale(.49,-.49)");
+        svg.appendChild(g);
+        var uc = circle(nzero, sigma);
+        g.appendChild(uc);
+        function ls(ss, z1, z2) {
+            var line = document.createElementNS('http://www.w3.org/2000/svg', "line");
+            line.setAttribute("x1", z1.x.toString());
+            line.setAttribute("y1", fixy(z1).y.toString());
+            line.setAttribute("x2", z2.x.toString());
+            line.setAttribute("y2", fixy(z2).y.toString());
+            line.setAttribute("stroke", ss);
+            g.appendChild(line);
+            return line;
+        }
+        for (var i = 0; i < foldts.length; i += 1) {
+            var t = foldts[i];
+            var x = calcFold(f1prime, f2prime, sigma, t);
+            //ls("#ff0000", x.p, x.p.add(x.radius));
+            // Draw fold
+            ls("teal", x.tangentcircleintersections[0], x.tangentcircleintersections[1]);
+            // Draw line from point on circle to other focus.
+            // ls("green", x.p, f1prime);
+            var line1 = ls("green", x.p, f2prime);
+            // Draw line from point on circle to other focus.
+            //ls("green", x.tangentpoint, f2prime);
+            var square1 = ls("green", x.alongYellow, x.corner);
+            var square2 = ls("green", x.corner, x.alongBlue);
+            line1.setAttribute("stroke-width", ".002px");
+            square1.setAttribute("stroke-width", ".002px");
+            square2.setAttribute("stroke-width", ".002px");
+        }
+        var fc1 = circle(f1prime, .025);
+        var fc2 = circle(f2prime, .025);
+        g.appendChild(fc1);
+        g.appendChild(fc2);
+        fc1.setAttribute("fill", "white");
+        fc2.setAttribute("fill", "white");
+        g.appendChild(text(f1prime, -.05, "c"));
+        g.appendChild(text(f2prime, -.05, "d"));
+        encode_as_link();
+    }
+    function calcEllipse(f1c, f2c, sigma) {
+        var majoraxisvector = f1c.sub(f2c);
+        var majoraxisunitvector = majoraxisvector.div(majoraxisvector.norm2());
+        var sigmac = c(sigma, 0);
+        var ftomaj = majoraxisunitvector.mul((sigma - f1c.sub(f2c).norm2()) / 2);
+        var l = f1c.add(ftomaj);
+        l = fz(l);
+        var r = f2c.sub(ftomaj);
+        r = fz(r);
+        var center = f1c.add(f2c).div(2);
+        var f2mf1 = f1c.sub(f2c).norm2();
+        var minoraxislen = Math.sqrt(sigma * sigma - f2mf1 * f2mf1) / 2.0;
+        var minoraxisunitvector = majoraxisunitvector.mul(c(0, 1));
+        var t2 = center.add(minoraxisunitvector.mul(minoraxislen));
+        return { r: r, center: center, t2: t2 };
     }
     function draw() {
         if (!goodGlobals()) {
@@ -283,20 +385,8 @@ var EllipseFolding;
         ctx.beginPath();
         // Draw ellipse.
         if (!$("#hideellipse").is(":checked")) {
-            var majoraxisvector = f1c.sub(f2c);
-            var majoraxisunitvector = majoraxisvector.div(majoraxisvector.norm2());
-            var sigmac = c(sigma, 0);
-            var ftomaj = majoraxisunitvector.mul((sigma - f1c.sub(f2c).norm2()) / 2);
-            var l = f1c.add(ftomaj);
-            l = fz(l);
-            var r = f2c.sub(ftomaj);
-            r = fz(r);
-            var center = f1c.add(f2c).div(2);
-            var f2mf1 = f1c.sub(f2c).norm2();
-            var minoraxislen = Math.sqrt(sigma * sigma - f2mf1 * f2mf1) / 2.0;
-            var minoraxisunitvector = majoraxisunitvector.mul(c(0, 1));
-            var t2 = center.add(minoraxisunitvector.mul(minoraxislen));
-            drawEllipse(ctx, r, center, t2);
+            var el = calcEllipse(f1c, f2c, sigma);
+            drawEllipse(ctx, el.r, el.center, el.t2);
         }
         // for (var i = 0; i < ts.length; i++) {
         //     var p2 = ps[i];

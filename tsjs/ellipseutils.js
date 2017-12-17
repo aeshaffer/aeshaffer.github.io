@@ -60,12 +60,12 @@ function lineCircleIntersection(lp, ld, cc, r) {
 function lineLineIntersectionZD(z0, d0, z1, d1) {
     var A = [[d0.x, -d1.x],
         [d0.y, -d1.y]];
-    var v = [z1.sub(z0).x, fixy(z1.sub(z0)).y];
+    var v = [z1.Csub(z0).x, fixy(z1.Csub(z0)).y];
     var rt = numeric.solve(A, v);
-    return z0.add(d0.mul(rt[0]));
+    return z0.Cadd(d0.Cmul(rt[0]));
 }
 function lineLineIntersectionZZ(z00, z01, z10, z11) {
-    return lineLineIntersectionZD(z00, z00.sub(z01), z10, z10.sub(z11));
+    return lineLineIntersectionZD(z00, z00.Csub(z01), z10, z10.Csub(z11));
 }
 function resetInner(r, fudgefactor, ctx2, cvs2) {
     var wh = window.innerHeight;
