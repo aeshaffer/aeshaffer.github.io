@@ -267,29 +267,31 @@ var EllipseFolding;
         svg.appendChild(g);
         var uc = circle(nzero, sigma);
         g.appendChild(uc);
-        function ls(ss, z1, z2) {
+        function ls(ss, z1, z2, dasharray) {
             var line = document.createElementNS('http://www.w3.org/2000/svg', "line");
             line.setAttribute("x1", z1.x.toString());
             line.setAttribute("y1", fixy(z1).y.toString());
             line.setAttribute("x2", z2.x.toString());
             line.setAttribute("y2", fixy(z2).y.toString());
             line.setAttribute("stroke", ss);
+            if (dasharray != "") {
+                line.setAttribute("stroke-dasharray", dasharray);
+            }
             g.appendChild(line);
             return line;
         }
         for (var i = 0; i < foldts.length; i += 1) {
             var t = foldts[i];
             var x = calcFold(f1prime, f2prime, sigma, t);
-            //ls("#ff0000", x.p, x.p.add(x.radius));
-            // Draw fold
-            ls("teal", x.tangentcircleintersections[0], x.tangentcircleintersections[1]);
-            // Draw line from point on circle to other focus.
-            // ls("green", x.p, f1prime);
-            var line1 = ls("green", x.p, f2prime);
-            // Draw line from point on circle to other focus.
-            //ls("green", x.tangentpoint, f2prime);
-            var square1 = ls("green", x.alongYellow, x.corner);
-            var square2 = ls("green", x.corner, x.alongBlue);
+            // Draw tickmark on circle
+            ls("#ff0000", x.p, x.p.add(x.radius), "");
+            // Draw fold.
+            ls("blue", x.tangentcircleintersections[0], x.tangentcircleintersections[1], ".01,.01");
+            // Draw perpendicular to fold through other focus.
+            var line1 = ls("green", x.p, f2prime, "");
+            // Draw rightangle marker
+            var square1 = ls("green", x.alongYellow, x.corner, "");
+            var square2 = ls("green", x.corner, x.alongBlue, "");
             line1.setAttribute("stroke-width", ".002px");
             square1.setAttribute("stroke-width", ".002px");
             square2.setAttribute("stroke-width", ".002px");
