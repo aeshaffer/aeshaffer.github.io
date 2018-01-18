@@ -312,20 +312,47 @@ namespace EllipseFolding {
 
         cont.empty().append(svg);
 
+        var style = document.createElementNS('http://www.w3.org/2000/svg', "style");
+        style.setAttribute("type", "text/css");
+        style.appendChild(document.createTextNode(`
+            .fold {
+                stroke-dasharray: .01,.01;
+                stroke-width: .002px;
+            }        
+            .perp {
+                stroke-width: .002px;
+            }
+            circle{ 
+                fill: white; 
+            }
+            .tick {
+                stroke: grey;
+            }
+            text {
+                stroke: black;
+                fill: white;
+                stroke-width: .002;
+            }
+            path { 
+                fill: none; 
+                stroke: grey;
+            }
+        `));
+        svg.appendChild(style);
+
         var g = document.createElementNS('http://www.w3.org/2000/svg', "g");
         g.setAttribute("transform", "translate(.5,.5) scale(.49,-.49)");
         svg.appendChild(g);
         var uc = circle(nzero, sigma);
         g.appendChild(uc);
 
-        function ls(ss: string, z1: numeric.T, z2: numeric.T, dasharray: string) {
+        function ls(cssClass: string, z1: numeric.T, z2: numeric.T) {
             var line = document.createElementNS('http://www.w3.org/2000/svg', "line");
             line.setAttribute("x1", z1.x.toString());
             line.setAttribute("y1", fixy(z1).y.toString());
             line.setAttribute("x2", z2.x.toString());
             line.setAttribute("y2", fixy(z2).y.toString());
-            line.setAttribute("stroke", ss);
-            if(dasharray != "") { line.setAttribute("stroke-dasharray", dasharray); }
+            line.setAttribute("class", cssClass);
             g.appendChild(line);
             return line;
         }
@@ -335,19 +362,18 @@ namespace EllipseFolding {
             var x = calcFold(f1prime, f2prime, sigma, t);
 
             // Draw tickmark on circle
-            ls("#ff0000", x.p, x.p.add(x.radius), "");
+            ls("tick", x.p, x.p.add(x.radius));
 
             // Draw fold.
-            ls("blue", x.tangentcircleintersections[0], x.tangentcircleintersections[1], ".01,.01");
+            ls("fold", x.tangentcircleintersections[0], x.tangentcircleintersections[1]);
 
             // Draw perpendicular to fold through other focus.
-            var line1 = ls("green", x.p, f2prime, "");
-            // Draw rightangle marker
-            var square1 = ls("green", x.alongYellow, x.corner, "");
-            var square2 = ls("green", x.corner, x.alongBlue, "");
-            line1.setAttribute("stroke-width", ".002px");
-            square1.setAttribute("stroke-width", ".002px");
-            square2.setAttribute("stroke-width", ".002px");
+            ls("perp", x.p, f2prime);
+
+            // Draw right-angle square
+            var ra =  document.createElementNS('http://www.w3.org/2000/svg', "path");
+            ra.setAttribute("d", `M ${x.alongYellow.x} ${fixy(x.alongYellow).y} L ${x.corner.x} ${fixy(x.corner).y} L ${x.alongBlue.x} ${fixy(x.alongBlue).y}`);
+            g.appendChild(ra);
         }
 
 
@@ -355,11 +381,13 @@ namespace EllipseFolding {
         var fc2 = circle(f2prime, .025);
         g.appendChild(fc1);
         g.appendChild(fc2);
-        fc1.setAttribute("fill", "white");
-        fc2.setAttribute("fill", "white");
-        g.appendChild(text(f1prime, -.05, "c"));
-        g.appendChild(text(f2prime, -.05, "d"));
-
+        var clabel2 = text(f1prime, -.05, "C");
+        var dlabel2 = text(f2prime, -.05, "D");
+        // g.appendChild(clabel1);
+        // g.appendChild(clabel2);
+        g.appendChild(dlabel2);
+        g.appendChild(clabel2);
+        
         encode_as_link();
 
     }
