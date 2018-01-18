@@ -318,9 +318,11 @@ namespace EllipseFolding {
             .fold {
                 stroke-dasharray: .01,.01;
                 stroke-width: .002px;
+                stroke: black;
             }        
             .perp {
                 stroke-width: .002px;
+                stroke: black;
             }
             circle{ 
                 fill: white; 
@@ -343,8 +345,19 @@ namespace EllipseFolding {
         var g = document.createElementNS('http://www.w3.org/2000/svg', "g");
         g.setAttribute("transform", "translate(.5,.5) scale(.49,-.49)");
         svg.appendChild(g);
+
         var uc = circle(nzero, sigma);
         g.appendChild(uc);
+
+        var folds = document.createElementNS('http://www.w3.org/2000/svg', "g");
+        g.appendChild(folds);
+        var perps = document.createElementNS('http://www.w3.org/2000/svg', "g");
+        g.appendChild(perps);
+        var ticks = document.createElementNS('http://www.w3.org/2000/svg', "g");
+        g.appendChild(ticks);
+        var ras = document.createElementNS('http://www.w3.org/2000/svg', "g");
+        g.appendChild(ras);
+
 
         function ls(cssClass: string, z1: numeric.T, z2: numeric.T) {
             var line = document.createElementNS('http://www.w3.org/2000/svg', "line");
@@ -353,7 +366,7 @@ namespace EllipseFolding {
             line.setAttribute("x2", z2.x.toString());
             line.setAttribute("y2", fixy(z2).y.toString());
             line.setAttribute("class", cssClass);
-            g.appendChild(line);
+            // g.appendChild(line);
             return line;
         }
 
@@ -362,20 +375,19 @@ namespace EllipseFolding {
             var x = calcFold(f1prime, f2prime, sigma, t);
 
             // Draw tickmark on circle
-            ls("tick", x.p, x.p.add(x.radius));
+            ticks.appendChild(ls("tick", x.p, x.p.add(x.radius)));
 
             // Draw fold.
-            ls("fold", x.tangentcircleintersections[0], x.tangentcircleintersections[1]);
+            folds.appendChild(ls("fold", x.tangentcircleintersections[0], x.tangentcircleintersections[1]));
 
             // Draw perpendicular to fold through other focus.
-            ls("perp", x.p, f2prime);
+            perps.appendChild(ls("perp", x.p, f2prime));
 
             // Draw right-angle square
             var ra =  document.createElementNS('http://www.w3.org/2000/svg', "path");
             ra.setAttribute("d", `M ${x.alongYellow.x} ${fixy(x.alongYellow).y} L ${x.corner.x} ${fixy(x.corner).y} L ${x.alongBlue.x} ${fixy(x.alongBlue).y}`);
-            g.appendChild(ra);
+            ras.appendChild(ra);
         }
-
 
         var fc1 = circle(f1prime, .025);
         var fc2 = circle(f2prime, .025);
