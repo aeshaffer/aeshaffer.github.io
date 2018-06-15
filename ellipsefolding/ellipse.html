@@ -66,7 +66,7 @@
         <br />
         <label for="numfolds">Number of Folds: </label><input type="text" id="numfolds" value="2"></input>
         <label for="hideellipse">Hide Ellipse: </label>
-        <input type="checkbox" id="hideellipse"></input><br /><br />
+        <input type="checkbox" id="hideellipse" checked="checked"></input><br /><br />
         <br />
 
         <!--
@@ -77,11 +77,13 @@
         <div id="f1div" class="focusdiv"></div>
         <div id="f2div" class="focusdiv"></div>
         <canvas id="canvas" height="512" width="512"></canvas>
-        <!-- <input type="button" id="getSVG">BLAH</input> -->
-        <!-- 
-            <div id="cont"></div>
+    </div>
+    <div id="GetSVG" style="display: none">
+        <input type="button" id="getSVG" value="Generate SVG"></input> 
+         
+        <div id="cont"></div>
         <a id="download"  download="ellipsefoldingfigure.svg">Download</a>
-        -->
+        
     </div>
 </body>
 

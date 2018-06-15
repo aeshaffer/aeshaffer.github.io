@@ -262,8 +262,8 @@ namespace EllipseFolding {
         g2.setAttribute("transform", "scale(1, -1)");
         var fc1 = document.createElementNS('http://www.w3.org/2000/svg', "text");
         fc1.setAttribute("x", c.x.toString());
-        var up = new numeric.T(0, r);
-        fc1.setAttribute("y", (fixy(c).Cadd(up)).y.toString());
+        var up = new numeric.T(0, -r);
+        fc1.setAttribute("y", (-(fixy(c).Cadd(up)).y).toString());
         fc1.setAttribute("font-size", ".1");
         fc1.appendChild(document.createTextNode(s));
         g2.appendChild(fc1);
@@ -293,6 +293,7 @@ namespace EllipseFolding {
     }
 
     function getSVG(cont) {
+        // Assume that C is at zero.
         var f1prime = nzero;
         var f2prime = f2.Csub(f1);
         var foldts: number[];
@@ -316,11 +317,11 @@ namespace EllipseFolding {
         style.setAttribute("type", "text/css");
         style.appendChild(document.createTextNode(`
             .fold {
-                stroke-dasharray: .01,.01;
                 stroke-width: .002px;
                 stroke: black;
             }        
             .perp {
+                stroke-dasharray: .01,.01;
                 stroke-width: .002px;
                 stroke: black;
             }

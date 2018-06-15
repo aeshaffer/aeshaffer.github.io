@@ -224,8 +224,8 @@ var EllipseFolding;
         g2.setAttribute("transform", "scale(1, -1)");
         var fc1 = document.createElementNS('http://www.w3.org/2000/svg', "text");
         fc1.setAttribute("x", c.x.toString());
-        var up = new numeric.T(0, r);
-        fc1.setAttribute("y", (fixy(c).Cadd(up)).y.toString());
+        var up = new numeric.T(0, -r);
+        fc1.setAttribute("y", (-(fixy(c).Cadd(up)).y).toString());
         fc1.setAttribute("font-size", ".1");
         fc1.appendChild(document.createTextNode(s));
         g2.appendChild(fc1);
@@ -246,6 +246,7 @@ var EllipseFolding;
         download.attr("href", 'data:image/svg+xml;base64,' + b64);
     }
     function getSVG(cont) {
+        // Assume that C is at zero.
         var f1prime = nzero;
         var f2prime = f2.Csub(f1);
         var foldts;
@@ -264,7 +265,7 @@ var EllipseFolding;
         cont.empty().append(svg);
         var style = document.createElementNS('http://www.w3.org/2000/svg', "style");
         style.setAttribute("type", "text/css");
-        style.appendChild(document.createTextNode("\n            .fold {\n                stroke-dasharray: .01,.01;\n                stroke-width: .002px;\n                stroke: black;\n            }        \n            .perp {\n                stroke-width: .002px;\n                stroke: black;\n            }\n            circle{ \n                fill: white; \n            }\n            .tick {\n                stroke: grey;\n            }\n            text {\n                stroke: black;\n                fill: white;\n                stroke-width: .002;\n            }\n            path { \n                fill: none; \n                stroke: grey;\n            }\n        "));
+        style.appendChild(document.createTextNode("\n            .fold {\n                stroke-width: .002px;\n                stroke: black;\n            }        \n            .perp {\n                stroke-dasharray: .01,.01;\n                stroke-width: .002px;\n                stroke: black;\n            }\n            circle{ \n                fill: white; \n            }\n            .tick {\n                stroke: grey;\n            }\n            text {\n                stroke: black;\n                fill: white;\n                stroke-width: .002;\n            }\n            path { \n                fill: none; \n                stroke: grey;\n            }\n        "));
         svg.appendChild(style);
         var g = document.createElementNS('http://www.w3.org/2000/svg', "g");
         g.setAttribute("transform", "translate(.5,.5) scale(.49,-.49)");
