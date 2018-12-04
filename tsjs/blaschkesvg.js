@@ -54,8 +54,8 @@ function calcanddrawtangentsSVG(cont, zs, numangles, colorhue, fulllines, skip) 
     for (var _i = 0, zs_1 = zs; _i < zs_1.length; _i++) {
         var z = zs_1[_i];
         var c = document.createElementNS('http://www.w3.org/2000/svg', "circle");
-        c.setAttribute("cx", z.x.toString());
-        c.setAttribute("cy", z.y.toString());
+        c.setAttribute("cx", fixy(z).x.toString());
+        c.setAttribute("cy", fixy(z).y.toString());
         c.setAttribute("r", ".02");
         c.setAttribute("fill", "none");
         c.setAttribute("stroke-width", ".01px");
@@ -63,27 +63,43 @@ function calcanddrawtangentsSVG(cont, zs, numangles, colorhue, fulllines, skip) 
     }
     for (var _a = 0, tanpoints_1 = tanpoints; _a < tanpoints_1.length; _a++) {
         var pts = tanpoints_1[_a];
-        for (var i = 0; i < pts.length; i++) {
-            var z1 = fixy(pts[i].z1);
-            var z2 = fixy(pts[i].z2);
-            var line = document.createElementNS('http://www.w3.org/2000/svg', "line");
-            line.setAttribute("x1", z1.x.toString());
-            line.setAttribute("y1", z1.y.toString());
-            line.setAttribute("x2", z2.x.toString());
-            line.setAttribute("y2", z2.y.toString());
-            line.setAttribute("css", "stroke: black");
-            g.appendChild(line);
+        if (skip == 1) {
+            var orderedpts = pts.map(function (z1z2) { return z1z2.z1; }); //.sort((a, b) => a.angle() - b.angle());
+            orderedpts.push(orderedpts[0]);
+            var polylinepath0 = orderedpts.map(function (z) { return z.x.toString() + "," + z.y.toString(); }).join(" ");
+            var polygon0 = document.createElementNS('http://www.w3.org/2000/svg', "polygon");
+            polygon0.setAttribute("points", polylinepath0);
+            polygon0.setAttribute("fill", "none");
+            polygon0.setAttribute("stroke", "black");
+            //polygon0.setAttribute("stroke-width", ".01px");
+            g.appendChild(polygon0);
+        }
+        else {
+            for (var i = 0; i < pts.length; i++) {
+                var z1 = fixy(pts[i].z1);
+                var z2 = fixy(pts[i].z2);
+                var line = document.createElementNS('http://www.w3.org/2000/svg', "line");
+                line.setAttribute("x1", z1.x.toString());
+                line.setAttribute("y1", z1.y.toString());
+                line.setAttribute("x2", z2.x.toString());
+                line.setAttribute("y2", z2.y.toString());
+                line.setAttribute("css", "stroke: black");
+                g.appendChild(line);
+            }
         }
     }
     var z1z2pts = tanpoints.reduce(function (a, b) { return a.concat(b); });
     // var allpts2 = z1z2pts.concat(z1z2pts.map(x => new Z1Z2ZTan(x.z2, x.z1, x.ztan, x.lambdaangle)));
     z1z2pts = z1z2pts.sort(function (a, b) { return a.z1.angle() - b.z1.angle(); });
     var allpts3 = z1z2pts;
-    var polylinepath = "";
-    for (var i = 0; i < allpts3.length; i++) {
+    var polylinepath0 = "";
+    var polylinepathpts = allpts3.map(function (v, i) {
         var intpts = calcinteresections(allpts3, i);
         var z1 = intpts.previntersection;
-        polylinepath += z1.x.toString() + "," + z1.y.toString();
+        return z1.x.toString() + "," + z1.y.toString();
+    });
+    polylinepath0 = polylinepathpts.join(" ");
+    for (var i = 0; i < allpts3.length; i++) {
         // var line = document.createElementNS('http://www.w3.org/2000/svg', "line");
         // line.setAttribute("x1", z1.x.toString());
         // line.setAttribute("y1", z1.y.toString());
@@ -94,11 +110,11 @@ function calcanddrawtangentsSVG(cont, zs, numangles, colorhue, fulllines, skip) 
         // line.setAttribute("stroke-width", "2%");
         // g.appendChild(line);
     }
-    var polygon = document.createElementNS('http://www.w3.org/2000/svg', "polygon");
-    polygon.setAttribute("points", polylinepath);
-    polygon.setAttribute("fill", "none");
-    polygon.setAttribute("stroke", "red");
-    polygon.setAttribute("stroke-width", ".01px");
-    g.appendChild(polygon);
+    var polygon0 = document.createElementNS('http://www.w3.org/2000/svg', "polygon");
+    polygon0.setAttribute("points", polylinepath0);
+    polygon0.setAttribute("fill", "none");
+    polygon0.setAttribute("stroke", "red");
+    polygon0.setAttribute("stroke-width", ".01px");
+    g.appendChild(polygon0);
 }
 //# sourceMappingURL=blaschkesvg.js.map
